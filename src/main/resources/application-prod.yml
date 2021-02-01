@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+spring:
+  config:
+    activate:
+      on-profile: "prod"
+  data:
+    mongodb:
+      uri: mongodb-hhvm-062.ebi.ac.uk:27017,mongodb-hxvm-063.ebi.ac.uk:27017/admin?replicaSet=gwasdepodevrs039

@@ -1,0 +1,14 @@
+server:
+  name: ontotools-curation
+  port: 80
+
+logging:
+  level:
+    org:
+      springframework: DEBUG
+
+ontotools-curation:
+  auth:
+    enabled: false
+    cert: aap.der
+

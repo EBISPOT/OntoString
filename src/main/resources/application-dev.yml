@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+spring:
+  config:
+    activate:
+      on-profile: "dev"
+  data:
+    mongodb:
+      uri: localhost:27017
+
+ontotools-curation:
+  db: ontotools-curation-dev

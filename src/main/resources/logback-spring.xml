@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property scope="context" name="serviceName" value="curation-service"/>
+
+    <springProfile name="dev">
+        <property resource="logging-dev.properties"/>
+
+        <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily -->
+                <fileNamePattern>${log.file.location}${log.file.name}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <!-- or whenever the file size reaches 100MB -->
+                    <maxFileSize>${log.max.file.size}</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+            <encoder>
+                <pattern>${log.pattern}</pattern>
+            </encoder>
+        </appender>
+
+        <logger name="uk.ac.ebi.spot.ontotools" level="INFO">
+            <appender-ref ref="ROLLING"/>
+        </logger>
+        <!--
+                <logger name="org.springframework" level="DEBUG">
+                    <appender-ref ref="ROLLING"/>
+                </logger>
+        -->
+
+        <root level="OFF">
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <property resource="logging-prod.properties"/>
+
+        <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily -->
+                <fileNamePattern>${log.file.location}${log.file.name}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <!-- or whenever the file size reaches 100MB -->
+                    <maxFileSize>${log.max.file.size}</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+            <encoder>
+                <pattern>${log.pattern}</pattern>
+            </encoder>
+        </appender>
+
+        <logger name="uk.ac.ebi.spot.ontotools" level="INFO">
+            <appender-ref ref="ROLLING"/>
+        </logger>
+        <root level="OFF">
+        </root>
+    </springProfile>
+
+    <springProfile name="sandbox">
+        <property resource="logging-sandbox.properties"/>
+
+        <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily -->
+                <fileNamePattern>${log.file.location}${log.file.name}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <!-- or whenever the file size reaches 100MB -->
+                    <maxFileSize>${log.max.file.size}</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+            <encoder>
+                <pattern>${log.pattern}</pattern>
+            </encoder>
+        </appender>
+
+        <logger name="uk.ac.ebi.spot.ontotools" level="INFO">
+            <appender-ref ref="ROLLING"/>
+        </logger>
+<!--
+        <logger name="org.springframework" level="DEBUG">
+            <appender-ref ref="ROLLING"/>
+        </logger>
+-->
+
+        <root level="OFF">
+        </root>
+    </springProfile>
+</configuration>

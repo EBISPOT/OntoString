@@ -1,0 +1,72 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{.Values.service.name}}
+  namespace: {{.Values.k8Namespace}}
+  lables:
+    version: {{.Values.image.tag}}
+spec:
+  replicas: {{.Values.replicaCount}}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{.Values.service.name}}
+    spec:
+      containers:
+      - name: {{.Values.service.name}}
+        image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
+        imagePullPolicy: {{.Values.image.pullPolicy}}
+        resources:
+          requests:
+            cpu: {{.Values.resources.requests.cpu}}
+            memory: {{.Values.resources.requests.memory}}
+          limits:
+            cpu: {{.Values.resources.limits.cpu}}
+            memory: {{.Values.resources.limits.memory}}
+        ports:
+        - name: http
+          containerPort: {{.Values.image.containerPort}}
+        volumeMounts:
+        - mountPath: {{.Values.image.logMountPath}}
+          name: log
+        env:
+        - name: ENVIRONMENT
+          value: {{.Values.image.env.envName}}
+        - name: XMS
+          value: {{.Values.image.env.xms}}
+        - name: XMX
+          value: {{.Values.image.env.xmx}}
+        - name: LOG_FILE_NAME
+          value: {{.Values.image.env.logFileName}}
+        - name: DB_USER
+          value: {{.Values.image.env.dbUser}}
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{.Values.image.env.secretsName}}
+              key: {{.Values.image.env.secretsKey}}
+      volumes:
+      - name: log
+        persistentVolumeClaim:
+           claimName: {{ .Values.image.volume.claimName }}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: {{.Values.service.name}}
+    version: {{.Values.image.tag}}
+  name: {{.Values.service.name}}
+  namespace: {{.Values.k8Namespace}}
+spec:
+  type: {{.Values.service.type}}
+  ports:
+  - name: "application"
+    port: {{.Values.service.port}}
+  selector:
+    app: {{.Values.service.name}}
