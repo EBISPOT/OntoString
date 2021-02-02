@@ -2,6 +2,8 @@ package uk.ac.ebi.spot.ontotools.curation.constants;
 
 public class CurationConstants {
 
+    public static final String API_PROJECTS = "/projects";
+
     public static final String API_TRAITS = "/traits";
 
     public static final String API_MAPPINGS = "/mappings";

@@ -19,7 +19,7 @@ image:
     secretsName: ""
     secretsKey: ""
   volume:
-    claimName: ontotools-depo-logs
+    claimName: ontotools-curation-logs
 
 imagePullSecrets: []
 nameOverride: ""
@@ -41,15 +41,15 @@ ingress:
 
   tls: []
 
-k8Namespace: default
+k8Namespace: ontotools
 
 resources:
   limits:
-    cpu: 100m
-    memory: 256Mi
-  requests:
     cpu: 200m
     memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
 
 nodeSelector: {}
 

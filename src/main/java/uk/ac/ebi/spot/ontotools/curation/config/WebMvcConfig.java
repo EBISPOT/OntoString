@@ -7,6 +7,7 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.support.MultipartFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.concurrent.Executor;
@@ -16,6 +17,16 @@ public class WebMvcConfig {
 
     @Configuration
     public static class GeneralWebMvcConfig implements WebMvcConfigurer {
+
+        @Bean
+        public AuthInterceptor authInterceptor() {
+            return new AuthInterceptor();
+        }
+
+        @Override
+        public void addInterceptors(InterceptorRegistry registry) {
+            registry.addInterceptor(authInterceptor());
+        }
 
         @Bean
         public Executor taskExecutor() {

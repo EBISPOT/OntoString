@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.ontotools.curation.domain;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "mappings")
@@ -13,6 +14,7 @@ public class Mapping {
     @Id
     private String id;
 
+    @Indexed
     private String mappedTraitId;
 
     private String mappedTermId;

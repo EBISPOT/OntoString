@@ -48,8 +48,8 @@ public class TraitsController {
     public List<TraitDto> getTraits() {
         log.info("Request to get traits.");
         List<Trait> traits = traitsService.getTraits();
-        List<String> mappingIds = traits.stream().filter(trait -> trait.getCurrentMappingId() != null).map(Trait::getCurrentMappingId).collect(Collectors.toList());
-        Map<String, Mapping> mappingMap = mappingService.getMappingsById(mappingIds);
+        List<String> traitIds = traits.stream().map(Trait::getId).collect(Collectors.toList());
+        Map<String, Mapping> mappingMap = mappingService.getMappingsByTrait(traitIds);
 
         List<String> ontoTermIds = new ArrayList<>();
         for (Mapping mapping : mappingMap.values()) {
@@ -61,7 +61,7 @@ public class TraitsController {
 
         List<TraitDto> result = new ArrayList<>();
         for (Trait trait : traits) {
-            result.add(TraitDtoAssembler.assemble(trait, mappingMap.get(trait.getCurrentMappingId()), ontologyTerms.get(mappingMap.get(trait.getCurrentMappingId()).getMappedTermId())));
+            result.add(TraitDtoAssembler.assemble(trait, mappingMap.get(trait.getId()), ontologyTerms.get(mappingMap.get(trait.getId()).getMappedTermId())));
 
         }
         return result;

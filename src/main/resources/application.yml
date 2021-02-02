@@ -1,6 +1,6 @@
 server:
   name: ontotools-curation
-  port: 80
+  port: 8080
 
 logging:
   level:
@@ -12,3 +12,41 @@ ontotools-curation:
     enabled: false
     cert: aap.der
 
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "dev"
+  data:
+    mongodb:
+      uri: localhost:27017
+
+ontotools-curation:
+  db: ontotools-curation-dev
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "sandbox"
+  data:
+    mongodb:
+      uri: mongo-0.mongo.default.svc.cluster.local,mongo-1.mongo.default.svc.cluster.local,mongo-2.mongo.default.svc.cluster.local:27017
+
+ontotools-curation:
+  db: ontotools-curation-sandbox
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "prod"
+  data:
+    mongodb:
+      uri: mongodb-hhvm-062.ebi.ac.uk:27017,mongodb-hxvm-063.ebi.ac.uk:27017/admin?replicaSet=gwasdepodevrs039
+
+ontotools-curation:
+  db: ontotools-curation

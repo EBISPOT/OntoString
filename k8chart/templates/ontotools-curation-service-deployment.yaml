@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{.Values.service.name}}
   namespace: {{.Values.k8Namespace}}
-  lables:
+  labels:
     version: {{.Values.image.tag}}
 spec:
   replicas: {{.Values.replicaCount}}

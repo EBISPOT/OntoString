@@ -6,9 +6,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class SystemConfigProperties {
 
-    @Value("${spring.config.activate.on-profile}")
-    private String activeSpringProfile;
-
     @Value("${server.name}")
     private String serverName;
 
@@ -18,9 +15,11 @@ public class SystemConfigProperties {
     @Value("${spring.data.mongodb.uri}")
     private String mongoUri;
 
-    public String getActiveSpringProfile() {
-        return activeSpringProfile;
-    }
+    @Value("${ontotools-curation.auth.enabled}")
+    private boolean authEnabled;
+
+    @Value("${ontotools-curation.auth.cert:#{NULL}}")
+    private String certPath;
 
     public String getServerName() {
         return serverName;
@@ -42,4 +41,11 @@ public class SystemConfigProperties {
         return System.getenv(GeneralCommon.DB_PASSWORD);
     }
 
+    public boolean isAuthEnabled() {
+        return authEnabled;
+    }
+
+    public String getCertPath() {
+        return certPath;
+    }
 }

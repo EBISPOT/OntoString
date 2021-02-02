@@ -21,12 +21,12 @@ public class MappingServiceImpl implements MappingService {
     private MappingRepository mappingRepository;
 
     @Override
-    public Map<String, Mapping> getMappingsById(List<String> mappingIds) {
-        log.info("Retrieving mappings for {} ids.", mappingIds.size());
+    public Map<String, Mapping> getMappingsByTrait(List<String> traitIds) {
+        log.info("Retrieving mappings for {} ids.", traitIds.size());
         Map<String, Mapping> mappingMap = new HashMap<>();
-        List<Mapping> mappings = mappingRepository.findByIdIn(mappingIds);
+        List<Mapping> mappings = mappingRepository.findByMappedTraitIdIn(traitIds);
         for (Mapping mapping : mappings) {
-            mappingMap.put(mapping.getMappedTermId(), mapping);
+            mappingMap.put(mapping.getMappedTraitId(), mapping);
         }
         return mappingMap;
     }

@@ -15,8 +15,6 @@ public class Trait {
 
     private String name;
 
-    private String currentMappingId;
-
     private int noSourceRecords;
 
     private Provenance created;
@@ -27,9 +25,8 @@ public class Trait {
     }
 
 
-    public Trait(String name, String currentMappingId, Provenance created) {
+    public Trait(String name, Provenance created) {
         this.name = name;
-        this.currentMappingId = currentMappingId;
         this.noSourceRecords = 0;
         this.created = created;
         this.lastUpdated = created;
