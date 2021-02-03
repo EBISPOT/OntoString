@@ -12,6 +12,19 @@ ontotools-curation:
     enabled: false
     cert: aap.der
 
+ontotools:
+  zooma:
+    base: http://www.ebi.ac.uk/spot/zooma/v2/api
+    endpoints:
+      annotate: /services/annotate
+  oxo:
+    base: https://www.ebi.ac.uk/spot/oxo/api/search?size=5000
+    mapping-distance: 2
+  ols:
+    base: https://www.ebi.ac.uk/ols/api
+    endpoints:
+      ontologies: /ontologies
+
 ---
 
 spring:

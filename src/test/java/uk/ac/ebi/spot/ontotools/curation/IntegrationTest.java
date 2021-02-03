@@ -53,6 +53,10 @@ public abstract class IntegrationTest {
         mapper = new ObjectMapper();
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        user = userRepository.insert(new User("test_user", "test@test.com", "USER"));
+        user = new User();
+        user.setName("Test User");
+        user.setEmail("test@test.comt");
+        user.setSuperUser(true);
+        user = userRepository.insert(user);
     }
 }
