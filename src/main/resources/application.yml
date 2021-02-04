@@ -9,7 +9,7 @@ logging:
 
 ontotools-curation:
   auth:
-    enabled: false
+    enabled: true
     cert: aap.der
 
 ontotools:

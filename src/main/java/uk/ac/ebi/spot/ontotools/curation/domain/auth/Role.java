@@ -12,7 +12,7 @@ import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 @Setter
 public class Role {
 
-    private String project;
+    private String projectId;
 
     private ProjectRole role;
 }

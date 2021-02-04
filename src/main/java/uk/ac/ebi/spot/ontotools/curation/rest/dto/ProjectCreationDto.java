@@ -11,13 +11,9 @@ import java.util.List;
 
 @EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public final class ProjectDto implements Serializable {
+public final class ProjectCreationDto implements Serializable {
 
     private static final long serialVersionUID = -4397444940725422977L;
-
-    @NotNull
-    @JsonProperty("id")
-    private final String id;
 
     @NotNull
     @JsonProperty("name")
@@ -32,26 +28,15 @@ public final class ProjectDto implements Serializable {
     @JsonProperty("ontologies")
     private final List<String> ontologies;
 
-    @JsonProperty("created")
-    private final ProvenanceDto created;
-
     @JsonCreator
-    public ProjectDto(@JsonProperty("id") String id,
-                      @JsonProperty("name") String name,
-                      @JsonProperty("description") String description,
-                      @JsonProperty("datasources") List<String> datasources,
-                      @JsonProperty("ontologies") List<String> ontologies,
-                      @JsonProperty("created") ProvenanceDto created) {
-        this.id = id;
+    public ProjectCreationDto(@JsonProperty("name") String name,
+                              @JsonProperty("description") String description,
+                              @JsonProperty("datasources") List<String> datasources,
+                              @JsonProperty("ontologies") List<String> ontologies) {
         this.name = name;
         this.description = description;
         this.datasources = datasources;
         this.ontologies = ontologies;
-        this.created = created;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public String getName() {
@@ -68,9 +53,5 @@ public final class ProjectDto implements Serializable {
 
     public List<String> getOntologies() {
         return ontologies;
-    }
-
-    public ProvenanceDto getCreated() {
-        return created;
     }
 }

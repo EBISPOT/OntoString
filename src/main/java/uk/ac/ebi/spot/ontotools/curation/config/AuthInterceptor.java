@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.HandlerInterceptor;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.AuthToken;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
-import uk.ac.ebi.spot.ontotools.curation.exception.AuthorizationException;
+import uk.ac.ebi.spot.ontotools.curation.exception.AuthenticationException;
 import uk.ac.ebi.spot.ontotools.curation.repository.AuthTokenRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.JWTService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
@@ -47,11 +47,11 @@ public class AuthInterceptor implements HandlerInterceptor {
 
             if (jwt == null) {
                 log.error("Authorization failure. JWT token is null.");
-                throw new AuthorizationException("Authorization failure. JWT token is null.");
+                throw new AuthenticationException("Authorization failure. JWT token is null.");
             }
             if ("".equals(jwt)) {
                 log.error("Authorization failure. JWT token is null.");
-                throw new AuthorizationException("Authorization failure. JWT token is null.");
+                throw new AuthenticationException("Authorization failure. JWT token is null.");
             }
 
             Optional<AuthToken> authTokenOptional = authTokenRepository.findByToken(jwt);
@@ -63,12 +63,12 @@ public class AuthInterceptor implements HandlerInterceptor {
             }
 
             try {
-                User user = jwtService.extractUser(jwt);
+                User user = jwtService.extractUserSlim(jwt);
                 log.info("User found: {} - {}", user.getName(), user.getEmail());
                 return true;
             } catch (Exception e) {
                 log.error("Authorization failure: {}", e.getMessage(), e);
-                throw new AuthorizationException(e.getMessage());
+                throw new AuthenticationException(e.getMessage());
             }
         }
 

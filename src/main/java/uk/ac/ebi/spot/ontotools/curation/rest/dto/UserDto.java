@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 @EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -15,33 +16,44 @@ public final class UserDto implements Serializable {
     private static final long serialVersionUID = 8940035463152694066L;
 
     @NotNull
-    @JsonProperty("username")
-    private final String username;
+    @JsonProperty("id")
+    private final String id;
 
+    @NotNull
+    @JsonProperty("name")
+    private final String name;
+
+    @NotNull
     @JsonProperty("email")
     private final String email;
 
-    @JsonProperty("role")
-    private final String role;
+    @JsonProperty("roles")
+    private final List<RoleDto> roles;
 
     @JsonCreator
-    public UserDto(@JsonProperty("username") String username,
+    public UserDto(@JsonProperty("id") String id,
+                   @JsonProperty("name") String name,
                    @JsonProperty("email") String email,
-                   @JsonProperty("role") String role) {
-        this.username = username;
+                   @JsonProperty("roles") List<RoleDto> roles) {
+        this.id = id;
+        this.name = name;
         this.email = email;
-        this.role = role;
+        this.roles = roles;
     }
 
-    public String getUsername() {
-        return username;
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public String getRole() {
-        return role;
+    public List<RoleDto> getRoles() {
+        return roles;
     }
 }

@@ -1,4 +1,4 @@
-package uk.ac.ebi.spot.ontotools.curation.domain.auth;
+package uk.ac.ebi.spot.ontotools.curation.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,15 +7,14 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
 
-import java.util.List;
-
-@Document(collection = "users")
+@Document(collection = "mappings")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Entity {
 
     @Id
     private String id;
@@ -23,9 +22,9 @@ public class User {
     private String name;
 
     @Indexed
-    private String email;
+    private String sourceId;
 
-    private List<Role> roles;
+    private Provenance created;
 
-    private boolean superUser;
+    private MappingStatus mappingStatus;
 }

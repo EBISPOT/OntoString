@@ -21,4 +21,14 @@ public class CurationUtil {
         return list;
     }
 
+    public static String ontoFromIRI(String iri) {
+        int index = iri.lastIndexOf("/");
+        String rest = iri.substring(index + 1);
+        index = rest.indexOf("_");
+        if (index == -1) {
+            return iri;
+        }
+        return rest.substring(0, index);
+    }
+
 }
