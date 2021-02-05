@@ -1,7 +1,9 @@
 package uk.ac.ebi.spot.ontotools.curation.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CurationUtil {
 
@@ -31,4 +33,20 @@ public class CurationUtil {
         return rest.substring(0, index);
     }
 
+    public static Map<String, String> parseAliases(List<String> aliasList) {
+        Map<String, String> map = new HashMap<>();
+        if (aliasList == null) {
+            return map;
+        }
+
+        for (String alias : aliasList) {
+            String[] split = alias.split("::");
+            if (split.length != 2) {
+                continue;
+            }
+
+            map.put(split[0].trim().toLowerCase(), split[1].trim().toLowerCase());
+        }
+        return map;
+    }
 }

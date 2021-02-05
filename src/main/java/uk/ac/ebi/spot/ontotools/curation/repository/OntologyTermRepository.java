@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface OntologyTermRepository extends MongoRepository<OntologyTerm, String> {
     List<OntologyTerm> findByIdIn(List<String> ontoTermIds);
+
+    List<OntologyTerm> findByIriHash(String iriHash);
 }

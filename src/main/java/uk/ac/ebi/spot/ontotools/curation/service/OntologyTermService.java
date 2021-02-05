@@ -7,4 +7,6 @@ import java.util.Map;
 
 public interface OntologyTermService {
     Map<String, OntologyTerm> getOntologyTermsById(List<String> ontoTermIds);
+
+    OntologyTerm createTerm(String iri);
 }

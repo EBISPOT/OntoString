@@ -15,15 +15,23 @@ import uk.ac.ebi.spot.ontotools.curation.config.RestInteractionConfig;
 import uk.ac.ebi.spot.ontotools.curation.constants.RestInteractionConstants;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSResponseDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
+import uk.ac.ebi.spot.ontotools.curation.service.ConfigListener;
+import uk.ac.ebi.spot.ontotools.curation.service.ConfigRegistry;
+import uk.ac.ebi.spot.ontotools.curation.service.ExternalServiceConfigService;
 import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
+import uk.ac.ebi.spot.ontotools.curation.util.CurationUtil;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
-public class OLSServiceImpl implements OLSService {
+public class OLSServiceImpl implements OLSService, ConfigListener {
 
     private static final Logger log = LoggerFactory.getLogger(OLSService.class);
+
+    private static final String SERVICE_NAME = "OLS";
 
     @Autowired
     private RestInteractionConfig restInteractionConfig;
@@ -31,8 +39,26 @@ public class OLSServiceImpl implements OLSService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private ExternalServiceConfigService externalServiceConfigService;
+
+    @Autowired
+    private ConfigRegistry configRegistry;
+
+    private Map<String, String> ontoAliases;
+
+    @PostConstruct
+    public void initialize() {
+        configRegistry.registerListener(this);
+        this.ontoAliases = externalServiceConfigService.retrieveAliases(SERVICE_NAME);
+    }
+
     public List<OLSTermDto> retrieveTerms(String ontologyId, String identifierValue) {
         log.info("Calling OLS: {} - {}", ontologyId, identifierValue);
+        if (ontoAliases.containsKey(ontologyId.toLowerCase())) {
+            log.info("Replacing ontologyId [{}] with alias: {}", ontologyId, ontoAliases.get(ontologyId.toLowerCase()));
+            ontologyId = ontoAliases.get(ontologyId.toLowerCase());
+        }
         String base = restInteractionConfig.getOlsOntologiesEndpoint() + "/" + ontologyId + RestInteractionConstants.OLS_TERMS;
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(base)
                 .queryParam(RestInteractionConstants.OLS_IDTYPE_IRI, identifierValue);
@@ -59,4 +85,13 @@ public class OLSServiceImpl implements OLSService {
         return new ArrayList<>();
     }
 
+    @Override
+    public void updateAliases(List<String> aliases) {
+        this.ontoAliases.putAll(CurationUtil.parseAliases(aliases));
+    }
+
+    @Override
+    public String getName() {
+        return SERVICE_NAME;
+    }
 }

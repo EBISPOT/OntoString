@@ -21,11 +21,16 @@ public final class OXOMappingResponseDto implements Serializable {
     @JsonProperty("label")
     private final String label;
 
+    @JsonProperty("targetPrefix")
+    private final String targetPrefix;
+
     @JsonCreator
     public OXOMappingResponseDto(@JsonProperty("curie") String curie,
-                                 @JsonProperty("label") String label) {
+                                 @JsonProperty("label") String label,
+                                 @JsonProperty("targetPrefix") String targetPrefix) {
         this.curie = curie;
         this.label = label;
+        this.targetPrefix = targetPrefix;
     }
 
     public String getCurie() {
@@ -34,5 +39,9 @@ public final class OXOMappingResponseDto implements Serializable {
 
     public String getLabel() {
         return label;
+    }
+
+    public String getTargetPrefix() {
+        return targetPrefix;
     }
 }

@@ -20,9 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class ZoomaServiceImpl implements ZoomaService {
@@ -35,15 +33,14 @@ public class ZoomaServiceImpl implements ZoomaService {
     @Autowired
     private RestTemplate restTemplate;
 
-    public Map<String, List<String>> annotate(String entityValue, List<String> datasources, List<String> ontologies) {
+    public List<ZoomaResponseDto> annotate(String entityValue, List<String> datasources, List<String> ontologies) {
         log.info("Calling Zooma for entity value: {}", entityValue);
-        Map<String, List<String>> suggestionsMap = new HashMap<>();
         String encodedString;
         try {
             encodedString = URLEncoder.encode(entityValue, StandardCharsets.UTF_8.toString());
         } catch (UnsupportedEncodingException e) {
             log.error("Unable to encode string: {} - {}", entityValue, e.getMessage(), e);
-            return suggestionsMap;
+            return new ArrayList<>();
         }
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(restInteractionConfig.getZoomaAnnotateEndpoint())
                 .queryParam(RestInteractionConstants.ZOOMA_PROPERTY_VALUE, encodedString)
@@ -60,18 +57,12 @@ public class ZoomaServiceImpl implements ZoomaService {
 
             if (response.getStatusCode().equals(HttpStatus.OK)) {
                 log.info("[{}] Zooma: received {} suggestions.", entityValue, response.getBody().size());
-                for (ZoomaResponseDto zoomaResponseDto : response.getBody()) {
-                    if (zoomaResponseDto.getConfidence() != null && !zoomaResponseDto.getSemanticTags().isEmpty()) {
-                        List<String> suggestionsList = suggestionsMap.containsKey(zoomaResponseDto.getConfidence()) ? suggestionsMap.get(zoomaResponseDto.getConfidence()) : new ArrayList<>();
-                        suggestionsList.addAll(zoomaResponseDto.getSemanticTags());
-                        suggestionsMap.put(zoomaResponseDto.getConfidence(), suggestionsList);
-                    }
-                }
+                return response.getBody();
             }
         } catch (Exception e) {
             log.error("Unable to call Zooma: {}", e.getMessage(), e);
         }
-        return suggestionsMap;
+        return new ArrayList<>();
     }
 
 }

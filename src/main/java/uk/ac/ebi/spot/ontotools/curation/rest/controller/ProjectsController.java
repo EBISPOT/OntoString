@@ -41,6 +41,9 @@ public class ProjectsController {
     @Autowired
     private UserService userService;
 
+    /**
+     * POST /v1/projects
+     */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
@@ -52,6 +55,9 @@ public class ProjectsController {
         return ProjectDtoAssembler.assemble(created, user);
     }
 
+    /**
+     * GET /v1/projects
+     */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<ProjectDto> getProjects(HttpServletRequest request) {
@@ -67,6 +73,9 @@ public class ProjectsController {
         return result;
     }
 
+    /**
+     * GET /v1/projects/{projectId}
+     */
     @GetMapping(value = "/{projectId}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -77,6 +86,9 @@ public class ProjectsController {
         return ProjectDtoAssembler.assemble(project, user);
     }
 
+    /**
+     * PUT /v1/projects/{projectId}
+     */
     @PutMapping(value = "/{projectId}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -88,6 +100,9 @@ public class ProjectsController {
         return ProjectDtoAssembler.assemble(updated, user);
     }
 
+    /**
+     * DELETE /v1/projects/{projectId}
+     */
     @DeleteMapping(value = "/{projectId}",
             produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseStatus(HttpStatus.OK)

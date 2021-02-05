@@ -1,11 +1,8 @@
 package uk.ac.ebi.spot.ontotools.curation.service;
 
-import uk.ac.ebi.spot.ontotools.curation.domain.Mapping;
-
-import java.util.List;
-import java.util.Map;
+import uk.ac.ebi.spot.ontotools.curation.domain.auth.Project;
 
 public interface MappingService {
 
-    void runAutoMapping(String sourceId);
+    void runAutoMapping(String sourceId, Project project);
 }

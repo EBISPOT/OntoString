@@ -30,4 +30,12 @@ public class OntologyTermServiceImpl implements OntologyTermService {
         }
         return mappingMap;
     }
+
+    /**
+     * TODO: Implement
+     */
+    @Override
+    public OntologyTerm createTerm(String iri) {
+        return null;
+    }
 }

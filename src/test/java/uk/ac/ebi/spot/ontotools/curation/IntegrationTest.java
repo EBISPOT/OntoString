@@ -78,6 +78,9 @@ public abstract class IntegrationTest {
 
         user2 = userRepository.insert(new User(null, "Test User 2", "test2@test.com", new ArrayList<>(), false));
         authTokenRepository.insert(new AuthToken(null, "token2", "test2@test.com"));
+
+        userRepository.insert(new User(null, "Super User", "super@test.com", new ArrayList<>(), true));
+        authTokenRepository.insert(new AuthToken(null, "supertoken", "super@test.com"));
     }
 
     protected ProjectDto createProject(String name, String token) throws Exception {

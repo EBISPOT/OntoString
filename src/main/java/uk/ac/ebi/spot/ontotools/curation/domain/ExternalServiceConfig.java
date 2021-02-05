@@ -8,29 +8,21 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "ontologyTerms")
+import java.util.List;
+
+@Document(collection = "externalServiceConfigs")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class OntologyTerm {
+@NoArgsConstructor
+public class ExternalServiceConfig {
 
     @Id
     private String id;
 
-    private String curie;
+    @Indexed(unique = true)
+    private String name;
 
-    private String iri;
-
-    @Indexed
-    private String iriHash;
-
-    private String label;
-
-    private String status;
-
-    private String description;
-
-    private String crossRefs;
+    private List<String> aliases;
 
 }

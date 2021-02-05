@@ -46,6 +46,9 @@ public class SourcesController {
     @Autowired
     private EntityService entityService;
 
+    /**
+     * POST /v1/projects/{projectId}/sources
+     */
     @PostMapping(value = "/{projectId}" + CurationConstants.API_SOURCES,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -58,6 +61,9 @@ public class SourcesController {
         return SourceDtoAssembler.assemble(created, user);
     }
 
+    /**
+     * GET /v1/projects/{projectId}/sources
+     */
     @GetMapping(value = "/{projectId}" + CurationConstants.API_SOURCES,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -74,6 +80,9 @@ public class SourcesController {
         return result;
     }
 
+    /**
+     * GET /v1/projects/{projectId}/sources/{sourceId}
+     */
     @GetMapping(value = "/{projectId}" + CurationConstants.API_SOURCES + "/{sourceId}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -85,6 +94,9 @@ public class SourcesController {
         return SourceDtoAssembler.assemble(source, user);
     }
 
+    /**
+     * POST /v1/projects/{projectId}/sources/{sourceId}
+     */
     @PutMapping(value = "/{projectId}" + CurationConstants.API_SOURCES + "/{sourceId}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
