@@ -41,10 +41,18 @@ public class OXOServiceImpl implements OXOService, ConfigListener {
     @Autowired
     private ConfigRegistry configRegistry;
 
+    /**
+     * Map to keep alias correspondences to ensure namespace acceptance by the service.
+     * For example, ORDO to Orphanet (since OXO requires the Orphanet namespace)
+     */
     private Map<String, String> ontoAliases;
 
     @PostConstruct
     public void initialize() {
+        /**
+         * Register this service as a listener for real-time configuration updates.
+         * Retrieve config data from DB.
+         */
         configRegistry.registerListener(this);
         this.ontoAliases = externalServiceConfigService.retrieveAliases(SERVICE_NAME);
     }
@@ -52,7 +60,6 @@ public class OXOServiceImpl implements OXOService, ConfigListener {
     public List<OXOMappingResponseDto> findMapping(List<String> ids, List<String> projectOntologies) {
         List<String> ontologies = this.fixAliases(projectOntologies);
         log.info("Calling OXO: {} - {} | {}", ids, projectOntologies, ontologies);
-        log.info(" -- ");
         try {
             HttpEntity httpEntity = restInteractionConfig.httpEntity()
                     .withJsonBody(new OXORequestDto(ids, ontologies, restInteractionConfig.getOxoMappingDistance()))
@@ -85,7 +92,7 @@ public class OXOServiceImpl implements OXOService, ConfigListener {
                     result.add(ontoAliases.get(ontology));
                 }
             } else {
-                result.add(ontoAliases.get(ontology));
+                result.add(ontology);
             }
         }
         return result;
@@ -93,6 +100,9 @@ public class OXOServiceImpl implements OXOService, ConfigListener {
 
     @Override
     public void updateAliases(List<String> aliases) {
+        /**
+         * Call received in real-time from the ConfigRegistry to update aliases.
+         */
         this.ontoAliases.putAll(CurationUtil.parseAliases(aliases));
     }
 

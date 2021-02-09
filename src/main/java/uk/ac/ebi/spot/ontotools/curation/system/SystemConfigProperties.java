@@ -21,6 +21,9 @@ public class SystemConfigProperties {
     @Value("${ontotools-curation.auth.cert:#{NULL}}")
     private String certPath;
 
+    @Value("${ontotools-curation.admin.robot-user}")
+    private String robotUser;
+
     public String getServerName() {
         return serverName;
     }
@@ -47,5 +50,9 @@ public class SystemConfigProperties {
 
     public String getCertPath() {
         return certPath;
+    }
+
+    public String getRobotUser() {
+        return robotUser;
     }
 }

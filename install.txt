@@ -1,0 +1,6 @@
+Data to be created during the initial setup.
+
+External service configs
+------------------------
+db.externalServiceConfigs.insert({"name": "OXO", "aliases" : ["ordo::Orphanet"]})
+db.externalServiceConfigs.insert({"name": "OLS", "aliases" : ["Orphanet::ordo"]})

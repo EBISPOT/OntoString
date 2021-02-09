@@ -32,6 +32,9 @@ public final class ProjectDto implements Serializable {
     @JsonProperty("ontologies")
     private final List<String> ontologies;
 
+    @JsonProperty("preferredMappingOntology")
+    private final String preferredMappingOntology;
+
     @JsonProperty("created")
     private final ProvenanceDto created;
 
@@ -41,12 +44,14 @@ public final class ProjectDto implements Serializable {
                       @JsonProperty("description") String description,
                       @JsonProperty("datasources") List<String> datasources,
                       @JsonProperty("ontologies") List<String> ontologies,
+                      @JsonProperty("preferredMappingOntology") String preferredMappingOntology,
                       @JsonProperty("created") ProvenanceDto created) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.datasources = datasources;
         this.ontologies = ontologies;
+        this.preferredMappingOntology = preferredMappingOntology;
         this.created = created;
     }
 
@@ -68,6 +73,10 @@ public final class ProjectDto implements Serializable {
 
     public List<String> getOntologies() {
         return ontologies;
+    }
+
+    public String getPreferredMappingOntology() {
+        return preferredMappingOntology;
     }
 
     public ProvenanceDto getCreated() {

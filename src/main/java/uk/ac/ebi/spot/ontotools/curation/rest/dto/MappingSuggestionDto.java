@@ -7,13 +7,12 @@ import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.List;
 
 @EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public final class MappingDto implements Serializable {
+public final class MappingSuggestionDto implements Serializable {
 
-    private static final long serialVersionUID = -2548737672325162378L;
+    private static final long serialVersionUID = -4565784727352793191L;
 
     @NotNull
     @JsonProperty("id")
@@ -26,33 +25,18 @@ public final class MappingDto implements Serializable {
     @JsonProperty("ontologyTerm")
     private final OntologyTermDto ontologyTerm;
 
-    @JsonProperty("reviewed")
-    private final boolean reviewed;
-
-    @JsonProperty("status")
-    private final String status;
-
-    @JsonProperty("reviews")
-    private final List<ReviewDto> reviews;
-
     @NotNull
     @JsonProperty("created")
     private final ProvenanceDto created;
 
     @JsonCreator
-    public MappingDto(@JsonProperty("id") String id,
-                      @JsonProperty("entityId") String entityId,
-                      @JsonProperty("ontologyTerm") OntologyTermDto ontologyTerm,
-                      @JsonProperty("reviewed") boolean reviewed,
-                      @JsonProperty("status") String status,
-                      @JsonProperty("reviews") List<ReviewDto> reviews,
-                      @JsonProperty("created") ProvenanceDto created) {
+    public MappingSuggestionDto(@JsonProperty("id") String id,
+                                @JsonProperty("entityId") String entityId,
+                                @JsonProperty("ontologyTerm") OntologyTermDto ontologyTerm,
+                                @JsonProperty("created") ProvenanceDto created) {
         this.id = id;
         this.entityId = entityId;
         this.ontologyTerm = ontologyTerm;
-        this.reviewed = reviewed;
-        this.status = status;
-        this.reviews = reviews;
         this.created = created;
     }
 
@@ -66,18 +50,6 @@ public final class MappingDto implements Serializable {
 
     public String getEntityId() {
         return entityId;
-    }
-
-    public boolean isReviewed() {
-        return reviewed;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public List<ReviewDto> getReviews() {
-        return reviews;
     }
 
     public ProvenanceDto getCreated() {

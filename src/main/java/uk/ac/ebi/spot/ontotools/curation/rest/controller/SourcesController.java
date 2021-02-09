@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
-import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
+import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.Source;
@@ -25,8 +25,8 @@ import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS)
@@ -57,8 +57,8 @@ public class SourcesController {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{} | {}] Request to create source: {}", user.getEmail(), projectId, sourceCreationDto.getName());
         projectService.verifyAccess(projectId, user);
-        Source created = sourceService.createSource(SourceDtoAssembler.disassemble(sourceCreationDto, new Provenance(user.getId(), DateTime.now())), projectId);
-        return SourceDtoAssembler.assemble(created, user);
+        Source created = sourceService.createSource(SourceDtoAssembler.disassemble(sourceCreationDto, new Provenance(user.getName(), user.getEmail(), DateTime.now())), projectId);
+        return SourceDtoAssembler.assemble(created);
     }
 
     /**
@@ -73,11 +73,7 @@ public class SourcesController {
         projectService.verifyAccess(projectId, user);
         List<Source> sources = sourceService.getSources(projectId);
         log.info("Found {} sources in project: {}", sources.size(), projectId);
-        List<SourceDto> result = new ArrayList<>();
-        for (Source source : sources) {
-            result.add(SourceDtoAssembler.assemble(source, user));
-        }
-        return result;
+        return sources.stream().map(SourceDtoAssembler::assemble).collect(Collectors.toList());
     }
 
     /**
@@ -91,7 +87,7 @@ public class SourcesController {
         log.info("[{}] Request to retrieve source: {} | {}", user.getEmail(), projectId, sourceId);
         projectService.verifyAccess(projectId, user);
         Source source = sourceService.getSource(sourceId, projectId);
-        return SourceDtoAssembler.assemble(source, user);
+        return SourceDtoAssembler.assemble(source);
     }
 
     /**
@@ -106,7 +102,7 @@ public class SourcesController {
         projectService.verifyAccess(projectId, user);
         Source source = sourceService.getSource(sourceId, projectId);
         for (String entity : entities) {
-            entityService.createEntity(new Entity(null, entity, source.getId(), new Provenance(user.getId(), DateTime.now()), MappingStatus.UNMAPPED));
+            entityService.createEntity(new Entity(null, entity, source.getId(), new Provenance(user.getName(), user.getEmail(), DateTime.now()), EntityStatus.UNMAPPED));
         }
     }
 }

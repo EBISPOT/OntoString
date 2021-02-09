@@ -9,6 +9,8 @@ public interface UserService {
 
     User findRandomSuperUser();
 
+    User retrieveRobotUser();
+
     void addProjectToUser(User user, Project project, ProjectRole role);
 
     void removeProjectFromUser(User user, String projectId);

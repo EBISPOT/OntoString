@@ -65,4 +65,15 @@ public class ZoomaServiceImpl implements ZoomaService {
         return new ArrayList<>();
     }
 
+
+    /**
+     * TODO: Implement
+     * Scheduled task to periodically go through all entties and re-attempt mapping
+     *
+     * Whyy??
+     */
+    public void importZooma() {
+
+    }
+
 }

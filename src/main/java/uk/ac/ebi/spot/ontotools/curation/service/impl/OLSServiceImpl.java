@@ -45,10 +45,18 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
     @Autowired
     private ConfigRegistry configRegistry;
 
+    /**
+     * Map to keep alias correspondences to ensure namespace acceptance by the service.
+     * For example, Orphanet to ORDO (since sometimes data retrieved from OXO uses the Orphanet namespace)
+     */
     private Map<String, String> ontoAliases;
 
     @PostConstruct
     public void initialize() {
+        /**
+         * Register this service as a listener for real-time configuration updates.
+         * Retrieve config data from DB.
+         */
         configRegistry.registerListener(this);
         this.ontoAliases = externalServiceConfigService.retrieveAliases(SERVICE_NAME);
     }
@@ -85,8 +93,22 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
         return new ArrayList<>();
     }
 
+    /**
+     * TODO: Implement
+     * Scheduled task to periodically go through all local terms with status CURRENT | AWAITING_IMPORT or NEEDS_IMPORT
+     * and repeat the process associated with checking the status - as per the initial term creation
+     * <p>
+     * Why??
+     */
+    public void importOLS() {
+
+    }
+
     @Override
     public void updateAliases(List<String> aliases) {
+        /**
+         * Call received in real-time from the ConfigRegistry to update aliases.
+         */
         this.ontoAliases.putAll(CurationUtil.parseAliases(aliases));
     }
 

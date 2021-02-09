@@ -1,8 +1,16 @@
 package uk.ac.ebi.spot.ontotools.curation.service;
 
-import uk.ac.ebi.spot.ontotools.curation.domain.auth.Project;
+import uk.ac.ebi.spot.ontotools.curation.domain.Entity;
+import uk.ac.ebi.spot.ontotools.curation.domain.Mapping;
+import uk.ac.ebi.spot.ontotools.curation.domain.OntologyTerm;
+import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
+
+import java.util.List;
+import java.util.Map;
 
 public interface MappingService {
 
-    void runAutoMapping(String sourceId, Project project);
+    Mapping createMapping(Entity entity, OntologyTerm ontologyTerm, Provenance provenance);
+
+    Map<String, List<Mapping>> retrieveMappingsForEntities(List<String> entityIds);
 }

@@ -10,7 +10,9 @@ public class CurationConstants {
 
     public static final String API_MAPPINGS = "/mappings";
 
-    public static final String API_SUGGESTIONS = "/mapping-suggestions";
+    public static final String API_ENTITIES = "/entities";
 
     public static final String ZOOMA_CONFIDENCE_HIGH = "HIGH";
+
+    public static final int NO_REVIEWS_REQUIRED = 3;
 }

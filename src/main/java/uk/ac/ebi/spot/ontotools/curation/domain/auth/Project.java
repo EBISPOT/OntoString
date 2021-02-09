@@ -24,9 +24,24 @@ public class Project {
 
     private String description;
 
+    /**
+     * List of datasources used to query Zooma to retrieve suggestions.
+     * Zooma service uses this list to filter results pertaining only to these datasources.
+     */
     private List<String> datasources;
 
+    /**
+     * List of datasources used to query Zooma to retrieve suggestions.
+     * Zooma service uses this list to filter results pertaining only to these ontologies.
+     *
+     * NB: Orphanet prefix used by Zooma is `ordo`
+     */
     private List<String> ontologies;
+
+    /**
+     * Ontology ID used when creating ontology terms locally to query OLS for a mapping
+     */
+    private String preferredMappintOntology;
 
     private Provenance created;
 }

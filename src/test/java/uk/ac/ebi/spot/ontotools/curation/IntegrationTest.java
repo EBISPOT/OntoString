@@ -73,6 +73,8 @@ public abstract class IntegrationTest {
         mapper = new ObjectMapper();
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
+        userRepository.insert(new User(null, "Robot User", "ontotools-curator@ebi.ac.uk", new ArrayList<>(), true));
+
         user1 = userRepository.insert(new User(null, "Test User 1", "test1@test.com", new ArrayList<>(), false));
         authTokenRepository.insert(new AuthToken(null, "token1", "test1@test.com"));
 
@@ -85,7 +87,7 @@ public abstract class IntegrationTest {
 
     protected ProjectDto createProject(String name, String token) throws Exception {
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS;
-        ProjectCreationDto projectCreationDto = new ProjectCreationDto(name, "Description", null, null);
+        ProjectCreationDto projectCreationDto = new ProjectCreationDto(name, "Description", null, null, "EFO");
 
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -104,6 +106,7 @@ public abstract class IntegrationTest {
         assertNotNull(actual.getOntologies());
         assertTrue(actual.getDatasources().isEmpty());
         assertTrue(actual.getOntologies().isEmpty());
+        assertEquals("EFO", actual.getPreferredMappingOntology());
         return actual;
     }
 

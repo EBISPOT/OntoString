@@ -83,6 +83,7 @@ public class ProjectsControllerTest extends IntegrationTest {
                 projectDto.getDescription(),
                 Arrays.asList(new String[]{"gwas"}),
                 Arrays.asList(new String[]{"ordo"}),
+                projectDto.getPreferredMappingOntology(),
                 projectDto.getCreated());
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();
@@ -114,6 +115,7 @@ public class ProjectsControllerTest extends IntegrationTest {
                 projectDto.getDescription(),
                 Arrays.asList(new String[]{"gwas"}),
                 Arrays.asList(new String[]{"ordo"}),
+                projectDto.getPreferredMappingOntology(),
                 projectDto.getCreated());
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();

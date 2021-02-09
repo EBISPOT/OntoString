@@ -7,7 +7,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
+import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 
 @Document(collection = "mappings")
 @Getter
@@ -26,5 +26,5 @@ public class Entity {
 
     private Provenance created;
 
-    private MappingStatus mappingStatus;
+    private EntityStatus mappingStatus;
 }

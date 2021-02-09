@@ -1,9 +1,9 @@
 package uk.ac.ebi.spot.ontotools.curation.constants;
 
-public enum MappingStatus {
+public enum ReviewStatus {
 
     AWAITING_REVIEW,
-    REVIEW_IN_PROGRESS,
-    FINALIZED
+    APPROVED,
+    REJECTED
 
 }

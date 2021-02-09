@@ -2,20 +2,19 @@ package uk.ac.ebi.spot.ontotools.curation.rest.assembler;
 
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.Source;
-import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 
 public class SourceDtoAssembler {
 
-    public static SourceDto assemble(Source source, User user) {
+    public static SourceDto assemble(Source source) {
         return new SourceDto(source.getId(),
                 source.getName(),
                 source.getDescription(),
                 source.getUri(),
                 source.getType(),
-                ProvenanceDtoAssembler.assemble(source.getCreated(), user),
-                ProvenanceDtoAssembler.assemble(source.getLastUpdated(), user));
+                ProvenanceDtoAssembler.assemble(source.getCreated()),
+                ProvenanceDtoAssembler.assemble(source.getLastUpdated()));
     }
 
     public static Source disassemble(SourceDto source) {

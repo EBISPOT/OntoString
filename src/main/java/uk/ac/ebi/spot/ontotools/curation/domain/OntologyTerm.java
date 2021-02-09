@@ -22,7 +22,7 @@ public class OntologyTerm {
 
     private String iri;
 
-    @Indexed
+    @Indexed(unique = true)
     private String iriHash;
 
     private String label;

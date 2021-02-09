@@ -1,28 +1,14 @@
 package uk.ac.ebi.spot.ontotools.curation.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "reviews")
 @Getter
-@Setter
+@AllArgsConstructor
 public class Review {
 
-    @Id
-    private String id;
-
-    private String reviewId;
+    private String comment;
 
     private Provenance created;
 
-    public Review() {
-
-    }
-
-    public Review(String reviewId, Provenance created) {
-        this.reviewId = reviewId;
-        this.created = created;
-    }
 }

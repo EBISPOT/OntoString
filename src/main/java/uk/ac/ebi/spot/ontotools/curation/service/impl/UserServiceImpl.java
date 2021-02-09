@@ -11,7 +11,9 @@ import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.ontotools.curation.repository.UserRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
+import uk.ac.ebi.spot.ontotools.curation.system.SystemConfigProperties;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +25,21 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private SystemConfigProperties systemConfigProperties;
+
+    private User robotUser;
+
+    @PostConstruct
+    public void initialize() {
+        this.robotUser = new User(null, "Robot User", systemConfigProperties.getRobotUser(), new ArrayList<>(), true);
+    }
+
+    @Override
+    public User retrieveRobotUser() {
+        return robotUser;
+    }
 
     @Override
     public User findByEmail(String email) {

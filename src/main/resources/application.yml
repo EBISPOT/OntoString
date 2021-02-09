@@ -11,6 +11,8 @@ ontotools-curation:
   auth:
     enabled: true
     cert: aap.der
+  admin:
+    robot-user: ontotools-curator@ebi.ac.uk
 
 ontotools:
   zooma:

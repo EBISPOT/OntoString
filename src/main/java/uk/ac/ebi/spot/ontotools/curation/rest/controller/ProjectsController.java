@@ -23,8 +23,8 @@ import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS)
@@ -50,9 +50,9 @@ public class ProjectsController {
     public ProjectDto createProject(@RequestBody @Valid ProjectCreationDto projectCreationDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to create project: {}", user.getEmail(), projectCreationDto.getName());
-        Project created = projectService.createProject(ProjectDtoAssembler.disassemble(projectCreationDto, new Provenance(user.getId(), DateTime.now())), user);
+        Project created = projectService.createProject(ProjectDtoAssembler.disassemble(projectCreationDto, new Provenance(user.getName(), user.getEmail(), DateTime.now())), user);
         userService.addProjectToUser(user, created, ProjectRole.ADMIN);
-        return ProjectDtoAssembler.assemble(created, user);
+        return ProjectDtoAssembler.assemble(created);
     }
 
     /**
@@ -66,11 +66,7 @@ public class ProjectsController {
 
         List<Project> projects = projectService.retrieveProjects(user);
         log.info("Found {} projects for user: {}", projects.size(), user.getEmail());
-        List<ProjectDto> result = new ArrayList<>();
-        for (Project project : projects) {
-            result.add(ProjectDtoAssembler.assemble(project, user));
-        }
-        return result;
+        return projects.stream().map(ProjectDtoAssembler::assemble).collect(Collectors.toList());
     }
 
     /**
@@ -83,7 +79,7 @@ public class ProjectsController {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve project: {}", user.getEmail(), projectId);
         Project project = projectService.retrieveProject(projectId, user);
-        return ProjectDtoAssembler.assemble(project, user);
+        return ProjectDtoAssembler.assemble(project);
     }
 
     /**
@@ -97,7 +93,7 @@ public class ProjectsController {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to update project [{}]: {}", user.getEmail(), projectId, projectDto.getName());
         Project updated = projectService.updateProject(ProjectDtoAssembler.disassemble(projectDto), projectId, user);
-        return ProjectDtoAssembler.assemble(updated, user);
+        return ProjectDtoAssembler.assemble(updated);
     }
 
     /**

@@ -28,15 +28,20 @@ public final class ProjectCreationDto implements Serializable {
     @JsonProperty("ontologies")
     private final List<String> ontologies;
 
+    @JsonProperty("preferredMappingOntology")
+    private final String preferredMappingOntology;
+
     @JsonCreator
     public ProjectCreationDto(@JsonProperty("name") String name,
                               @JsonProperty("description") String description,
                               @JsonProperty("datasources") List<String> datasources,
-                              @JsonProperty("ontologies") List<String> ontologies) {
+                              @JsonProperty("ontologies") List<String> ontologies,
+                              @JsonProperty("preferredMappingOntology") String preferredMappingOntology) {
         this.name = name;
         this.description = description;
         this.datasources = datasources;
         this.ontologies = ontologies;
+        this.preferredMappingOntology = preferredMappingOntology;
     }
 
     public String getName() {
@@ -49,6 +54,10 @@ public final class ProjectCreationDto implements Serializable {
 
     public List<String> getDatasources() {
         return datasources;
+    }
+
+    public String getPreferredMappingOntology() {
+        return preferredMappingOntology;
     }
 
     public List<String> getOntologies() {
