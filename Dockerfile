@@ -1,5 +1,8 @@
 # Import base image
-FROM openjdk:15.0.2
+FROM openjdk:15-buster
+
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends less
 
 # Create log file directory and set permission
 RUN groupadd -r ontotools-curation-service && useradd -r --create-home -g ontotools-curation-service ontotools-curation-service
