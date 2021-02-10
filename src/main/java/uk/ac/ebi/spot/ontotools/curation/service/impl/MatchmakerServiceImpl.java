@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
-import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
@@ -58,6 +57,8 @@ public class MatchmakerServiceImpl implements MatchmakerService {
     public void runMatchmaking(String sourceId, Project project) {
         log.info("Running auto-mapping for source: {}", sourceId);
         User robotUser = userService.retrieveRobotUser();
+        project.setOntologies(CurationUtil.toLowerCase(project.getOntologies()));
+        project.setPreferredMappintOntology(project.getPreferredMappintOntology().toLowerCase());
         Stream<Entity> entityStream = entityService.retrieveEntitiesForSource(sourceId);
         entityStream.forEach(entity -> this.autoMap(entity, project, robotUser));
         entityStream.close();
@@ -94,7 +95,7 @@ public class MatchmakerServiceImpl implements MatchmakerService {
              * Retain only suggestions pertaining to the ontologies of interest (if these have been specified)
              */
             if (project.getOntologies() != null) {
-                if (project.getOntologies().contains(CurationUtil.ontoFromIRI(suggestedTermIRI))) {
+                if (project.getOntologies().contains(CurationUtil.ontoFromIRI(suggestedTermIRI).toLowerCase())) {
                     finalIRIs.add(suggestedTermIRI);
                 }
             } else {

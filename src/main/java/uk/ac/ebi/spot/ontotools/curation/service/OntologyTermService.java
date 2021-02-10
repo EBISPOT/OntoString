@@ -10,4 +10,6 @@ public interface OntologyTermService {
     OntologyTerm createTerm(String iri, Project project);
 
     Map<String, OntologyTerm> retrieveTerms(List<String> ontologyTermIds);
+
+    List<OntologyTerm> retrieveAllTerms();
 }

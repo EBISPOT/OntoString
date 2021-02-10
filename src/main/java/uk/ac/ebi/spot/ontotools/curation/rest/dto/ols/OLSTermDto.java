@@ -18,11 +18,8 @@ public final class OLSTermDto implements Serializable {
     @JsonProperty("iri")
     private final String iri;
 
-    @JsonProperty("curie")
-    private final String curie;
-
     @JsonProperty("obo_id")
-    private final String oboId;
+    private final String curie;
 
     @JsonProperty("label")
     private final String label;
@@ -32,13 +29,11 @@ public final class OLSTermDto implements Serializable {
 
     @JsonCreator
     public OLSTermDto(@JsonProperty("iri") String iri,
-                      @JsonProperty("curie") String curie,
-                      @JsonProperty("obo_id") String oboId,
+                      @JsonProperty("obo_id") String curie,
                       @JsonProperty("label") String label,
                       @JsonProperty("is_obsolete") Boolean obsolete) {
         this.iri = iri;
         this.curie = curie;
-        this.oboId = oboId;
         this.label = label;
         this.obsolete = obsolete;
     }
@@ -49,10 +44,6 @@ public final class OLSTermDto implements Serializable {
 
     public String getCurie() {
         return curie;
-    }
-
-    public String getOboId() {
-        return oboId;
     }
 
     public String getLabel() {

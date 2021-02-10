@@ -3,14 +3,11 @@ package uk.ac.ebi.spot.ontotools.curation.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.support.MultipartFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.util.concurrent.Executor;
 
 
 public class WebMvcConfig {
@@ -26,11 +23,6 @@ public class WebMvcConfig {
         @Override
         public void addInterceptors(InterceptorRegistry registry) {
             registry.addInterceptor(authInterceptor());
-        }
-
-        @Bean
-        public Executor taskExecutor() {
-            return new SimpleAsyncTaskExecutor();
         }
 
         @Bean

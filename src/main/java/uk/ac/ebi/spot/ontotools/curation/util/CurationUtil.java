@@ -4,8 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CurationUtil {
+
+    public static List<String> toLowerCase(List<String> list) {
+        if (list == null) {
+            return null;
+        }
+        return list.stream().map(String::toLowerCase).collect(Collectors.toList());
+    }
 
     public static List<String> sToList(String s) {
         List<String> list = new ArrayList<>();

@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -19,6 +18,7 @@ import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.EntityDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.SourceDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.service.*;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
@@ -58,7 +58,7 @@ public class EntityController {
     @GetMapping(value = "/{projectId}" + CurationConstants.API_ENTITIES,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public Page<EntityDto> getEntities(@PathVariable String projectId, @PageableDefault(size = 20, page = 0) Pageable pageable, HttpServletRequest request) {
+    public RestResponsePage<EntityDto> getEntities(@PathVariable String projectId, @PageableDefault(size = 20, page = 0) Pageable pageable, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve entities: {}", user.getEmail(), projectId);
         projectService.verifyAccess(projectId, user);
@@ -76,7 +76,7 @@ public class EntityController {
         for (Entity entity : entities.getContent()) {
             entityDtos.add(EntityDtoAssembler.assemble(entity, sourceMap.get(entity.getSourceId()), mappings.get(entity.getId()), mappingSuggestions.get(entity.getId())));
         }
-        return new PageImpl<>(entityDtos, pageable, entities.getTotalElements());
+        return new RestResponsePage<>(entityDtos, pageable, entities.getTotalElements());
     }
 
     /**

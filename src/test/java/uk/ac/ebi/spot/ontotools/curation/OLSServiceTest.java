@@ -24,7 +24,7 @@ public class OLSServiceTest extends IntegrationTest {
         assertEquals(1, terms.size());
         assertEquals(termId, terms.get(0).getIri());
         assertEquals("Achondroplasia", terms.get(0).getLabel());
-        assertEquals("Orphanet:15", terms.get(0).getOboId());
+        assertEquals("Orphanet:15", terms.get(0).getCurie());
         assertFalse(terms.get(0).getObsolete());
     }
 

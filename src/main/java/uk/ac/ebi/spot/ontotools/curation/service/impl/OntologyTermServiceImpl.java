@@ -28,17 +28,6 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     @Autowired
     private OLSService olsService;
 
-    //    @Override
-    public Map<String, OntologyTerm> getOntologyTermsById(List<String> ontoTermIds) {
-        log.info("Retrieving ontology terms for {} ids.", ontoTermIds.size());
-        Map<String, OntologyTerm> mappingMap = new HashMap<>();
-        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findByIdIn(ontoTermIds);
-        for (OntologyTerm ontologyTerm : ontologyTerms) {
-            mappingMap.put(ontologyTerm.getId(), ontologyTerm);
-        }
-        return mappingMap;
-    }
-
     @Override
     public OntologyTerm createTerm(String iri, Project project) {
         log.info("Creating term: {}", iri);
@@ -53,7 +42,7 @@ public class OntologyTermServiceImpl implements OntologyTermService {
         String ontoId = CurationUtil.ontoFromIRI(iri);
         String termStatus;
         if (!ontoId.equalsIgnoreCase(project.getPreferredMappintOntology())) {
-            parentOntoResponse = olsService.retrieveTerms(project.getPreferredMappintOntology(), iri);
+            parentOntoResponse = olsService.retrieveTerms(ontoId, iri);
             termStatus = parseStatus(preferredOntoResponse, parentOntoResponse, null);
         } else {
             termStatus = parseStatus(preferredOntoResponse, null, null);
@@ -94,6 +83,12 @@ public class OntologyTermServiceImpl implements OntologyTermService {
             result.put(ontologyTerm.getId(), ontologyTerm);
         }
         return result;
+    }
+
+    @Override
+    public List<OntologyTerm> retrieveAllTerms() {
+        log.info("Retrieving all ontology terms.");
+        return ontologyTermRepository.findAll();
     }
 
     private String parseStatus(List<OLSTermDto> preferredOntoResponse, List<OLSTermDto> parentOntoResponse, String previousState) {

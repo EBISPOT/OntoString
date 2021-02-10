@@ -22,7 +22,7 @@ public class ProjectsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldCreateProject() throws Exception {
-        super.createProject("New Project", "token1");
+        super.createProject("New Project", "token1", null, null, null);
     }
 
     /**
@@ -30,8 +30,8 @@ public class ProjectsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetProjects() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", "token1");
-        super.createProject("New Project 2", "token2");
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null);
+        super.createProject("New Project 2", "token2", null, null, null);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS;
         String response = mockMvc.perform(get(endpoint)
@@ -56,7 +56,7 @@ public class ProjectsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", "token1");
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();
         String response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -77,7 +77,7 @@ public class ProjectsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldUpdateProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", "token1");
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null);
         ProjectDto updatedProject = new ProjectDto(projectDto.getId(),
                 "New Name",
                 projectDto.getDescription(),
@@ -109,7 +109,7 @@ public class ProjectsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotUpdateProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", "token1");
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null);
         ProjectDto updatedProject = new ProjectDto(projectDto.getId(),
                 "New Name",
                 projectDto.getDescription(),
@@ -131,7 +131,7 @@ public class ProjectsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldDeleteProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", "token1");
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();
         mockMvc.perform(delete(endpoint)
                 .header(IDPConstants.JWT_TOKEN, "token1"))
