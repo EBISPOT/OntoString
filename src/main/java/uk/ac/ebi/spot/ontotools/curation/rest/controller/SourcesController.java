@@ -16,10 +16,7 @@ import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.SourceDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
-import uk.ac.ebi.spot.ontotools.curation.service.EntityService;
-import uk.ac.ebi.spot.ontotools.curation.service.JWTService;
-import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
-import uk.ac.ebi.spot.ontotools.curation.service.SourceService;
+import uk.ac.ebi.spot.ontotools.curation.service.*;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
@@ -45,6 +42,9 @@ public class SourcesController {
 
     @Autowired
     private EntityService entityService;
+
+    @Autowired
+    private MatchmakerService matchmakerService;
 
     /**
      * POST /v1/projects/{projectId}/sources
@@ -93,9 +93,9 @@ public class SourcesController {
     /**
      * POST /v1/projects/{projectId}/sources/{sourceId}
      */
-    @PutMapping(value = "/{projectId}" + CurationConstants.API_SOURCES + "/{sourceId}",
+    @PostMapping(value = "/{projectId}" + CurationConstants.API_SOURCES + "/{sourceId}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     public void addDataToSource(@RequestBody List<String> entities, @PathVariable String projectId, @PathVariable String sourceId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to add data to source: {} | {} | {}", user.getEmail(), projectId, sourceId, entities);
@@ -104,5 +104,6 @@ public class SourcesController {
         for (String entity : entities) {
             entityService.createEntity(new Entity(null, entity, source.getId(), new Provenance(user.getName(), user.getEmail(), DateTime.now()), EntityStatus.UNMAPPED));
         }
+        matchmakerService.runMatchmaking(sourceId, projectService.retrieveProject(projectId, user));
     }
 }
