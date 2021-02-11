@@ -10,8 +10,12 @@ import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.Project;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.*;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
@@ -20,11 +24,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ContextConfiguration(classes = {IntegrationTest.MockTaskExecutorConfig.class})
-public class EntityControllerTest extends IntegrationTest {
+public class MappingsControllerTest extends IntegrationTest {
 
     @Autowired
     private UserService userService;
@@ -50,24 +56,11 @@ public class EntityControllerTest extends IntegrationTest {
     }
 
     /**
-     * GET /v1/projects/{projectId}/entities
+     * GET /v1/projects/{projectId}/mappings?entityId=<entityId>
      */
     @Test
-    public void shouldGetEntities() throws Exception {
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_ENTITIES;
-        String response = mockMvc.perform(get(endpoint)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header(IDPConstants.JWT_TOKEN, "token1"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        RestResponsePage<EntityDto> entitiesPage = mapper.readValue(response, new TypeReference<RestResponsePage<EntityDto>>() {
-        });
-        assertEquals(1, entitiesPage.getTotalElements());
-
-        EntityDto actual = entitiesPage.getContent().get(0);
+    public void shouldGetMappings() throws Exception {
+        EntityDto actual = retrieveEntity();
         assertEquals("Achondroplasia", actual.getName());
         assertEquals(EntityStatus.AUTO_MAPPED.name(), actual.getMappingStatus());
 
@@ -91,16 +84,27 @@ public class EntityControllerTest extends IntegrationTest {
     }
 
     /**
-     * GET /v1/projects/{projectId}/entities/{entityId}
+     * POST /v1/projects/{projectId}/mappings
      */
     @Test
-    public void shouldGetEntity() throws Exception {
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
-                CurationConstants.API_ENTITIES + "/" + entity.getId();
-        String response = mockMvc.perform(get(endpoint)
+    public void shouldCreateMapping() throws Exception {
+        EntityDto entityDto = retrieveEntity();
+        OntologyTermDto ontologyTermDto = null;
+        for (MappingSuggestionDto mappingSuggestionDto : entityDto.getMappingSuggestions()) {
+            if (mappingSuggestionDto.getOntologyTerm().getCurie().equalsIgnoreCase("MONDO:0007037")) {
+                ontologyTermDto = mappingSuggestionDto.getOntologyTerm();
+                break;
+            }
+        }
+        assertNotNull(ontologyTermDto);
+        MappingCreationDto mappingCreationDto = new MappingCreationDto(entityDto.getId(), ontologyTermDto);
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
+        String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(mappingCreationDto))
                 .header(IDPConstants.JWT_TOKEN, "token1"))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -109,10 +113,10 @@ public class EntityControllerTest extends IntegrationTest {
         });
 
         assertEquals("Achondroplasia", actual.getName());
-        assertEquals(EntityStatus.AUTO_MAPPED.name(), actual.getMappingStatus());
+        assertEquals(EntityStatus.MANUALLY_MAPPED.name(), actual.getMappingStatus());
 
         assertEquals(1, actual.getMappings().size());
-        assertEquals("Orphanet:15", actual.getMappings().get(0).getOntologyTerm().getCurie());
+        assertEquals("MONDO:0007037", actual.getMappings().get(0).getOntologyTerm().getCurie());
         assertEquals(MappingStatus.AWAITING_REVIEW.name(), actual.getMappings().get(0).getStatus());
 
         assertEquals(2, actual.getMappingSuggestions().size());
@@ -128,5 +132,21 @@ public class EntityControllerTest extends IntegrationTest {
 
         assertEquals(2, foundCuries);
         assertEquals(sourceDto.getId(), actual.getSource().getId());
+    }
+
+    private EntityDto retrieveEntity() throws Exception {
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS
+                + "?entityId=" + super.entity.getId();
+        String response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        EntityDto actual = mapper.readValue(response, new TypeReference<EntityDto>() {
+        });
+        return actual;
     }
 }

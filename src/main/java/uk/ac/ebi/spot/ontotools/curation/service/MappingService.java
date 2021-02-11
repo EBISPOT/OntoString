@@ -13,4 +13,8 @@ public interface MappingService {
     Mapping createMapping(Entity entity, OntologyTerm ontologyTerm, Provenance provenance);
 
     Map<String, List<Mapping>> retrieveMappingsForEntities(List<String> entityIds);
+
+    List<Mapping> retrieveMappingsForEntity(String entityId);
+
+    List<String> deleteMappingExcluding(Entity entity, String ontologyTermId);
 }

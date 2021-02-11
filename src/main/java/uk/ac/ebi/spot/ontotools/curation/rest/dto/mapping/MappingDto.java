@@ -1,9 +1,10 @@
-package uk.ac.ebi.spot.ontotools.curation.rest.dto;
+package uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProvenanceDto;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -19,6 +20,7 @@ public final class MappingDto implements Serializable {
     @JsonProperty("id")
     private final String id;
 
+    @NotNull
     @JsonProperty("entityId")
     private final String entityId;
 

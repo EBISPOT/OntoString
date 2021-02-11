@@ -1,7 +1,7 @@
 package uk.ac.ebi.spot.ontotools.curation.rest.assembler;
 
 import uk.ac.ebi.spot.ontotools.curation.domain.Mapping;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.MappingDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -17,5 +17,4 @@ public class MappingDtoAssembler {
                 mapping.getReviews() != null ? mapping.getReviews().stream().map(ReviewDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>(),
                 ProvenanceDtoAssembler.assemble(mapping.getCreated()));
     }
-
 }

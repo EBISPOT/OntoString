@@ -1,11 +1,11 @@
-package uk.ac.ebi.spot.ontotools.curation.rest.dto;
+package uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 
 @EqualsAndHashCode
@@ -14,19 +14,18 @@ public final class OntologyTermDto implements Serializable {
 
     private static final long serialVersionUID = 714105630780606515L;
 
-    @NotNull
+    @NotEmpty
     @JsonProperty("curie")
     private final String curie;
 
-    @NotNull
+    @NotEmpty
     @JsonProperty("iri")
     private final String iri;
 
-    @NotNull
+    @NotEmpty
     @JsonProperty("label")
     private final String label;
 
-    @NotNull
     @JsonProperty("status")
     private final String status;
 

@@ -41,7 +41,7 @@ public class EntityServiceImpl implements EntityService {
 
     @Override
     public Entity updateMappingStatus(Entity entity, EntityStatus mappingStatus) {
-        log.info("Updating mappping status [{}]: {}", entity.getName(), mappingStatus);
+        log.info("Updating mapping status [{}]: {}", entity.getName(), mappingStatus);
         Optional<Entity> entityOptional = entityRepository.findById(entity.getId());
         if (!entityOptional.isPresent()) {
             log.error("Unable to find entity: {}", entity.getName());

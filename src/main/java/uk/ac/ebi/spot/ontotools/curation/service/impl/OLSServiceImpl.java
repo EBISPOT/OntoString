@@ -99,6 +99,8 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
      * and repeat the process associated with checking the status - as per the initial term creation
      * <p>
      * Why??
+     *
+     * Do we have to introduce project-based terms? If not - how do we use project preferences to do this import?
      */
     public void importOLS() {
 

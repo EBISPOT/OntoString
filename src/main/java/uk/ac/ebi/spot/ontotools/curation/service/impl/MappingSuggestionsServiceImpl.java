@@ -71,4 +71,34 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
         }
         return result;
     }
+
+    @Override
+    public List<MappingSuggestion> retrieveMappingSuggestionsForEntity(String entityId) {
+        log.info("Retrieving mapping suggestions for entity: {}", entityId);
+        List<MappingSuggestion> mappingSuggestions = mappingSuggestionRepository.findByEntityId(entityId);
+        List<String> ontologyTermIds = mappingSuggestions.stream().map(MappingSuggestion::getOntologyTermId).collect(Collectors.toList());
+        Map<String, OntologyTerm> ontologyTermMap = ontologyTermService.retrieveTerms(ontologyTermIds);
+        log.info("Found {} mapping suggestions.", mappingSuggestions.size());
+        List<MappingSuggestion> result = new ArrayList<>();
+        for (MappingSuggestion mappingSuggestion : mappingSuggestions) {
+            if (!ontologyTermMap.containsKey(mappingSuggestion.getOntologyTermId())) {
+                log.warn("Unable to find ontology term [{}] for mapping suggestion: {}", mappingSuggestion.getOntologyTermId(), mappingSuggestion.getId());
+                continue;
+            }
+            mappingSuggestion.setOntologyTerm(ontologyTermMap.get(mappingSuggestion.getOntologyTermId()));
+            result.add(mappingSuggestion);
+        }
+        return result;
+    }
+
+    @Override
+    public void deleteMappingSuggestions(String entityId, String ontologyTermId) {
+        log.info("Deleting mapping suggestions for entity [{}] with ontology term: {}", entityId, ontologyTermId);
+        List<MappingSuggestion> mappingSuggestions = mappingSuggestionRepository.findByEntityId(entityId);
+        for (MappingSuggestion mappingSuggestion : mappingSuggestions) {
+            if (!mappingSuggestion.getOntologyTermId().equalsIgnoreCase(ontologyTermId)) {
+                mappingSuggestionRepository.delete(mappingSuggestion);
+            }
+        }
+    }
 }

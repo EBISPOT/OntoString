@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;

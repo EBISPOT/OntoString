@@ -14,5 +14,5 @@ public interface MappingSuggestionRepository extends MongoRepository<MappingSugg
 
     List<MappingSuggestion> findByEntityIdAndOntologyTermIdNotIn(String entityId, List<String> ontologyTermIds);
 
-    List<MappingSuggestion> findByOntologyTermId(String ontologyTermId);
+    List<MappingSuggestion> findByEntityId(String entityId);
 }

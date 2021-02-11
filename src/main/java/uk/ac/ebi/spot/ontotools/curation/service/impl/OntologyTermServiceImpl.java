@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.Project;
+import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermRepository;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
@@ -27,6 +28,20 @@ public class OntologyTermServiceImpl implements OntologyTermService {
 
     @Autowired
     private OLSService olsService;
+
+    @Override
+    public OntologyTerm createTerm(OntologyTerm term) {
+        log.info("Creating term manually: {}", term.getCurie());
+        Optional<OntologyTerm> ontologyTermOp = ontologyTermRepository.findByIriHash(DigestUtils.sha256Hex(term.getIri()));
+        if (ontologyTermOp.isPresent()) {
+            log.warn("Ontology term already exists: {} | {}", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel());
+            return ontologyTermOp.get();
+        }
+
+        OntologyTerm ontologyTerm = ontologyTermRepository.insert(term);
+        log.info("Term [{}] created: {}", ontologyTerm.getCurie(), ontologyTerm.getId());
+        return ontologyTerm;
+    }
 
     @Override
     public OntologyTerm createTerm(String iri, Project project) {
@@ -89,6 +104,28 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     public List<OntologyTerm> retrieveAllTerms() {
         log.info("Retrieving all ontology terms.");
         return ontologyTermRepository.findAll();
+    }
+
+    @Override
+    public OntologyTerm retrieveTermByIri(String iri) {
+        log.info("Retrieving ontology term: {}", iri);
+        Optional<OntologyTerm> ontologyTermOp = ontologyTermRepository.findByIriHash(DigestUtils.sha256Hex(iri));
+        if (!ontologyTermOp.isPresent()) {
+            log.error("Unable to find ontology term: {}", iri);
+            throw new EntityNotFoundException("Unable to find ontology term: " + iri);
+        }
+        return ontologyTermOp.get();
+    }
+
+    @Override
+    public OntologyTerm retrieveTermById(String ontologyTermId) {
+        log.info("Retrieving ontology term: {}", ontologyTermId);
+        Optional<OntologyTerm> ontologyTermOp = ontologyTermRepository.findById(ontologyTermId);
+        if (!ontologyTermOp.isPresent()) {
+            log.error("Unable to find ontology term: {}", ontologyTermId);
+            throw new EntityNotFoundException("Unable to find ontology term: " + ontologyTermId);
+        }
+        return ontologyTermOp.get();
     }
 
     private String parseStatus(List<OLSTermDto> preferredOntoResponse, List<OLSTermDto> parentOntoResponse, String previousState) {

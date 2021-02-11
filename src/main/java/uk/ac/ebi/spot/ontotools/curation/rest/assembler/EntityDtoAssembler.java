@@ -4,8 +4,8 @@ import uk.ac.ebi.spot.ontotools.curation.domain.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.MappingSuggestion;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.MappingDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.MappingSuggestionDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 
 import java.util.List;
