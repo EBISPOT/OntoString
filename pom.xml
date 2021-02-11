@@ -41,6 +41,16 @@
         <junit.version>4.13.1</junit.version>
         <mockito.core>3.7.7</mockito.core>
         <equalsverifier.version>3.5.2</equalsverifier.version>
+
+        <jacoco.plugin.version>0.8.6</jacoco.plugin.version>
+        <skip.coverage>false</skip.coverage>
+
+        <coverage.ratio.instruction>0.7000</coverage.ratio.instruction>
+        <coverage.ratio.branch>0.7000</coverage.ratio.branch>
+        <coverage.ratio.method>0.7500</coverage.ratio.method>
+        <coverage.ratio.complexity>0.7000</coverage.ratio.complexity>
+        <coverage.ratio.line>0.7000</coverage.ratio.line>
+        <coverage.ratio.class>0.9000</coverage.ratio.class>
     </properties>
 
     <scm>
@@ -55,6 +65,107 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.plugin.version}</version>
+                <configuration>
+                    <dataFile>${project.build.directory}/coverage-reports/jacoco.exec</dataFile>
+                    <outputDirectory>${project.build.directory}/coverage-reports/</outputDirectory>
+                    <skip>true</skip>
+                    <excludes>
+                        <exclude>**/*Config.*</exclude>
+                        <exclude>**/*ConfigProd.*</exclude>
+                        <exclude>**/*Application.*</exclude>
+                        <exclude>**/*ConfigDev.*</exclude>
+                        <exclude>**/*ConfigNonDev.*</exclude>
+                        <exclude>**/*Constants.*</exclude>
+                        <exclude>**/*Properties.*</exclude>
+                        <exclude>**/*Exception.*</exclude>
+                        <exclude>**/*Serializer.*</exclude>
+                        <exclude>**/*Deserializer.*</exclude>
+                        <exclude>**/constants/**/*</exclude>
+                        <exclude>**/constants/*.*</exclude>
+                        <exclude>**/*Advice.*</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.coverage}</skip>
+                            <tasks>
+                                <echo message="Creating coverage-reports output directory"/>
+                                <mkdir dir="${project.build.directory}/target/coverage-reports/"/>
+                            </tasks>
+                            <destFile>${project.build.directory}/coverage-reports/jacoco.exec</destFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <!-- Run before maven-scr-plugin adds in the service methods -->
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.coverage}</skip>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <!-- Run before maven-scr-plugin adds in the service methods -->
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.coverage}</skip>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${coverage.ratio.instruction}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${coverage.ratio.line}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${coverage.ratio.branch}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>METHOD</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${coverage.ratio.method}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>CLASS</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${coverage.ratio.class}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>COMPLEXITY</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${coverage.ratio.complexity}</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 

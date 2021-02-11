@@ -17,19 +17,6 @@ public class SourceDtoAssembler {
                 ProvenanceDtoAssembler.assemble(source.getLastUpdated()));
     }
 
-    public static Source disassemble(SourceDto source) {
-        return new Source(source.getId(),
-                source.getName(),
-                source.getDescription(),
-                source.getUri(),
-                source.getType(),
-                ProvenanceDtoAssembler.disassemble(source.getCreated()),
-                ProvenanceDtoAssembler.disassemble(source.getLastUpdated()),
-                null,
-                null,
-                false);
-    }
-
     public static Source disassemble(SourceCreationDto source, Provenance provenance) {
         return new Source(null,
                 source.getName(),
