@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.ontotools.curation.service;
 
+import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 
@@ -16,5 +17,5 @@ public interface ProjectService {
 
     Project retrieveProject(String projectId, User user);
 
-    void verifyAccess(String projectId, User user);
+    void verifyAccess(String projectId, User user, List<ProjectRole> roles);
 }

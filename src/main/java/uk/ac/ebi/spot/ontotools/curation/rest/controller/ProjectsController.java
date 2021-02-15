@@ -23,6 +23,7 @@ import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,7 +52,7 @@ public class ProjectsController {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to create project: {}", user.getEmail(), projectCreationDto.getName());
         Project created = projectService.createProject(ProjectDtoAssembler.disassemble(projectCreationDto, new Provenance(user.getName(), user.getEmail(), DateTime.now())), user);
-        userService.addProjectToUser(user, created, ProjectRole.ADMIN);
+        userService.addUserToProject(user, created.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
         return ProjectDtoAssembler.assemble(created);
     }
 

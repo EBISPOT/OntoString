@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
+import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.*;
 import uk.ac.ebi.spot.ontotools.curation.domain.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
@@ -23,6 +24,7 @@ import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +65,7 @@ public class MappingsController {
     public EntityDto getMappings(@PathVariable String projectId, @RequestParam(value = CurationConstants.PARAM_ENTITY_ID) String entityId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve mappings: {} | {}", user.getEmail(), projectId, entityId);
-        projectService.verifyAccess(projectId, user);
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
         Entity entity = entityService.retrieveEntity(entityId);
         return packAndSend(entity, projectId);
     }
@@ -78,7 +80,7 @@ public class MappingsController {
     public EntityDto createMapping(@PathVariable String projectId, @RequestBody @Valid MappingCreationDto mappingCreationDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to create mapping: {} | {} | {}", user.getEmail(), projectId, mappingCreationDto.getEntityId(), mappingCreationDto.getOntologyTerm().getCurie());
-        projectService.verifyAccess(projectId, user);
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
 
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         Entity entity = entityService.retrieveEntity(mappingCreationDto.getEntityId());

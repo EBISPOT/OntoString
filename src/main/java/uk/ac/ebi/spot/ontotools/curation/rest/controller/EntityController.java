@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
+import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.MappingSuggestion;
@@ -61,7 +62,7 @@ public class EntityController {
     public RestResponsePage<EntityDto> getEntities(@PathVariable String projectId, @PageableDefault(size = 20, page = 0) Pageable pageable, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve entities: {}", user.getEmail(), projectId);
-        projectService.verifyAccess(projectId, user);
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
         List<Source> sources = sourceService.getSources(projectId);
         Map<String, SourceDto> sourceMap = new HashMap<>();
         for (Source source : sources) {
@@ -88,7 +89,7 @@ public class EntityController {
     public EntityDto getEntity(@PathVariable String projectId, @PathVariable String entityId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve entity: {} | {}", user.getEmail(), projectId, entityId);
-        projectService.verifyAccess(projectId, user);
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
         Entity entity = entityService.retrieveEntity(entityId);
         Source source = sourceService.getSource(entity.getSourceId(), projectId);
         Map<String, List<Mapping>> mappings = mappingService.retrieveMappingsForEntities(Arrays.asList(new String[]{entityId}));
