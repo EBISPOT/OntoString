@@ -14,6 +14,7 @@ import uk.ac.ebi.spot.ontotools.curation.repository.ProjectRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,7 +52,7 @@ public class ProjectServiceImpl implements ProjectService {
             log.error("[{}] Unable to find project: {}", user.getEmail(), projectId);
             throw new EntityNotFoundException("[" + user.getEmail() + "] Unable to find project: " + projectId);
         }
-        if (hasAccess(user, projectId)) {
+        if (hasAccess(user, projectId, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}))) {
             Project existing = exitingOp.get();
             existing.setDatasources(project.getDatasources() != null ? project.getDatasources() : new ArrayList<>());
             existing.setOntologies(project.getOntologies() != null ? project.getOntologies() : new ArrayList<>());
@@ -72,7 +73,7 @@ public class ProjectServiceImpl implements ProjectService {
             log.error("[{}] Unable to find project: {}", user.getEmail(), projectId);
             throw new EntityNotFoundException("[" + user.getEmail() + "] Unable to find project: " + projectId);
         }
-        if (hasAccess(user, projectId)) {
+        if (hasAccess(user, projectId, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}))) {
             Project existing = exitingOp.get();
             projectRepository.delete(existing);
 
@@ -88,7 +89,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project retrieveProject(String projectId, User user) {
         log.info("[{}] Retrieving project: {}", user.getEmail(), projectId);
-        if (!hasAccess(user, projectId)) {
+        if (!hasAccess(user, projectId, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONSUMER, ProjectRole.CONTRIBUTOR}))) {
             log.error("[{}] User does not have access project: {}", user.getEmail(), projectId);
             throw new EntityNotFoundException("[" + user.getEmail() + "] Unable to find project: " + projectId);
         }
@@ -103,9 +104,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void verifyAccess(String projectId, User user) {
+    public void verifyAccess(String projectId, User user, List<ProjectRole> roles) {
         log.info("[{}] Verifying access to project: {}", user.getEmail(), projectId);
-        if (!hasAccess(user, projectId)) {
+        if (!hasAccess(user, projectId, roles)) {
             log.error("[{}] User does not have access project: {}", user.getEmail(), projectId);
             throw new EntityNotFoundException("[" + user.getEmail() + "] Unable to find project: " + projectId);
         }
@@ -116,10 +117,10 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private boolean hasAccess(User user, String projectId) {
+    private boolean hasAccess(User user, String projectId, List<ProjectRole> roles) {
         if (user.getRoles() != null) {
             for (Role role : user.getRoles()) {
-                if (role.getProjectId().equals(projectId) && role.getRole().equals(ProjectRole.ADMIN)) {
+                if (role.getProjectId().equals(projectId) && roles.contains(role.getRole())) {
                     return true;
                 }
             }

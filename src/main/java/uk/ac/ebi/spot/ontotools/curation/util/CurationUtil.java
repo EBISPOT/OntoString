@@ -1,5 +1,7 @@
 package uk.ac.ebi.spot.ontotools.curation.util;
 
+import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +9,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CurationUtil {
+
+    public static List<ProjectRole> rolesFromStringList(List<String> list) {
+        List<ProjectRole> projectRoles = new ArrayList<>();
+        for (String pRole : list) {
+            projectRoles.add(ProjectRole.valueOf(pRole.toUpperCase()));
+        }
+        return projectRoles;
+    }
 
     public static List<String> toLowerCase(List<String> list) {
         if (list == null) {

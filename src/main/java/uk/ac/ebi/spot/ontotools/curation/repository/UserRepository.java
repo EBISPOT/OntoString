@@ -11,4 +11,6 @@ public interface UserRepository extends MongoRepository<User, String> {
     Optional<User> findByEmailIgnoreCase(String email);
 
     List<User> findBySuperUser(boolean superUser);
+
+    List<User> findByRoles_ProjectId(String projectId);
 }
