@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.ontotools.curation.rest.controller;
 
+import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -124,6 +126,13 @@ public class SourcesController {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to import data from file [{} - {}] to source: {} | {}", user.getEmail(), file.getOriginalFilename(), file.getSize(), projectId, sourceId);
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
-        dataImportService.importData(file, projectId, sourceId, user);
+
+        try {
+            String fileData = IOUtils.toString(file.getInputStream(), "UTF-8");
+            dataImportService.importData(fileData, projectId, sourceId, user);
+        } catch (IOException e) {
+            log.error("Unable to deserialize import data file: {}", e.getMessage(), e);
+        }
+
     }
 }

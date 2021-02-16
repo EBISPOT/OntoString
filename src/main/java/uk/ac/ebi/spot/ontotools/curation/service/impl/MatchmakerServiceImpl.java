@@ -53,7 +53,7 @@ public class MatchmakerServiceImpl implements MatchmakerService {
     private UserService userService;
 
     @Override
-    @Async
+    @Async(value = "applicationTaskExecutor")
     public void runMatchmaking(String sourceId, Project project) {
         log.info("Running auto-mapping for source: {}", sourceId);
         User robotUser = userService.retrieveRobotUser();

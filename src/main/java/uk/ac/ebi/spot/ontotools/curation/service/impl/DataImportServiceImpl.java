@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
@@ -45,14 +44,14 @@ public class DataImportServiceImpl implements DataImportService {
         this.objectMapper = new ObjectMapper();
     }
 
-    @Async
+    @Async(value = "applicationTaskExecutor")
     @Override
-    public void importData(MultipartFile file, String projectId, String sourceId, User user) {
-        log.info("[{} | {}] Importing data from: {}", projectId, sourceId, file.getOriginalFilename());
+    public void importData(String fileData, String projectId, String sourceId, User user) {
+        log.info("[{} | {}] Importing data from file.", projectId, sourceId);
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         Project project = projectService.retrieveProject(projectId, user);
         try {
-            ImportDataPackageDto importDataPackageDto = this.objectMapper.readValue(file.getInputStream(), new TypeReference<ImportDataPackageDto>() {
+            ImportDataPackageDto importDataPackageDto = this.objectMapper.readValue(fileData, new TypeReference<ImportDataPackageDto>() {
             });
 
             log.info("Received {} entries to import.", importDataPackageDto.getData().size());
@@ -64,7 +63,7 @@ public class DataImportServiceImpl implements DataImportService {
                         sourceId, provenance, EntityStatus.UNMAPPED));
                 count++;
                 if (count % 100 == 0) {
-                    log.info(" -- [{} | {}] Progress: {} of {}", count, importDataPackageDto.getData().size());
+                    log.info(" -- [{} | {}] Progress: {} of {}", projectId, sourceId, count, importDataPackageDto.getData().size());
                 }
             }
             long eTime = System.currentTimeMillis();

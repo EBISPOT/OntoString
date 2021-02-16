@@ -49,7 +49,7 @@ public abstract class IntegrationTest {
     public static class MockTaskExecutorConfig {
 
         @Bean
-        public TaskExecutor taskExecutor() {
+        public TaskExecutor applicationTaskExecutor() {
             return new SyncTaskExecutor();
         }
     }
