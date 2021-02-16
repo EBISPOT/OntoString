@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.ontotools.curation;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -28,12 +29,14 @@ import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.service.MatchmakerService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,6 +51,15 @@ public abstract class IntegrationTest {
         @Bean
         public TaskExecutor taskExecutor() {
             return new SyncTaskExecutor();
+        }
+    }
+
+    @Configuration
+    public static class MockMatchmakerServiceConfig {
+
+        @Bean
+        public MatchmakerService matchmakerService() {
+            return mock(MatchmakerService.class);
         }
     }
 
@@ -166,7 +178,8 @@ public abstract class IntegrationTest {
 
     protected void createEntityTestData(String sourceId, User user) {
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
-        entity = entityRepository.insert(new Entity(null, "Achondroplasia", sourceId, provenance, EntityStatus.AUTO_MAPPED));
+        entity = entityRepository.insert(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
+                RandomStringUtils.randomAlphabetic(10), sourceId, provenance, EntityStatus.AUTO_MAPPED));
 
         OntologyTerm orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
                 DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia", TermStatus.CURRENT.name(), null, null));

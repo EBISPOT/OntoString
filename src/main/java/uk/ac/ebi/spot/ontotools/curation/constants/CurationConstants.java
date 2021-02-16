@@ -6,6 +6,8 @@ public class CurationConstants {
 
     public static final String API_SOURCES = "/sources";
 
+    public static final String API_UPLOAD = "/upload";
+
     public static final String API_PLATFORM_ADMIN = "/platform-admin";
 
     public static final String API_MAPPINGS = "/mappings";

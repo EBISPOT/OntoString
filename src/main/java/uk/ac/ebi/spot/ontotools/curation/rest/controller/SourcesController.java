@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
@@ -47,6 +48,9 @@ public class SourcesController {
 
     @Autowired
     private MatchmakerService matchmakerService;
+
+    @Autowired
+    private DataImportService dataImportService;
 
     /**
      * POST /v1/projects/{projectId}/sources
@@ -104,8 +108,22 @@ public class SourcesController {
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
         Source source = sourceService.getSource(sourceId, projectId);
         for (String entity : entities) {
-            entityService.createEntity(new Entity(null, entity, source.getId(), new Provenance(user.getName(), user.getEmail(), DateTime.now()), EntityStatus.UNMAPPED));
+            entityService.createEntity(new Entity(null, entity, null, null,
+                    source.getId(), new Provenance(user.getName(), user.getEmail(), DateTime.now()), EntityStatus.UNMAPPED));
         }
         matchmakerService.runMatchmaking(sourceId, projectService.retrieveProject(projectId, user));
+    }
+
+    /**
+     * POST /v1/projects/{projectId}/sources/{sourceId}/upload
+     */
+    @PostMapping(value = "/{projectId}" + CurationConstants.API_SOURCES + "/{sourceId}" + CurationConstants.API_UPLOAD,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public void importDataFromFile(@RequestParam MultipartFile file, @PathVariable String projectId, @PathVariable String sourceId, HttpServletRequest request) {
+        User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        log.info("[{}] Request to import data from file [{} - {}] to source: {} | {}", user.getEmail(), file.getOriginalFilename(), file.getSize(), projectId, sourceId);
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        dataImportService.importData(file, projectId, sourceId, user);
     }
 }

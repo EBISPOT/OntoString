@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.ontotools.curation;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +76,8 @@ public class MatchMakingTest extends IntegrationTest {
          * - Hemochromatosis type 1
          * - Retinal dystrophy
          */
-        entity = entityService.createEntity(new Entity(null, "Achondroplasia", sourceDto.getId(), provenance, EntityStatus.UNMAPPED));
+        entity = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
+                RandomStringUtils.randomAlphabetic(10), sourceDto.getId(), provenance, EntityStatus.UNMAPPED));
     }
 
     @Test
