@@ -4,9 +4,9 @@ import uk.ac.ebi.spot.ontotools.curation.domain.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.MappingSuggestion;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +20,8 @@ public class EntityDtoAssembler {
         return new EntityDto(entity.getId(),
                 source,
                 entity.getName(),
+                entity.getBaseId(),
+                entity.getBaseField(),
                 entity.getMappingStatus().name(),
                 mappingSuggestionDtos,
                 mappingDtos,

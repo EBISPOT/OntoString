@@ -28,9 +28,9 @@ public class EntityServiceImpl implements EntityService {
 
     @Override
     public Entity createEntity(Entity entity) {
-        log.info("[{}] Creating entity: {}", entity.getSourceId(), entity.getName());
+        log.debug("[{}] Creating entity: {}", entity.getSourceId(), entity.getName());
         Entity created = entityRepository.insert(entity);
-        log.info("[{}] Entity created: {}", created.getSourceId(), created.getId());
+        log.debug("[{}] Entity created: {}", created.getSourceId(), created.getId());
         return created;
     }
 
@@ -56,16 +56,16 @@ public class EntityServiceImpl implements EntityService {
 
     @Override
     public Page<Entity> retrieveEntitiesForSources(List<Source> sources, Pageable page) {
-        log.info("Retrieving entities for {} sources: {} | {}", sources.size(), page.getPageNumber(), page.getPageSize());
+        log.debug("Retrieving entities for {} sources: {} | {}", sources.size(), page.getPageNumber(), page.getPageSize());
         List<String> sourceIds = sources.stream().map(Source::getId).collect(Collectors.toList());
         Page<Entity> entityPage = entityRepository.findBySourceIdIn(sourceIds, page);
-        log.info("Found {} entities.", entityPage.getContent().size());
+        log.debug("Found {} entities.", entityPage.getContent().size());
         return entityPage;
     }
 
     @Override
     public Entity retrieveEntity(String entityId) {
-        log.info("Retrieving entity: {}", entityId);
+        log.debug("Retrieving entity: {}", entityId);
         Optional<Entity> entityOptional = entityRepository.findById(entityId);
         if (!entityOptional.isPresent()) {
             log.error("Unable to find entity: {}", entityId);

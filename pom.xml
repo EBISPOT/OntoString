@@ -97,10 +97,6 @@
                         </goals>
                         <configuration>
                             <skip>${skip.coverage}</skip>
-                            <tasks>
-                                <echo message="Creating coverage-reports output directory"/>
-                                <mkdir dir="${project.build.directory}/target/coverage-reports/"/>
-                            </tasks>
                             <destFile>${project.build.directory}/coverage-reports/jacoco.exec</destFile>
                         </configuration>
                     </execution>

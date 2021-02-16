@@ -21,6 +21,10 @@ public class Entity {
 
     private String name;
 
+    private String baseId;
+
+    private String baseField;
+
     @Indexed
     private String sourceId;
 
