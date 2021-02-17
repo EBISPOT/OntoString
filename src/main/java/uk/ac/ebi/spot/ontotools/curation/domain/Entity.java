@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 
-@Document(collection = "mappings")
+@Document(collection = "entities")
 @Getter
 @Setter
 @NoArgsConstructor
