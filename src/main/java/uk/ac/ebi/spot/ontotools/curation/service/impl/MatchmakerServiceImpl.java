@@ -58,7 +58,7 @@ public class MatchmakerServiceImpl implements MatchmakerService {
         log.info("Running auto-mapping for source: {}", sourceId);
         User robotUser = userService.retrieveRobotUser();
         project.setOntologies(CurationUtil.toLowerCase(project.getOntologies()));
-        project.setPreferredMappintOntology(project.getPreferredMappintOntology().toLowerCase());
+        project.setPreferredMappingOntology(project.getPreferredMappingOntology().toLowerCase());
 
         long sTime = System.currentTimeMillis();
         Stream<Entity> entityStream = entityService.retrieveEntitiesForSource(sourceId);

@@ -15,7 +15,7 @@ public class ProjectDtoAssembler {
                 project.getDescription(),
                 project.getDatasources(),
                 project.getOntologies(),
-                project.getPreferredMappintOntology(),
+                project.getPreferredMappingOntology(),
                 ProvenanceDtoAssembler.assemble(project.getCreated()));
     }
 

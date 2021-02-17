@@ -41,7 +41,7 @@ public class Project {
     /**
      * Ontology ID used when creating ontology terms locally to query OLS for a mapping
      */
-    private String preferredMappintOntology;
+    private String preferredMappingOntology;
 
     private Provenance created;
 }

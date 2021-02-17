@@ -52,11 +52,11 @@ public class OntologyTermServiceImpl implements OntologyTermService {
             return ontologyTermOp.get();
         }
 
-        List<OLSTermDto> preferredOntoResponse = olsService.retrieveTerms(project.getPreferredMappintOntology(), iri);
+        List<OLSTermDto> preferredOntoResponse = olsService.retrieveTerms(project.getPreferredMappingOntology(), iri);
         List<OLSTermDto> parentOntoResponse = new ArrayList<>();
         String ontoId = CurationUtil.ontoFromIRI(iri);
         String termStatus;
-        if (!ontoId.equalsIgnoreCase(project.getPreferredMappintOntology())) {
+        if (!ontoId.equalsIgnoreCase(project.getPreferredMappingOntology())) {
             parentOntoResponse = olsService.retrieveTerms(ontoId, iri);
             termStatus = parseStatus(preferredOntoResponse, parentOntoResponse, null);
         } else {
