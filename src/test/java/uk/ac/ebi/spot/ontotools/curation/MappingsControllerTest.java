@@ -25,7 +25,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -60,7 +59,7 @@ public class MappingsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetMappings() throws Exception {
-        EntityDto actual = retrieveEntity();
+        EntityDto actual = super.retrieveEntity(project.getId());
         assertEquals("Achondroplasia", actual.getName());
         assertEquals(EntityStatus.AUTO_MAPPED.name(), actual.getMappingStatus());
 
@@ -88,7 +87,7 @@ public class MappingsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldCreateMapping() throws Exception {
-        EntityDto entityDto = retrieveEntity();
+        EntityDto entityDto = super.retrieveEntity(project.getId());
         OntologyTermDto ontologyTermDto = null;
         for (MappingSuggestionDto mappingSuggestionDto : entityDto.getMappingSuggestions()) {
             if (mappingSuggestionDto.getOntologyTerm().getCurie().equalsIgnoreCase("MONDO:0007037")) {
@@ -134,19 +133,4 @@ public class MappingsControllerTest extends IntegrationTest {
         assertEquals(sourceDto.getId(), actual.getSource().getId());
     }
 
-    private EntityDto retrieveEntity() throws Exception {
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS
-                + "?entityId=" + super.entity.getId();
-        String response = mockMvc.perform(get(endpoint)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header(IDPConstants.JWT_TOKEN, "token1"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        EntityDto actual = mapper.readValue(response, new TypeReference<EntityDto>() {
-        });
-        return actual;
-    }
 }

@@ -18,6 +18,8 @@ public class CurationConstants {
 
     public static final String API_USERS = "/users";
 
+    public static final String API_REVIEWS = "/reviews";
+
     public static final String API_COMMENTS = "/comments";
 
     public static final String PARAM_ENTITY_ID = "entityId";

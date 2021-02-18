@@ -5,10 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
+import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
+import uk.ac.ebi.spot.ontotools.curation.domain.Review;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
-import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
+import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.ontotools.curation.repository.MappingRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.MappingService;
 import uk.ac.ebi.spot.ontotools.curation.service.OntologyTermService;
@@ -84,6 +86,10 @@ public class MappingServiceImpl implements MappingService {
     @Override
     public List<String> deleteMappingExcluding(Entity entity, String ontologyTermId) {
         log.info("Deleting mappings for entity [{}] excluding ontology term: {}", entity.getId(), ontologyTermId);
+        /**
+         * TODO: Archive the reviews associated with the previous mappings so that they can be restored if need be at a later time.
+         */
+
         List<Mapping> mappings = mappingRepository.findByEntityId(entity.getId());
         List<String> result = new ArrayList<>();
         for (Mapping mapping : mappings) {
@@ -93,5 +99,30 @@ public class MappingServiceImpl implements MappingService {
             }
         }
         return result;
+    }
+
+    @Override
+    public Mapping addReviewToMapping(String mappingId, String comment, Provenance provenance) {
+        log.info("Adding review to mapping: {}", mappingId);
+        Optional<Mapping> mappingOp = mappingRepository.findById(mappingId);
+        if (!mappingOp.isPresent()) {
+            log.error("Mapping not found: {}", mappingId);
+            throw new EntityNotFoundException("Mapping not found: " + mappingId);
+        }
+        Mapping mapping = mappingOp.get();
+        mapping.addReview(new Review(comment, provenance));
+        mapping = mappingRepository.save(mapping);
+        return mapping;
+    }
+
+    @Override
+    public Mapping retrieveMappingById(String mappingId) {
+        log.info("Retrieving mapping: {}", mappingId);
+        Optional<Mapping> mappingOp = mappingRepository.findById(mappingId);
+        if (!mappingOp.isPresent()) {
+            log.error("Mapping not found: {}", mappingId);
+            throw new EntityNotFoundException("Mapping not found: " + mappingId);
+        }
+        return mappingOp.get();
     }
 }
