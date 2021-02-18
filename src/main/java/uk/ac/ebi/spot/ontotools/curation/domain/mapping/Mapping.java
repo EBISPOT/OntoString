@@ -1,4 +1,4 @@
-package uk.ac.ebi.spot.ontotools.curation.domain;
+package uk.ac.ebi.spot.ontotools.curation.domain.mapping;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +11,8 @@ import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
+import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
+import uk.ac.ebi.spot.ontotools.curation.domain.Review;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -2,7 +2,7 @@ package uk.ac.ebi.spot.ontotools.curation.service.impl;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import uk.ac.ebi.spot.ontotools.curation.domain.ExternalServiceConfig;
+import uk.ac.ebi.spot.ontotools.curation.domain.config.ExternalServiceConfig;
 import uk.ac.ebi.spot.ontotools.curation.service.ConfigListener;
 import uk.ac.ebi.spot.ontotools.curation.service.ConfigRegistry;
 

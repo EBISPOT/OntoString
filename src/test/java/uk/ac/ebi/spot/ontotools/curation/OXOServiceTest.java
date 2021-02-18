@@ -2,7 +2,7 @@ package uk.ac.ebi.spot.ontotools.curation;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.ac.ebi.spot.ontotools.curation.domain.ExternalServiceConfig;
+import uk.ac.ebi.spot.ontotools.curation.domain.config.ExternalServiceConfig;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.oxo.OXOMappingResponseDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ConfigRegistry;
 import uk.ac.ebi.spot.ontotools.curation.service.OXOService;

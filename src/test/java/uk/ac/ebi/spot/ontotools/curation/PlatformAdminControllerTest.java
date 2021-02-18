@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
-import uk.ac.ebi.spot.ontotools.curation.domain.ExternalServiceConfig;
+import uk.ac.ebi.spot.ontotools.curation.domain.config.ExternalServiceConfig;
 import uk.ac.ebi.spot.ontotools.curation.repository.ExternalServiceConfigRepository;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.config.ExternalServiceConfigDto;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;

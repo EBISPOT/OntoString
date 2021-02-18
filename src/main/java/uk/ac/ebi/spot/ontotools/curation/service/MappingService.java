@@ -1,8 +1,8 @@
 package uk.ac.ebi.spot.ontotools.curation.service;
 
-import uk.ac.ebi.spot.ontotools.curation.domain.Entity;
-import uk.ac.ebi.spot.ontotools.curation.domain.Mapping;
-import uk.ac.ebi.spot.ontotools.curation.domain.OntologyTerm;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 
 import java.util.List;

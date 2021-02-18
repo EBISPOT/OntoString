@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectMappingConfigDto;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
 import java.util.Arrays;
@@ -81,9 +82,9 @@ public class ProjectsControllerTest extends IntegrationTest {
         ProjectDto updatedProject = new ProjectDto(projectDto.getId(),
                 "New Name",
                 projectDto.getDescription(),
-                Arrays.asList(new String[]{"gwas"}),
-                Arrays.asList(new String[]{"ordo"}),
-                projectDto.getPreferredMappingOntology(),
+                Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"gwas"}))}),
+                Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"ordo"}))}),
+                projectDto.getPreferredMappingOntologies(),
                 projectDto.getCreated());
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();
@@ -113,9 +114,9 @@ public class ProjectsControllerTest extends IntegrationTest {
         ProjectDto updatedProject = new ProjectDto(projectDto.getId(),
                 "New Name",
                 projectDto.getDescription(),
-                Arrays.asList(new String[]{"gwas"}),
-                Arrays.asList(new String[]{"ordo"}),
-                projectDto.getPreferredMappingOntology(),
+                Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"gwas"}))}),
+                Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"ordo"}))}),
+                projectDto.getPreferredMappingOntologies(),
                 projectDto.getCreated());
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();

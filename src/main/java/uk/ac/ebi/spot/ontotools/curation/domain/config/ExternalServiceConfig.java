@@ -1,4 +1,4 @@
-package uk.ac.ebi.spot.ontotools.curation.domain;
+package uk.ac.ebi.spot.ontotools.curation.domain.config;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,28 +7,22 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 
-@Document(collection = "entities")
+import java.util.List;
+
+@Document(collection = "externalServiceConfigs")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class Entity {
+@NoArgsConstructor
+public class ExternalServiceConfig {
 
     @Id
     private String id;
 
+    @Indexed(unique = true)
     private String name;
 
-    private String baseId;
+    private List<String> aliases;
 
-    private String baseField;
-
-    @Indexed
-    private String sourceId;
-
-    private Provenance created;
-
-    private EntityStatus mappingStatus;
 }

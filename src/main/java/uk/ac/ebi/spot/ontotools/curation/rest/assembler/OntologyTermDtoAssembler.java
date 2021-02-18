@@ -2,7 +2,7 @@ package uk.ac.ebi.spot.ontotools.curation.rest.assembler;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
-import uk.ac.ebi.spot.ontotools.curation.domain.OntologyTerm;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
 
 public class OntologyTermDtoAssembler {

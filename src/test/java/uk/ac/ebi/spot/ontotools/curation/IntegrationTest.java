@@ -21,18 +21,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.ac.ebi.spot.ontotools.curation.constants.*;
-import uk.ac.ebi.spot.ontotools.curation.domain.*;
+import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.AuthToken;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.repository.*;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectCreationDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceCreationDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.*;
 import uk.ac.ebi.spot.ontotools.curation.service.MatchmakerService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -119,7 +121,12 @@ public abstract class IntegrationTest {
                                        List<String> datasources, List<String> ontologies,
                                        String preferredMappingOntology) throws Exception {
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS;
-        ProjectCreationDto projectCreationDto = new ProjectCreationDto(name, "Description", datasources, ontologies, preferredMappingOntology);
+
+
+        ProjectCreationDto projectCreationDto = new ProjectCreationDto(name, "Description",
+                datasources != null ? Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", datasources)}) : new ArrayList<>(),
+                ontologies != null ? Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", ontologies)}) : new ArrayList<>(),
+                preferredMappingOntology != null ? Arrays.asList(new String[]{preferredMappingOntology}) : new ArrayList<>());
 
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -139,15 +146,19 @@ public abstract class IntegrationTest {
         if (datasources == null) {
             assertTrue(actual.getDatasources().isEmpty());
         } else {
-            assertEquals(datasources.size(), actual.getDatasources().size());
+            assertEquals(1, actual.getDatasources().size());
+            assertEquals("ALL", actual.getDatasources().get(0).getField());
+            assertEquals(datasources.size(), actual.getDatasources().get(0).getMappingList().size());
         }
         if (ontologies == null) {
             assertTrue(actual.getOntologies().isEmpty());
         } else {
-            assertEquals(ontologies.size(), actual.getOntologies().size());
+            assertEquals(1, actual.getOntologies().size());
+            assertEquals("ALL", actual.getOntologies().get(0).getField());
+            assertEquals(ontologies.size(), actual.getOntologies().get(0).getMappingList().size());
         }
         if (preferredMappingOntology != null) {
-            assertEquals(preferredMappingOntology, actual.getPreferredMappingOntology());
+            assertEquals(preferredMappingOntology, actual.getPreferredMappingOntologies().get(0));
         }
         return actual;
     }

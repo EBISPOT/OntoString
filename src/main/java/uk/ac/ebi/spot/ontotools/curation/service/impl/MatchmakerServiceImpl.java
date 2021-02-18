@@ -7,11 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
-import uk.ac.ebi.spot.ontotools.curation.domain.Entity;
-import uk.ac.ebi.spot.ontotools.curation.domain.OntologyTerm;
+import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
-import uk.ac.ebi.spot.ontotools.curation.domain.auth.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.oxo.OXOMappingResponseDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.zooma.ZoomaResponseDto;
@@ -57,8 +57,9 @@ public class MatchmakerServiceImpl implements MatchmakerService {
     public void runMatchmaking(String sourceId, Project project) {
         log.info("Running auto-mapping for source: {}", sourceId);
         User robotUser = userService.retrieveRobotUser();
-        project.setOntologies(CurationUtil.toLowerCase(project.getOntologies()));
-        project.setPreferredMappingOntology(project.getPreferredMappingOntology().toLowerCase());
+        project.setOntologies(CurationUtil.configListtoLowerCase(project.getOntologies()));
+        project.setDatasources(CurationUtil.configListtoLowerCase(project.getDatasources()));
+        project.setPreferredMappingOntologies(CurationUtil.listToLowerCase(project.getPreferredMappingOntologies()));
 
         long sTime = System.currentTimeMillis();
         Stream<Entity> entityStream = entityService.retrieveEntitiesForSource(sourceId);
@@ -69,15 +70,18 @@ public class MatchmakerServiceImpl implements MatchmakerService {
     }
 
     private void autoMap(Entity entity, Project project, User user) {
+        List<String> projectDatasources = CurationUtil.configForField(entity, project.getDatasources());
+        List<String> projectOntologies = CurationUtil.configForField(entity, project.getOntologies());
+
         /**
          * Retrieve annotations from Zooma from datasources stored in the project
          */
-        List<ZoomaResponseDto> zoomaResults = zoomaService.annotate(entity.getName(), project.getDatasources(), null);
+        List<ZoomaResponseDto> zoomaResults = zoomaService.annotate(entity.getName(), projectDatasources, null);
 
         /**
          * Retrieve annotations from Zooma from ontologies stored in the project
          */
-        zoomaResults.addAll(zoomaService.annotate(entity.getName(), null, project.getOntologies()));
+        zoomaResults.addAll(zoomaService.annotate(entity.getName(), null, projectOntologies));
 
         List<String> highConfidenceIRIs = new ArrayList<>();
         Set<String> finalIRIs = new HashSet<>();
@@ -98,8 +102,8 @@ public class MatchmakerServiceImpl implements MatchmakerService {
             /**
              * Retain only suggestions pertaining to the ontologies of interest (if these have been specified)
              */
-            if (project.getOntologies() != null) {
-                if (project.getOntologies().contains(CurationUtil.ontoFromIRI(suggestedTermIRI).toLowerCase())) {
+            if (projectOntologies != null) {
+                if (projectOntologies.contains(CurationUtil.ontoFromIRI(suggestedTermIRI).toLowerCase())) {
                     finalIRIs.add(suggestedTermIRI);
                 }
             } else {
@@ -171,7 +175,8 @@ public class MatchmakerServiceImpl implements MatchmakerService {
             /**
              * TODO: Discuss why are so many calls to OLS required
              */
-            List<OXOMappingResponseDto> oxoMappings = oxoService.findMapping(Arrays.asList(new String[]{olsTerms.get(0).getCurie()}), project.getOntologies());
+            List<OXOMappingResponseDto> oxoMappings = oxoService.findMapping(Arrays.asList(new String[]{olsTerms.get(0).getCurie()}),
+                    CurationUtil.configForField(entity, project.getOntologies()));
             for (OXOMappingResponseDto oxoMappingResponseDto : oxoMappings) {
                 String targetOntoId = oxoMappingResponseDto.getTargetPrefix().toLowerCase();
                 olsTerms = olsService.retrieveTerms(targetOntoId, oxoMappingResponseDto.getCurie());

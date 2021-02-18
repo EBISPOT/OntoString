@@ -3,7 +3,7 @@ package uk.ac.ebi.spot.ontotools.curation.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import uk.ac.ebi.spot.ontotools.curation.domain.Entity;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 
 import java.util.List;
 import java.util.stream.Stream;

@@ -27,13 +27,13 @@ public final class ProjectDto implements Serializable {
     private final String description;
 
     @JsonProperty("datasources")
-    private final List<String> datasources;
+    private final List<ProjectMappingConfigDto> datasources;
 
     @JsonProperty("ontologies")
-    private final List<String> ontologies;
+    private final List<ProjectMappingConfigDto> ontologies;
 
-    @JsonProperty("preferredMappingOntology")
-    private final String preferredMappingOntology;
+    @JsonProperty("preferredMappingOntologies")
+    private final List<String> preferredMappingOntologies;
 
     @JsonProperty("created")
     private final ProvenanceDto created;
@@ -42,16 +42,16 @@ public final class ProjectDto implements Serializable {
     public ProjectDto(@JsonProperty("id") String id,
                       @JsonProperty("name") String name,
                       @JsonProperty("description") String description,
-                      @JsonProperty("datasources") List<String> datasources,
-                      @JsonProperty("ontologies") List<String> ontologies,
-                      @JsonProperty("preferredMappingOntology") String preferredMappingOntology,
+                      @JsonProperty("datasources") List<ProjectMappingConfigDto> datasources,
+                      @JsonProperty("ontologies") List<ProjectMappingConfigDto> ontologies,
+                      @JsonProperty("preferredMappingOntologies") List<String> preferredMappingOntologies,
                       @JsonProperty("created") ProvenanceDto created) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.datasources = datasources;
         this.ontologies = ontologies;
-        this.preferredMappingOntology = preferredMappingOntology;
+        this.preferredMappingOntologies = preferredMappingOntologies;
         this.created = created;
     }
 
@@ -67,16 +67,16 @@ public final class ProjectDto implements Serializable {
         return description;
     }
 
-    public List<String> getDatasources() {
+    public List<ProjectMappingConfigDto> getDatasources() {
         return datasources;
     }
 
-    public List<String> getOntologies() {
+    public List<ProjectMappingConfigDto> getOntologies() {
         return ontologies;
     }
 
-    public String getPreferredMappingOntology() {
-        return preferredMappingOntology;
+    public List<String> getPreferredMappingOntologies() {
+        return preferredMappingOntologies;
     }
 
     public ProvenanceDto getCreated() {
