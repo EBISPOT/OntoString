@@ -1,6 +1,6 @@
 package uk.ac.ebi.spot.ontotools.curation.service;
 
-import uk.ac.ebi.spot.ontotools.curation.domain.ExternalServiceConfig;
+import uk.ac.ebi.spot.ontotools.curation.domain.config.ExternalServiceConfig;
 
 /**
  * Class in charge with keeping a registry of services awaiting for real-time configuration updates.

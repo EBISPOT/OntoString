@@ -1,6 +1,6 @@
 package uk.ac.ebi.spot.ontotools.curation.rest.assembler;
 
-import uk.ac.ebi.spot.ontotools.curation.domain.ExternalServiceConfig;
+import uk.ac.ebi.spot.ontotools.curation.domain.config.ExternalServiceConfig;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.config.ExternalServiceConfigDto;
 import uk.ac.ebi.spot.ontotools.curation.util.CurationUtil;
 

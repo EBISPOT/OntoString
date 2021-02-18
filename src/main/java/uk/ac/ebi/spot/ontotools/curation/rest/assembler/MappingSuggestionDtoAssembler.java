@@ -1,6 +1,6 @@
 package uk.ac.ebi.spot.ontotools.curation.rest.assembler;
 
-import uk.ac.ebi.spot.ontotools.curation.domain.MappingSuggestion;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
 
 public class MappingSuggestionDtoAssembler {

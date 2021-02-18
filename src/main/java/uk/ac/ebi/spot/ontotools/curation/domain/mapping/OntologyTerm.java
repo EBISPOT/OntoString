@@ -1,4 +1,4 @@
-package uk.ac.ebi.spot.ontotools.curation.domain;
+package uk.ac.ebi.spot.ontotools.curation.domain.mapping;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,21 +8,29 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
-
-@Document(collection = "externalServiceConfigs")
+@Document(collection = "ontologyTerms")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class ExternalServiceConfig {
+@AllArgsConstructor
+public class OntologyTerm {
 
     @Id
     private String id;
 
-    @Indexed(unique = true)
-    private String name;
+    private String curie;
 
-    private List<String> aliases;
+    private String iri;
+
+    @Indexed(unique = true)
+    private String iriHash;
+
+    private String label;
+
+    private String status;
+
+    private String description;
+
+    private String crossRefs;
 
 }

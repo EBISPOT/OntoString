@@ -1,7 +1,7 @@
 package uk.ac.ebi.spot.ontotools.curation.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import uk.ac.ebi.spot.ontotools.curation.domain.MappingSuggestion;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
 
 import java.util.List;
 import java.util.Optional;

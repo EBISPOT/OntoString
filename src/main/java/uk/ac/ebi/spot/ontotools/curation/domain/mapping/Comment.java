@@ -1,9 +1,10 @@
-package uk.ac.ebi.spot.ontotools.curation.domain;
+package uk.ac.ebi.spot.ontotools.curation.domain.mapping;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 
 @Document(collection = "comments")
 @Getter
