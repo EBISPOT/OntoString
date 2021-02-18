@@ -39,6 +39,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -202,4 +203,21 @@ public abstract class IntegrationTest {
         mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), mondoTerm.getId(), provenance, null));
         mappingRepository.insert(new Mapping(null, entity.getId(), orphaTerm.getId(), false, new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
     }
+
+    protected EntityDto retrieveEntity(String projectId) throws Exception {
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectId + CurationConstants.API_MAPPINGS
+                + "?entityId=" + entity.getId();
+        String response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        EntityDto actual = mapper.readValue(response, new TypeReference<EntityDto>() {
+        });
+        return actual;
+    }
+
 }

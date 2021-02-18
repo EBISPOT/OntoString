@@ -1,9 +1,9 @@
 package uk.ac.ebi.spot.ontotools.curation.service;
 
+import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
-import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 
 import java.util.List;
 import java.util.Map;
@@ -17,4 +17,8 @@ public interface MappingService {
     List<Mapping> retrieveMappingsForEntity(String entityId);
 
     List<String> deleteMappingExcluding(Entity entity, String ontologyTermId);
+
+    Mapping addReviewToMapping(String mappingId, String comment, Provenance provenance);
+
+    Mapping retrieveMappingById(String mappingId);
 }
