@@ -7,15 +7,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
-import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.ProvenanceDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.CommentDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.ReviewDto;
 import uk.ac.ebi.spot.ontotools.curation.service.MappingService;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
@@ -24,13 +23,13 @@ import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ContextConfiguration(classes = {IntegrationTest.MockTaskExecutorConfig.class})
-public class MappingReviewsControllerTest extends IntegrationTest {
+public class MappingCommentsControllerTest extends IntegrationTest {
 
     @Autowired
     private UserService userService;
@@ -59,7 +58,7 @@ public class MappingReviewsControllerTest extends IntegrationTest {
     }
 
     /**
-     * POST /v1/projects/{projectId}/mappings/{mappingId}/reviews
+     * POST /v1/projects/{projectId}/mappings/{mappingId}/comments
      */
     @Test
     public void shouldCreateReview() throws Exception {
@@ -67,64 +66,35 @@ public class MappingReviewsControllerTest extends IntegrationTest {
         MappingDto mappingDto = actual.getMappings().get(0);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
-                CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_REVIEWS;
+                CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_COMMENTS;
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("New review")
+                .content("New comment")
                 .header(IDPConstants.JWT_TOKEN, "token1"))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        ReviewDto reviewDto = mapper.readValue(response, new TypeReference<ReviewDto>() {
+        CommentDto commentDto = mapper.readValue(response, new TypeReference<CommentDto>() {
         });
-        assertEquals("New review", reviewDto.getComment());
+        assertEquals("New comment", commentDto.getBody());
         Mapping mapping = mappingService.retrieveMappingById(mappingDto.getId());
-        assertEquals(1, mapping.getReviews().size());
-        assertEquals("New review", mapping.getReviews().get(0).getComment());
-        assertFalse(mapping.isReviewed());
-        assertEquals(MappingStatus.REVIEW_IN_PROGRESS.name(), mapping.getStatus());
+        assertEquals(1, mapping.getComments().size());
+        assertEquals("New comment", mapping.getComments().get(0).getBody());
     }
 
     /**
-     * POST /v1/projects/{projectId}/mappings/{mappingId}/reviews
-     */
-    @Test
-    public void shouldCreateReviewedMapping() throws Exception {
-        EntityDto actual = super.retrieveEntity(project.getId());
-        MappingDto mappingDto = actual.getMappings().get(0);
-
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
-                CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_REVIEWS;
-
-        for (int i = 0; i < 3; i++) {
-            mockMvc.perform(post(endpoint)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("New review")
-                    .header(IDPConstants.JWT_TOKEN, "token1"))
-                    .andExpect(status().isCreated())
-                    .andReturn()
-                    .getResponse()
-                    .getContentAsString();
-        }
-
-        Mapping mapping = mappingService.retrieveMappingById(mappingDto.getId());
-        assertTrue(mapping.isReviewed());
-        assertEquals(MappingStatus.REQUIRED_REVIEWS_REACHED.name(), mapping.getStatus());
-    }
-
-    /**
-     * GET /v1/projects/{projectId}/mappings/{mappingId}/reviews
+     * GET /v1/projects/{projectId}/mappings/{mappingId}/comments
      */
     @Test
     public void shouldGetReviews() throws Exception {
         EntityDto actual = super.retrieveEntity(project.getId());
         MappingDto mappingDto = actual.getMappings().get(0);
-        mappingService.addReviewToMapping(mappingDto.getId(), "New review", ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
+        mappingService.addCommentToMapping(mappingDto.getId(), "New comment", ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
-                CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_REVIEWS;
+                CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_COMMENTS;
         String response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token1"))
@@ -133,9 +103,9 @@ public class MappingReviewsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<ReviewDto> reviewDtos = mapper.readValue(response, new TypeReference<List<ReviewDto>>() {
+        List<CommentDto> commentDtos = mapper.readValue(response, new TypeReference<List<CommentDto>>() {
         });
-        assertEquals(1, reviewDtos.size());
-        assertEquals("New review", reviewDtos.get(0).getComment());
+        assertEquals(1, commentDtos.size());
+        assertEquals("New comment", commentDtos.get(0).getBody());
     }
 }

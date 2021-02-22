@@ -37,6 +37,9 @@ public final class MappingDto implements Serializable {
     @JsonProperty("reviews")
     private final List<ReviewDto> reviews;
 
+    @JsonProperty("comments")
+    private final List<CommentDto> comments;
+
     @NotNull
     @JsonProperty("created")
     private final ProvenanceDto created;
@@ -48,6 +51,7 @@ public final class MappingDto implements Serializable {
                       @JsonProperty("reviewed") boolean reviewed,
                       @JsonProperty("status") String status,
                       @JsonProperty("reviews") List<ReviewDto> reviews,
+                      @JsonProperty("comments") List<CommentDto> comments,
                       @JsonProperty("created") ProvenanceDto created) {
         this.id = id;
         this.entityId = entityId;
@@ -55,6 +59,7 @@ public final class MappingDto implements Serializable {
         this.reviewed = reviewed;
         this.status = status;
         this.reviews = reviews;
+        this.comments = comments;
         this.created = created;
     }
 
@@ -80,6 +85,10 @@ public final class MappingDto implements Serializable {
 
     public List<ReviewDto> getReviews() {
         return reviews;
+    }
+
+    public List<CommentDto> getComments() {
+        return comments;
     }
 
     public ProvenanceDto getCreated() {

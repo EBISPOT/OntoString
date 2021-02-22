@@ -15,6 +15,7 @@ public class MappingDtoAssembler {
                 mapping.isReviewed(),
                 mapping.getStatus(),
                 mapping.getReviews() != null ? mapping.getReviews().stream().map(ReviewDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>(),
+                mapping.getComments() != null ? mapping.getComments().stream().map(CommentDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>(),
                 ProvenanceDtoAssembler.assemble(mapping.getCreated()));
     }
 }

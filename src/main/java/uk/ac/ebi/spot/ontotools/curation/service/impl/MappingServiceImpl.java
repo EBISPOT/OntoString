@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.Review;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Comment;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
@@ -39,7 +40,7 @@ public class MappingServiceImpl implements MappingService {
         }
 
         Mapping created = mappingRepository.insert(new Mapping(null, entity.getId(), ontologyTerm.getId(), entity.getProjectId(),
-                false, new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
+                false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
         log.info("Mapping for between entity [{}] and ontology term [{}] created: {}", entity.getName(), ontologyTerm.getCurie(), created.getId());
         return created;
     }
@@ -126,5 +127,22 @@ public class MappingServiceImpl implements MappingService {
             throw new EntityNotFoundException("Mapping not found: " + mappingId);
         }
         return mappingOp.get();
+    }
+
+    @Override
+    public Mapping addCommentToMapping(String mappingId, String body, Provenance provenance) {
+        log.info("Adding comment to mapping: {}", mappingId);
+        Optional<Mapping> mappingOp = mappingRepository.findById(mappingId);
+        if (!mappingOp.isPresent()) {
+            log.error("Mapping not found: {}", mappingId);
+            throw new EntityNotFoundException("Mapping not found: " + mappingId);
+        }
+        Mapping mapping = mappingOp.get();
+        if (mapping.getComments() == null) {
+            mapping.setComments(new ArrayList<>());
+        }
+        mapping.getComments().add(new Comment(body, provenance));
+        mapping = mappingRepository.save(mapping);
+        return mapping;
     }
 }

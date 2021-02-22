@@ -43,6 +43,8 @@ public class Mapping {
 
     private List<Review> reviews;
 
+    private List<Comment> comments;
+
     private String status;
 
     private Provenance created;
