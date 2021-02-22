@@ -38,7 +38,8 @@ public class MappingServiceImpl implements MappingService {
             return mappingOp.get();
         }
 
-        Mapping created = mappingRepository.insert(new Mapping(null, entity.getId(), ontologyTerm.getId(), false, new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
+        Mapping created = mappingRepository.insert(new Mapping(null, entity.getId(), ontologyTerm.getId(), entity.getProjectId(),
+                false, new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
         log.info("Mapping for between entity [{}] and ontology term [{}] created: {}", entity.getName(), ontologyTerm.getCurie(), created.getId());
         return created;
     }

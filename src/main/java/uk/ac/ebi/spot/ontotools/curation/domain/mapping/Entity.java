@@ -29,6 +29,9 @@ public class Entity {
     @Indexed
     private String sourceId;
 
+    @Indexed
+    private String projectId;
+
     private Provenance created;
 
     private EntityStatus mappingStatus;

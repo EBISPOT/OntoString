@@ -188,10 +188,10 @@ public abstract class IntegrationTest {
         return actual;
     }
 
-    protected void createEntityTestData(String sourceId, User user) {
+    protected void createEntityTestData(String sourceId, String projectId, User user) {
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         entity = entityRepository.insert(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
-                RandomStringUtils.randomAlphabetic(10), sourceId, provenance, EntityStatus.AUTO_MAPPED));
+                RandomStringUtils.randomAlphabetic(10), sourceId, projectId, provenance, EntityStatus.AUTO_MAPPED));
 
         OntologyTerm orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
                 DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia", TermStatus.CURRENT.name(), null, null));
@@ -199,9 +199,9 @@ public abstract class IntegrationTest {
         OntologyTerm mondoTerm = ontologyTermRepository.insert(new OntologyTerm(null, "MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
                 DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia", TermStatus.NEEDS_IMPORT.name(), null, null));
 
-        mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), orphaTerm.getId(), provenance, null));
-        mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), mondoTerm.getId(), provenance, null));
-        mappingRepository.insert(new Mapping(null, entity.getId(), orphaTerm.getId(), false, new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
+        mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), orphaTerm.getId(), projectId, provenance, null));
+        mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), mondoTerm.getId(), projectId, provenance, null));
+        mappingRepository.insert(new Mapping(null, entity.getId(), orphaTerm.getId(), projectId, false, new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
     }
 
     protected EntityDto retrieveEntity(String projectId) throws Exception {

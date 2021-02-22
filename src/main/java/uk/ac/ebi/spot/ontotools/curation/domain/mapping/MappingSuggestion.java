@@ -29,6 +29,9 @@ public class MappingSuggestion {
     @Indexed
     private String ontologyTermId;
 
+    @Indexed
+    private String projectId;
+
     private Provenance created;
 
     @Transient

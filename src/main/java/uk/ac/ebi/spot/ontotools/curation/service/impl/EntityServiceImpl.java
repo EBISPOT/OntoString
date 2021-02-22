@@ -8,14 +8,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
-import uk.ac.ebi.spot.ontotools.curation.domain.Source;
 import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.ontotools.curation.repository.EntityRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.EntityService;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -55,10 +52,9 @@ public class EntityServiceImpl implements EntityService {
     }
 
     @Override
-    public Page<Entity> retrieveEntitiesForSources(List<Source> sources, Pageable page) {
-        log.debug("Retrieving entities for {} sources: {} | {}", sources.size(), page.getPageNumber(), page.getPageSize());
-        List<String> sourceIds = sources.stream().map(Source::getId).collect(Collectors.toList());
-        Page<Entity> entityPage = entityRepository.findBySourceIdIn(sourceIds, page);
+    public Page<Entity> retrieveEntitiesForProject(String projectId, Pageable page) {
+        log.debug("Retrieving entities for {} sources: {} | {}", projectId, page.getPageNumber(), page.getPageSize());
+        Page<Entity> entityPage = entityRepository.findByProjectId(projectId, page);
         log.debug("Found {} entities.", entityPage.getContent().size());
         return entityPage;
     }
