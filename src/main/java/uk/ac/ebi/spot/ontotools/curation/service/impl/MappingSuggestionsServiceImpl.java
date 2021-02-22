@@ -36,7 +36,7 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
             return mappingSuggestionOp.get();
         }
 
-        MappingSuggestion created = mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), ontologyTerm.getId(), provenance, null));
+        MappingSuggestion created = mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), ontologyTerm.getId(), entity.getProjectId(), provenance, null));
         log.info("[{} | {}] Mapping suggestion created: {}", entity.getName(), ontologyTerm.getCurie(), created.getId());
         return created;
     }

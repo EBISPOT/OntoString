@@ -12,10 +12,10 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.Source;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.SourceDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
@@ -110,8 +110,8 @@ public class SourcesController {
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
         Source source = sourceService.getSource(sourceId, projectId);
         for (String entity : entities) {
-            entityService.createEntity(new Entity(null, entity, null, null,
-                    source.getId(), new Provenance(user.getName(), user.getEmail(), DateTime.now()), EntityStatus.UNMAPPED));
+            entityService.createEntity(new Entity(null, entity, null, null, source.getId(),
+                    projectId, new Provenance(user.getName(), user.getEmail(), DateTime.now()), EntityStatus.UNMAPPED));
         }
         matchmakerService.runMatchmaking(sourceId, projectService.retrieveProject(projectId, user));
     }

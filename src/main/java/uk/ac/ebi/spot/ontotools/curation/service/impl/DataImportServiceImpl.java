@@ -60,7 +60,7 @@ public class DataImportServiceImpl implements DataImportService {
             int count = 0;
             for (ImportDataElementDto importDataElementDto : importDataPackageDto.getData()) {
                 entityService.createEntity(new Entity(null, importDataElementDto.getText(), importDataElementDto.getBaseId(), importDataElementDto.getBaseField(),
-                        sourceId, provenance, EntityStatus.UNMAPPED));
+                        sourceId, projectId, provenance, EntityStatus.UNMAPPED));
                 count++;
                 if (count % 100 == 0) {
                     log.info(" -- [{} | {}] Progress: {} of {}", projectId, sourceId, count, importDataPackageDto.getData().size());

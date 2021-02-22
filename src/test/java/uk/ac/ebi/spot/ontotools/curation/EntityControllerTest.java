@@ -46,7 +46,7 @@ public class EntityControllerTest extends IntegrationTest {
         project = projectService.retrieveProject(projectDto.getId(), user1);
         sourceDto = super.createSource(project.getId());
 
-        super.createEntityTestData(sourceDto.getId(), user1);
+        super.createEntityTestData(sourceDto.getId(), project.getId(), user1);
     }
 
     /**

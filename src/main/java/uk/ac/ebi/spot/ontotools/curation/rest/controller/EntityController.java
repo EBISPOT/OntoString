@@ -11,11 +11,11 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
+import uk.ac.ebi.spot.ontotools.curation.domain.Source;
+import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
-import uk.ac.ebi.spot.ontotools.curation.domain.Source;
-import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.EntityDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.SourceDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
@@ -69,7 +69,7 @@ public class EntityController {
             sourceMap.put(source.getId(), SourceDtoAssembler.assemble(source));
         }
 
-        Page<Entity> entities = entityService.retrieveEntitiesForSources(sources, pageable);
+        Page<Entity> entities = entityService.retrieveEntitiesForProject(projectId, pageable);
         List<String> entityIds = entities.get().map(Entity::getId).collect(Collectors.toList());
         Map<String, List<Mapping>> mappings = mappingService.retrieveMappingsForEntities(entityIds);
         Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(entityIds);

@@ -35,6 +35,9 @@ public class Mapping {
     private String ontologyTermId;
 
     @Indexed
+    private String projectId;
+
+    @Indexed
     private boolean reviewed;
 
     private List<Review> reviews;
