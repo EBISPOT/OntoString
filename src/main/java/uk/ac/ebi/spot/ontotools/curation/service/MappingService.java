@@ -21,4 +21,6 @@ public interface MappingService {
     Mapping addReviewToMapping(String mappingId, String comment, Provenance provenance);
 
     Mapping retrieveMappingById(String mappingId);
+
+    Mapping addCommentToMapping(String mappingId, String body, Provenance provenance);
 }

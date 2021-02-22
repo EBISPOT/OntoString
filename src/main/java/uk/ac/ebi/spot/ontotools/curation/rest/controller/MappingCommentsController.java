@@ -12,8 +12,8 @@ import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
-import uk.ac.ebi.spot.ontotools.curation.rest.assembler.ReviewDtoAssembler;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.ReviewDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.assembler.CommentDtoAssembler;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.CommentDto;
 import uk.ac.ebi.spot.ontotools.curation.service.JWTService;
 import uk.ac.ebi.spot.ontotools.curation.service.MappingService;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
@@ -21,6 +21,7 @@ import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,9 +29,9 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS)
-public class MappingReviewsController {
+public class MappingCommentsController {
 
-    private static final Logger log = LoggerFactory.getLogger(MappingReviewsController.class);
+    private static final Logger log = LoggerFactory.getLogger(MappingCommentsController.class);
 
     @Autowired
     private JWTService jwtService;
@@ -42,34 +43,34 @@ public class MappingReviewsController {
     private MappingService mappingService;
 
     /**
-     * POST /v1/projects/{projectId}/mappings/{mappingId}/reviews
+     * POST /v1/projects/{projectId}/mappings/{mappingId}/comments
      */
-    @PostMapping(value = "/{projectId}" + CurationConstants.API_MAPPINGS + "/{mappingId}" + CurationConstants.API_REVIEWS,
+    @PostMapping(value = "/{projectId}" + CurationConstants.API_MAPPINGS + "/{mappingId}" + CurationConstants.API_COMMENTS,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public ReviewDto createReview(@PathVariable String projectId, @PathVariable String mappingId,
-                                  @RequestBody String comment, HttpServletRequest request) {
+    public CommentDto createComment(@PathVariable String projectId, @PathVariable String mappingId,
+                                    @RequestBody @NotEmpty String body, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
-        log.info("[{}] Request to create review on mapping: {} | {}", user.getEmail(), projectId, mappingId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        log.info("[{}] Request to create comment on mapping: {} | {}", user.getEmail(), projectId, mappingId);
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
 
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
-        Mapping mapping = mappingService.addReviewToMapping(mappingId, comment, provenance);
-        return ReviewDtoAssembler.assemble(mapping.getReviews().get(mapping.getReviews().size() - 1));
+        Mapping mapping = mappingService.addCommentToMapping(mappingId, body, provenance);
+        return CommentDtoAssembler.assemble(mapping.getComments().get(mapping.getComments().size() - 1));
     }
 
     /**
-     * GET /v1/projects/{projectId}/mappings/{mappingId}/reviews
+     * GET /v1/projects/{projectId}/mappings/{mappingId}/comments
      */
-    @GetMapping(value = "/{projectId}" + CurationConstants.API_MAPPINGS + "/{mappingId}" + CurationConstants.API_REVIEWS,
+    @GetMapping(value = "/{projectId}" + CurationConstants.API_MAPPINGS + "/{mappingId}" + CurationConstants.API_COMMENTS,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public List<ReviewDto> retrieveReviews(@PathVariable String projectId, @PathVariable String mappingId, HttpServletRequest request) {
+    public List<CommentDto> retrieveReviews(@PathVariable String projectId, @PathVariable String mappingId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
-        log.info("[{}] Request to retrieve reviews for mapping: {} | {}", user.getEmail(), projectId, mappingId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        log.info("[{}] Request to retrieve comments for mapping: {} | {}", user.getEmail(), projectId, mappingId);
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
 
         Mapping mapping = mappingService.retrieveMappingById(mappingId);
-        return mapping.getReviews() != null ? mapping.getReviews().stream().map(ReviewDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>();
+        return mapping.getReviews() != null ? mapping.getComments().stream().map(CommentDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>();
     }
 }

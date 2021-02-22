@@ -6,31 +6,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProvenanceDto;
 
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public final class ReviewDto implements Serializable {
+public final class CommentDto implements Serializable {
 
     private static final long serialVersionUID = -3975761372901822735L;
 
-    @JsonProperty("comment")
-    private final String comment;
+    @NotNull
+    @JsonProperty("body")
+    private final String body;
 
-    @NotEmpty
+    @NotNull
     @JsonProperty("created")
     private final ProvenanceDto created;
 
     @JsonCreator
-    public ReviewDto(@JsonProperty("comment") String comment,
-                     @JsonProperty("created") ProvenanceDto created) {
-        this.comment = comment;
+    public CommentDto(@JsonProperty("body") String body,
+                      @JsonProperty("created") ProvenanceDto created) {
+        this.body = body;
         this.created = created;
     }
 
-    public String getComment() {
-        return comment;
+    public String getBody() {
+        return body;
     }
 
     public ProvenanceDto getCreated() {
