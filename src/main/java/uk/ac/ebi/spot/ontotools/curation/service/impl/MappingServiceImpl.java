@@ -111,6 +111,7 @@ public class MappingServiceImpl implements MappingService {
             throw new EntityNotFoundException("Mapping not found: " + mappingId);
         }
         Mapping mapping = mappingOp.get();
+        mapping.setStatus(MappingStatus.REVIEW_IN_PROGRESS.name());
         mapping.addReview(new Review(comment, provenance));
         mapping = mappingRepository.save(mapping);
         return mapping;

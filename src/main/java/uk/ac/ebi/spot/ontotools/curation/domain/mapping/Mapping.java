@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
+import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.Review;
 
@@ -56,6 +57,7 @@ public class Mapping {
         this.reviews.add(review);
         if (this.reviews.size() >= CurationConstants.NO_REVIEWS_REQUIRED) {
             this.reviewed = true;
+            this.status = MappingStatus.REQUIRED_REVIEWS_REACHED.name();
         }
     }
 }

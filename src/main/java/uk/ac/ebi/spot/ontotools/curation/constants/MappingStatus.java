@@ -4,6 +4,6 @@ public enum MappingStatus {
 
     AWAITING_REVIEW,
     REVIEW_IN_PROGRESS,
-    FINALIZED
+    REQUIRED_REVIEWS_REACHED
 
 }
