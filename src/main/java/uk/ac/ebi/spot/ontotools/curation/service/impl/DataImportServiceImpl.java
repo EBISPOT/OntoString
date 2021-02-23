@@ -9,10 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
-import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
+import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.dataimport.ImportDataElementDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.dataimport.ImportDataPackageDto;
 import uk.ac.ebi.spot.ontotools.curation.service.DataImportService;
@@ -59,7 +59,7 @@ public class DataImportServiceImpl implements DataImportService {
             log.info("Creating entities ...");
             int count = 0;
             for (ImportDataElementDto importDataElementDto : importDataPackageDto.getData()) {
-                entityService.createEntity(new Entity(null, importDataElementDto.getText(), importDataElementDto.getBaseId(), importDataElementDto.getBaseField(),
+                entityService.createEntity(new Entity(null, importDataElementDto.getText(), importDataElementDto.getUpstreamId(), importDataElementDto.getUpstreamField(),
                         sourceId, projectId, provenance, EntityStatus.UNMAPPED));
                 count++;
                 if (count % 100 == 0) {
