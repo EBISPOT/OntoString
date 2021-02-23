@@ -14,34 +14,34 @@ public final class ImportDataElementDto implements Serializable {
 
     private static final long serialVersionUID = -472202121082840265L;
 
-    @JsonProperty("baseId")
-    private final String baseId;
+    @JsonProperty("upstreamId")
+    private final String upstreamId;
 
     @NotEmpty
     @JsonProperty("text")
     private final String text;
 
-    @JsonProperty("baseField")
-    private final String baseField;
+    @JsonProperty("upstreamField")
+    private final String upstreamField;
 
     @JsonCreator
     public ImportDataElementDto(@JsonProperty("text") String text,
-                                @JsonProperty("baseId") String baseId,
-                                @JsonProperty("baseField") String baseField) {
-        this.baseId = baseId;
+                                @JsonProperty("upstreamId") String upstreamId,
+                                @JsonProperty("upstreamField") String upstreamField) {
+        this.upstreamId = upstreamId;
         this.text = text;
-        this.baseField = baseField;
-    }
-
-    public String getBaseId() {
-        return baseId;
+        this.upstreamField = upstreamField;
     }
 
     public String getText() {
         return text;
     }
 
-    public String getBaseField() {
-        return baseField;
+    public String getUpstreamId() {
+        return upstreamId;
+    }
+
+    public String getUpstreamField() {
+        return upstreamField;
     }
 }
