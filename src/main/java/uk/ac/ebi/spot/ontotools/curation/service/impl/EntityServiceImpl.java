@@ -37,6 +37,11 @@ public class EntityServiceImpl implements EntityService {
     }
 
     @Override
+    public Stream<Entity> streamEntitiesForProject(String projectId) {
+        return entityRepository.readByProjectId(projectId);
+    }
+
+    @Override
     public Entity updateMappingStatus(Entity entity, EntityStatus mappingStatus) {
         log.info("Updating mapping status [{}]: {}", entity.getName(), mappingStatus);
         Optional<Entity> entityOptional = entityRepository.findById(entity.getId());

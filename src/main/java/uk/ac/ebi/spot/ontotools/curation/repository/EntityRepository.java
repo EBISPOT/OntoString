@@ -12,4 +12,6 @@ public interface EntityRepository extends MongoRepository<Entity, String> {
     Stream<Entity> readBySourceId(String sourceId);
 
     Page<Entity> findByProjectId(String projectId, Pageable page);
+
+    Stream<Entity> readByProjectId(String projectId);
 }

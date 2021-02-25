@@ -11,6 +11,7 @@ ontotools-curation:
   auth:
     enabled: true
     cert: aap.der
+    unauthenticated-endpoints-prefix: /public
   admin:
     robot-user: ontotools-curator@ebi.ac.uk
 

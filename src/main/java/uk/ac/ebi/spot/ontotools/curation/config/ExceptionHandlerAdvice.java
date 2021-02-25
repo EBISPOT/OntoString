@@ -6,10 +6,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.spot.ontotools.curation.exception.AuthenticationException;
 import uk.ac.ebi.spot.ontotools.curation.exception.AuthorizationException;
 import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
+import uk.ac.ebi.spot.ontotools.curation.exception.FileProcessingException;
 
 @ControllerAdvice(annotations = RestController.class)
 public class ExceptionHandlerAdvice {
@@ -34,4 +36,10 @@ public class ExceptionHandlerAdvice {
         headers.setContentType(MediaType.TEXT_PLAIN);
         return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(FileProcessingException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public void handleFileProcessingException() {
+    }
+
 }

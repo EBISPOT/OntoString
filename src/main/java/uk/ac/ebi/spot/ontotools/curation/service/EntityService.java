@@ -15,6 +15,8 @@ public interface EntityService {
 
     Stream<Entity> retrieveEntitiesForSource(String sourceId);
 
+    Stream<Entity> streamEntitiesForProject(String projectId);
+
     Entity updateMappingStatus(Entity entity, EntityStatus mappingStatus);
 
     Page<Entity> retrieveEntitiesForProject(String projectId, Pageable page);

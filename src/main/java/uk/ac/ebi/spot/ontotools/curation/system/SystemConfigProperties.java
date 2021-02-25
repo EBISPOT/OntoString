@@ -21,6 +21,9 @@ public class SystemConfigProperties {
     @Value("${ontotools-curation.auth.cert:#{NULL}}")
     private String certPath;
 
+    @Value("${ontotools-curation.auth.unauthenticated-endpoints-prefix:#{NULL}}")
+    private String unauthenticatedEndpointsPrefix;
+
     @Value("${ontotools-curation.admin.robot-user}")
     private String robotUser;
 
@@ -54,5 +57,9 @@ public class SystemConfigProperties {
 
     public String getRobotUser() {
         return robotUser;
+    }
+
+    public String getUnauthenticatedEndpointsPrefix() {
+        return unauthenticatedEndpointsPrefix;
     }
 }
