@@ -33,6 +33,7 @@ import uk.ac.ebi.spot.ontotools.curation.rest.dto.*;
 import uk.ac.ebi.spot.ontotools.curation.service.MatchmakerService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
+import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -116,6 +117,11 @@ public abstract class IntegrationTest {
 
         userRepository.insert(new User(null, "Super User", "super@test.com", new ArrayList<>(), true));
         authTokenRepository.insert(new AuthToken(null, "supertoken", "super@test.com"));
+    }
+
+    @PreDestroy
+    public void destroy() {
+        mongoTemplate.getDb().drop();
     }
 
     protected ProjectDto createProject(String name, String token,

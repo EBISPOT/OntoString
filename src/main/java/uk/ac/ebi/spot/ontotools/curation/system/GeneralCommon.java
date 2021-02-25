@@ -2,6 +2,8 @@ package uk.ac.ebi.spot.ontotools.curation.system;
 
 public class GeneralCommon {
 
+    public static final String API_PUBLIC = "/public";
+
     public static final String API_V1 = "/v1";
 
     public static final String LOG_FILE_NAME = "LOG_FILE_NAME";

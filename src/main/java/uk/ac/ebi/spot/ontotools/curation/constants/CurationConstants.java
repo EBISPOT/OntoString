@@ -12,6 +12,10 @@ public class CurationConstants {
 
     public static final String API_MAPPINGS = "/mappings";
 
+    public static final String API_EXPORT = "/export";
+
+    public static final String API_DOWNLOAD = "/download";
+
     public static final String API_ENTITIES = "/entities";
 
     public static final String API_ONTOLOGY_TERMS = "/ontology-terms";

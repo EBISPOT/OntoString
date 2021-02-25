@@ -43,6 +43,12 @@ public class AuthInterceptor implements HandlerInterceptor {
                 return true;
             }
 
+            String requestedURI = httpServletRequest.getRequestURI();
+            if (systemConfigProperties.getUnauthenticatedEndpointsPrefix() != null && requestedURI.startsWith(systemConfigProperties.getUnauthenticatedEndpointsPrefix())) {
+                log.info("Received call on unauthenticated endpoint: {}", requestedURI);
+                return true;
+            }
+
             String jwt = HeadersUtil.extractJWT(httpServletRequest);
 
             if (jwt == null) {
