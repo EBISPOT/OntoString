@@ -104,7 +104,7 @@ public class MappingServiceImpl implements MappingService {
     }
 
     @Override
-    public Mapping addReviewToMapping(String mappingId, String comment, Provenance provenance) {
+    public Mapping addReviewToMapping(String mappingId, String comment, int noReviewsRequired, Provenance provenance) {
         log.info("Adding review to mapping: {}", mappingId);
         Optional<Mapping> mappingOp = mappingRepository.findById(mappingId);
         if (!mappingOp.isPresent()) {
@@ -113,7 +113,7 @@ public class MappingServiceImpl implements MappingService {
         }
         Mapping mapping = mappingOp.get();
         mapping.setStatus(MappingStatus.REVIEW_IN_PROGRESS.name());
-        mapping.addReview(new Review(comment, provenance));
+        mapping.addReview(new Review(comment, provenance), noReviewsRequired);
         mapping = mappingRepository.save(mapping);
         return mapping;
     }

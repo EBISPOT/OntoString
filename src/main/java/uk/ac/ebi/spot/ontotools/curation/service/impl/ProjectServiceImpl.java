@@ -58,6 +58,7 @@ public class ProjectServiceImpl implements ProjectService {
             existing.setOntologies(project.getOntologies() != null ? project.getOntologies() : new ArrayList<>());
             existing.setName(project.getName());
             existing.setDescription(project.getDescription());
+            existing.setNumberOfReviewsRequired(project.getNumberOfReviewsRequired());
             return projectRepository.save(existing);
         } else {
             log.error("User [{}] cannot change project [{}]. Required access is missing.", user.getEmail(), projectId);

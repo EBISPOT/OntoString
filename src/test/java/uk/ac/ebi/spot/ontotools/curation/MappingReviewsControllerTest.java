@@ -50,7 +50,7 @@ public class MappingReviewsControllerTest extends IntegrationTest {
         super.setup();
         List<String> datasources = Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"});
         List<String> ontologies = Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"});
-        ProjectDto projectDto = super.createProject("New Project", "token1", datasources, ontologies, "efo");
+        ProjectDto projectDto = super.createProject("New Project", "token1", datasources, ontologies, "efo", 3);
         user1 = userService.findByEmail(user1.getEmail());
         project = projectService.retrieveProject(projectDto.getId(), user1);
         sourceDto = super.createSource(project.getId());
@@ -121,7 +121,7 @@ public class MappingReviewsControllerTest extends IntegrationTest {
     public void shouldGetReviews() throws Exception {
         EntityDto actual = super.retrieveEntity(project.getId());
         MappingDto mappingDto = actual.getMappings().get(0);
-        mappingService.addReviewToMapping(mappingDto.getId(), "New review", ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
+        mappingService.addReviewToMapping(mappingDto.getId(), "New review", 3, ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
                 CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_REVIEWS;

@@ -49,5 +49,7 @@ public class Project {
      */
     private List<String> preferredMappingOntologies;
 
+    private Integer numberOfReviewsRequired;
+
     private Provenance created;
 }
