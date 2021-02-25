@@ -23,7 +23,7 @@ public class ProjectsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldCreateProject() throws Exception {
-        super.createProject("New Project", "token1", null, null, null);
+        super.createProject("New Project", "token1", null, null, null, 0);
     }
 
     /**
@@ -31,8 +31,8 @@ public class ProjectsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetProjects() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null);
-        super.createProject("New Project 2", "token2", null, null, null);
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null, 0);
+        super.createProject("New Project 2", "token2", null, null, null, 0);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS;
         String response = mockMvc.perform(get(endpoint)
@@ -57,7 +57,7 @@ public class ProjectsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null);
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null, 0);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();
         String response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -78,13 +78,14 @@ public class ProjectsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldUpdateProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null);
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null, 0);
         ProjectDto updatedProject = new ProjectDto(projectDto.getId(),
                 "New Name",
                 projectDto.getDescription(),
                 Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"gwas"}))}),
                 Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"ordo"}))}),
                 projectDto.getPreferredMappingOntologies(),
+                0,
                 projectDto.getCreated());
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();
@@ -110,13 +111,14 @@ public class ProjectsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotUpdateProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null);
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null, 0);
         ProjectDto updatedProject = new ProjectDto(projectDto.getId(),
                 "New Name",
                 projectDto.getDescription(),
                 Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"gwas"}))}),
                 Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"ordo"}))}),
                 projectDto.getPreferredMappingOntologies(),
+                0,
                 projectDto.getCreated());
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();
@@ -132,7 +134,7 @@ public class ProjectsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldDeleteProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null);
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null, 0);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();
         mockMvc.perform(delete(endpoint)
                 .header(IDPConstants.JWT_TOKEN, "token1"))

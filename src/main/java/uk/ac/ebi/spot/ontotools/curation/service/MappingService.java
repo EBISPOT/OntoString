@@ -18,7 +18,7 @@ public interface MappingService {
 
     List<String> deleteMappingExcluding(Entity entity, String ontologyTermId);
 
-    Mapping addReviewToMapping(String mappingId, String comment, Provenance provenance);
+    Mapping addReviewToMapping(String mappingId, String comment, int noReviewsRequired, Provenance provenance);
 
     Mapping retrieveMappingById(String mappingId);
 

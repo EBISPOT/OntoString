@@ -120,14 +120,14 @@ public abstract class IntegrationTest {
 
     protected ProjectDto createProject(String name, String token,
                                        List<String> datasources, List<String> ontologies,
-                                       String preferredMappingOntology) throws Exception {
+                                       String preferredMappingOntology, int noReviewsRequired) throws Exception {
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS;
 
 
         ProjectCreationDto projectCreationDto = new ProjectCreationDto(name, "Description",
                 datasources != null ? Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", datasources)}) : new ArrayList<>(),
                 ontologies != null ? Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", ontologies)}) : new ArrayList<>(),
-                preferredMappingOntology != null ? Arrays.asList(new String[]{preferredMappingOntology}) : new ArrayList<>());
+                preferredMappingOntology != null ? Arrays.asList(new String[]{preferredMappingOntology}) : new ArrayList<>(), noReviewsRequired);
 
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)

@@ -17,6 +17,7 @@ public class ProjectDtoAssembler {
                 project.getDatasources() != null ? project.getDatasources().stream().map(ProjectMappingConfigDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>(),
                 project.getOntologies() != null ? project.getOntologies().stream().map(ProjectMappingConfigDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>(),
                 project.getPreferredMappingOntologies(),
+                project.getNumberOfReviewsRequired(),
                 ProvenanceDtoAssembler.assemble(project.getCreated()));
     }
 
@@ -27,6 +28,7 @@ public class ProjectDtoAssembler {
                 project.getDatasources() != null ? project.getDatasources().stream().map(ProjectMappingConfigDtoAssembler::disassemble).collect(Collectors.toList()) : new ArrayList<>(),
                 project.getOntologies() != null ? project.getOntologies().stream().map(ProjectMappingConfigDtoAssembler::disassemble).collect(Collectors.toList()) : new ArrayList<>(),
                 project.getPreferredMappingOntologies(),
+                project.getNumberOfReviewsRequired(),
                 ProvenanceDtoAssembler.disassemble(project.getCreated()));
     }
 
@@ -37,6 +39,7 @@ public class ProjectDtoAssembler {
                 project.getDatasources() != null ? project.getDatasources().stream().map(ProjectMappingConfigDtoAssembler::disassemble).collect(Collectors.toList()) : new ArrayList<>(),
                 project.getOntologies() != null ? project.getOntologies().stream().map(ProjectMappingConfigDtoAssembler::disassemble).collect(Collectors.toList()) : new ArrayList<>(),
                 project.getPreferredMappingOntologies(),
+                project.getNumberOfReviewsRequired(),
                 provenance);
     }
 }

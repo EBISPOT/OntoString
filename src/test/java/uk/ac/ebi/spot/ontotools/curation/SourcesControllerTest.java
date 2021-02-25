@@ -22,7 +22,7 @@ public class SourcesControllerTest extends IntegrationTest {
     @Override
     public void setup() throws Exception {
         super.setup();
-        projectDto = createProject("New Project", "token1", null, null, null);
+        projectDto = createProject("New Project", "token1", null, null, null, 0);
     }
 
     /**

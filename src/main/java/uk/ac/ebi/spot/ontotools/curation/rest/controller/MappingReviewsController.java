@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
+import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
@@ -53,8 +54,10 @@ public class MappingReviewsController {
         log.info("[{}] Request to create review on mapping: {} | {}", user.getEmail(), projectId, mappingId);
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
 
+        Project project = projectService.retrieveProject(projectId, user);
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
-        Mapping mapping = mappingService.addReviewToMapping(mappingId, comment, provenance);
+        Mapping mapping = mappingService.addReviewToMapping(mappingId, comment,
+                project.getNumberOfReviewsRequired() == null ? 0 : project.getNumberOfReviewsRequired(), provenance);
         return ReviewDtoAssembler.assemble(mapping.getReviews().get(mapping.getReviews().size() - 1));
     }
 

@@ -10,7 +10,6 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.Review;
@@ -52,12 +51,12 @@ public class Mapping {
     @Transient
     private OntologyTerm ontologyTerm;
 
-    public void addReview(Review review) {
+    public void addReview(Review review, int noReviewsRequired) {
         if (reviews == null) {
             reviews = new ArrayList<>();
         }
         this.reviews.add(review);
-        if (this.reviews.size() >= CurationConstants.NO_REVIEWS_REQUIRED) {
+        if (this.reviews.size() >= noReviewsRequired) {
             this.reviewed = true;
             this.status = MappingStatus.REQUIRED_REVIEWS_REACHED.name();
         }
