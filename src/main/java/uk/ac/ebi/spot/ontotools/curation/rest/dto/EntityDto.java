@@ -27,11 +27,11 @@ public final class EntityDto implements Serializable {
     @JsonProperty("name")
     private final String name;
 
-    @JsonProperty("baseId")
-    private final String baseId;
+    @JsonProperty("upstreamId")
+    private final String upstreamId;
 
-    @JsonProperty("baseField")
-    private final String baseField;
+    @JsonProperty("upstreamField")
+    private final String upstreamField;
 
     @JsonProperty("mappingStatus")
     private final String mappingStatus;
@@ -49,8 +49,8 @@ public final class EntityDto implements Serializable {
     public EntityDto(@JsonProperty("id") String id,
                      @JsonProperty("source") SourceDto source,
                      @JsonProperty("name") String name,
-                     @JsonProperty("baseId") String baseId,
-                     @JsonProperty("baseField") String baseField,
+                     @JsonProperty("upstreamId") String upstreamId,
+                     @JsonProperty("upstreamField") String upstreamField,
                      @JsonProperty("mappingStatus") String mappingStatus,
                      @JsonProperty("mappingSuggestions") List<MappingSuggestionDto> mappingSuggestions,
                      @JsonProperty("mappings") List<MappingDto> mappings,
@@ -58,8 +58,8 @@ public final class EntityDto implements Serializable {
         this.id = id;
         this.source = source;
         this.name = name;
-        this.baseId = baseId;
-        this.baseField = baseField;
+        this.upstreamId = upstreamId;
+        this.upstreamField = upstreamField;
         this.mappingStatus = mappingStatus;
         this.mappingSuggestions = mappingSuggestions;
         this.mappings = mappings;
@@ -94,11 +94,11 @@ public final class EntityDto implements Serializable {
         return mappings;
     }
 
-    public String getBaseId() {
-        return baseId;
+    public String getUpstreamId() {
+        return upstreamId;
     }
 
-    public String getBaseField() {
-        return baseField;
+    public String getUpstreamField() {
+        return upstreamField;
     }
 }

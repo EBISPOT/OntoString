@@ -17,11 +17,11 @@ public final class ExportEntityDto implements Serializable {
     @JsonProperty("name")
     private final String name;
 
-    @JsonProperty("baseId")
-    private final String baseId;
+    @JsonProperty("upstreamId")
+    private final String upstreamId;
 
-    @JsonProperty("baseField")
-    private final String baseField;
+    @JsonProperty("upstreamField")
+    private final String upstreamField;
 
     @JsonProperty("mappingSuggestions")
     private final List<ExportMappingSuggestionDto> mappingSuggestions;
@@ -31,13 +31,13 @@ public final class ExportEntityDto implements Serializable {
 
     @JsonCreator
     public ExportEntityDto(@JsonProperty("name") String name,
-                           @JsonProperty("baseId") String baseId,
-                           @JsonProperty("baseField") String baseField,
+                           @JsonProperty("upstreamId") String upstreamId,
+                           @JsonProperty("upstreamField") String upstreamField,
                            @JsonProperty("mappingSuggestions") List<ExportMappingSuggestionDto> mappingSuggestions,
                            @JsonProperty("mappings") List<ExportMappingDto> mappings) {
         this.name = name;
-        this.baseId = baseId;
-        this.baseField = baseField;
+        this.upstreamId = upstreamId;
+        this.upstreamField = upstreamField;
         this.mappingSuggestions = mappingSuggestions;
         this.mappings = mappings;
     }
@@ -46,12 +46,13 @@ public final class ExportEntityDto implements Serializable {
         return name;
     }
 
-    public String getBaseId() {
-        return baseId;
+
+    public String getUpstreamId() {
+        return upstreamId;
     }
 
-    public String getBaseField() {
-        return baseField;
+    public String getUpstreamField() {
+        return upstreamField;
     }
 
     public List<ExportMappingSuggestionDto> getMappingSuggestions() {
