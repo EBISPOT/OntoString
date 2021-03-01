@@ -72,7 +72,7 @@ public class EntityControllerTest extends IntegrationTest {
         assertEquals(EntityStatus.AUTO_MAPPED.name(), actual.getMappingStatus());
 
         assertEquals(1, actual.getMappings().size());
-        assertEquals("Orphanet:15", actual.getMappings().get(0).getOntologyTerm().getCurie());
+        assertEquals("Orphanet:15", actual.getMappings().get(0).getOntologyTerms().get(0).getCurie());
         assertEquals(MappingStatus.AWAITING_REVIEW.name(), actual.getMappings().get(0).getStatus());
 
         assertEquals(2, actual.getMappingSuggestions().size());
@@ -112,7 +112,7 @@ public class EntityControllerTest extends IntegrationTest {
         assertEquals(EntityStatus.AUTO_MAPPED.name(), actual.getMappingStatus());
 
         assertEquals(1, actual.getMappings().size());
-        assertEquals("Orphanet:15", actual.getMappings().get(0).getOntologyTerm().getCurie());
+        assertEquals("Orphanet:15", actual.getMappings().get(0).getOntologyTerms().get(0).getCurie());
         assertEquals(MappingStatus.AWAITING_REVIEW.name(), actual.getMappings().get(0).getStatus());
 
         assertEquals(2, actual.getMappingSuggestions().size());

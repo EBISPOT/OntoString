@@ -96,7 +96,7 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
         log.info("Deleting mapping suggestions for entity [{}] with ontology term: {}", entityId, ontologyTermId);
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionRepository.findByEntityId(entityId);
         for (MappingSuggestion mappingSuggestion : mappingSuggestions) {
-            if (!mappingSuggestion.getOntologyTermId().equalsIgnoreCase(ontologyTermId)) {
+            if (mappingSuggestion.getOntologyTermId().equalsIgnoreCase(ontologyTermId)) {
                 mappingSuggestionRepository.delete(mappingSuggestion);
             }
         }

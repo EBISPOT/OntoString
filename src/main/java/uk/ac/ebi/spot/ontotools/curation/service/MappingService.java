@@ -16,11 +16,13 @@ public interface MappingService {
 
     List<Mapping> retrieveMappingsForEntity(String entityId);
 
-    List<String> deleteMappingExcluding(Entity entity, String ontologyTermId);
-
     Mapping addReviewToMapping(String mappingId, String comment, int noReviewsRequired, Provenance provenance);
 
     Mapping retrieveMappingById(String mappingId);
 
     Mapping addCommentToMapping(String mappingId, String body, Provenance provenance);
+
+    void updateMapping(String mappingId, OntologyTerm ontologyTerm, Provenance provenance);
+
+    List<String> deleteMapping(String mappingId, String ontoTermId, Provenance provenance);
 }

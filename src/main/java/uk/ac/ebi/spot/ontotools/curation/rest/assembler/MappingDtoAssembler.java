@@ -11,7 +11,7 @@ public class MappingDtoAssembler {
     public static MappingDto assemble(Mapping mapping) {
         return new MappingDto(mapping.getId(),
                 mapping.getEntityId(),
-                OntologyTermDtoAssembler.assemble(mapping.getOntologyTerm()),
+                mapping.getOntologyTerms().stream().map(OntologyTermDtoAssembler::assemble).collect(Collectors.toList()),
                 mapping.isReviewed(),
                 mapping.getStatus(),
                 mapping.getReviews() != null ? mapping.getReviews().stream().map(ReviewDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>(),

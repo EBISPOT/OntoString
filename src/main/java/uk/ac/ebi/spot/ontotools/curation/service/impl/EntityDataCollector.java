@@ -11,11 +11,13 @@ import uk.ac.ebi.spot.ontotools.curation.rest.assembler.ProvenanceDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.export.ExportEntityDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.export.ExportMappingDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.export.ExportMappingSuggestionDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -38,7 +40,8 @@ public class EntityDataCollector {
 
         if (mappingList != null) {
             for (Mapping mapping : mappingList) {
-                mappings.add(new ExportMappingDto(OntologyTermDtoAssembler.assemble(mapping.getOntologyTerm()), mapping.isReviewed(),
+                List<OntologyTermDto> ontologyTermDtos = mapping.getOntologyTerms().stream().map(OntologyTermDtoAssembler::assemble).collect(Collectors.toList());
+                mappings.add(new ExportMappingDto(ontologyTermDtos, mapping.isReviewed(),
                         mapping.getStatus(), ProvenanceDtoAssembler.assemble(mapping.getCreated())));
             }
         }

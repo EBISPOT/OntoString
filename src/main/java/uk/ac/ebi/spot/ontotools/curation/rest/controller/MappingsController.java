@@ -10,10 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
-import uk.ac.ebi.spot.ontotools.curation.domain.*;
+import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
+import uk.ac.ebi.spot.ontotools.curation.domain.Source;
+import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
-import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.EntityDtoAssembler;
@@ -75,6 +76,11 @@ public class MappingsController {
 
     /**
      * POST /v1/projects/{projectId}/mappings
+     * <p>
+     * Assumptions:
+     * - Creating a mapping = transforming an existing mapping suggestion into a new mapping.
+     * - No existing mappings are deleted
+     * - Originating mapping suggestion is removed
      */
     @PostMapping(value = "/{projectId}" + CurationConstants.API_MAPPINGS,
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -82,12 +88,12 @@ public class MappingsController {
     @ResponseStatus(HttpStatus.CREATED)
     public EntityDto createMapping(@PathVariable String projectId, @RequestBody @Valid MappingCreationDto mappingCreationDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
-        log.info("[{}] Request to create mapping: {} | {} | {}", user.getEmail(), projectId, mappingCreationDto.getEntityId(), mappingCreationDto.getOntologyTerm().getCurie());
+        log.info("[{}] Request to create mapping: {} | {} | {}", user.getEmail(), projectId, mappingCreationDto.getEntityId(), mappingCreationDto.getOntologyTerm());
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
 
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         Entity entity = entityService.retrieveEntity(mappingCreationDto.getEntityId());
-        OntologyTerm ontologyTerm = ontologyTermService.retrieveTermByIri(mappingCreationDto.getOntologyTerm().getIri());
+        OntologyTerm ontologyTerm = ontologyTermService.retrieveTermByCurie(mappingCreationDto.getOntologyTerm().getCurie());
 
         /**
          * Check if a mapping to this term already exists
@@ -95,7 +101,7 @@ public class MappingsController {
         List<Mapping> existingMappings = mappingService.retrieveMappingsForEntity(entity.getId());
         boolean exists = false;
         for (Mapping mapping : existingMappings) {
-            if (mapping.getOntologyTermId().equalsIgnoreCase(ontologyTerm.getId())) {
+            if (mapping.getOntologyTermIds().contains(ontologyTerm.getId())) {
                 exists = true;
                 break;
             }
@@ -111,10 +117,59 @@ public class MappingsController {
         mappingService.createMapping(entity, ontologyTerm, provenance);
 
         /**
-         * New mapping created - deleting existing mappings, except of the newly created one.
-         * Retaining ontology terms associated with the previous mappings.
+         * Updating mapping status to MANUAL.
          */
-        List<String> ontologyTermIds = mappingService.deleteMappingExcluding(entity, ontologyTerm.getId());
+        entity = entityService.updateMappingStatus(entity, EntityStatus.MANUALLY_MAPPED);
+
+        /**
+         * Deleting mapping suggestions associated with the current ontology term.
+         */
+        mappingSuggestionsService.deleteMappingSuggestions(entity.getId(), ontologyTerm.getId());
+
+        return packAndSend(entity, projectId);
+    }
+
+    /**
+     * PUT /v1/projects/{projectId}/mappings/{mappingId}
+     * <p>
+     * Assumptions:
+     * - Updating a mapping = adding an additional ontology term from a mapping suggestion to an existing mapping
+     * - No existing mappings are deleted
+     * - Originating mapping suggestion is removed
+     */
+    @PutMapping(value = "/{projectId}" + CurationConstants.API_MAPPINGS + "/{mappingId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public EntityDto updateMapping(@PathVariable String projectId, @PathVariable String mappingId, @RequestBody @Valid MappingCreationDto mappingCreationDto, HttpServletRequest request) {
+        User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        log.info("[{}] Request to update mapping [{} - {}]: {} | {}", user.getEmail(), projectId, mappingId, mappingCreationDto.getEntityId(), mappingCreationDto.getOntologyTerm());
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+
+        Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
+        Entity entity = entityService.retrieveEntity(mappingCreationDto.getEntityId());
+        OntologyTerm ontologyTerm = ontologyTermService.retrieveTermByCurie(mappingCreationDto.getOntologyTerm().getCurie());
+
+        /**
+         * Check if a different mapping to this term already exists
+         */
+        List<Mapping> existingMappings = mappingService.retrieveMappingsForEntity(entity.getId());
+        boolean exists = false;
+        for (Mapping mapping : existingMappings) {
+            if (mapping.getOntologyTermIds().contains(ontologyTerm.getId())) {
+                exists = true;
+                break;
+            }
+        }
+        if (exists) {
+            log.warn("[{}] Mapping to term [{}] already exists.", entity.getName(), ontologyTerm.getCurie());
+            return packAndSend(entity, projectId);
+        }
+
+        /**
+         * Update mapping.
+         */
+        mappingService.updateMapping(mappingId, ontologyTerm, provenance);
 
         /**
          * Updating mapping status to MANUAL.
@@ -126,15 +181,44 @@ public class MappingsController {
          */
         mappingSuggestionsService.deleteMappingSuggestions(entity.getId(), ontologyTerm.getId());
 
+        return packAndSend(entity, projectId);
+    }
+
+    /**
+     * DELETE /v1/projects/{projectId}/mappings/{mappingId}?curie=<CURIE>
+     * <p>
+     * Assumptions:
+     * - Delete entire mapping when curie is missing
+     * - Delete only mapping to curie when this is present
+     * - Convert all removed curies to mapping suggestions
+     */
+    @DeleteMapping(value = "/{projectId}" + CurationConstants.API_MAPPINGS + "/{mappingId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteMapping(@PathVariable String projectId, @PathVariable String mappingId,
+                              @RequestParam(value = CurationConstants.PARAM_CURIE, required = false) String curie,
+                              HttpServletRequest request) {
+        User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        log.info("[{}] Request to delete mapping [{} - {}]: {}", user.getEmail(), projectId, mappingId, curie);
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+
+        Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
+        Mapping mapping = mappingService.retrieveMappingById(mappingId);
+        Entity entity = entityService.retrieveEntity(mapping.getEntityId());
+
         /**
-         * Creating new mapping suggestion from the terms previously included in the mappings.
+         * Delete mapping.
          */
-        for (String ontologyTermId : ontologyTermIds) {
-            OntologyTerm ontoTerm = ontologyTermService.retrieveTermById(ontologyTermId);
-            mappingSuggestionsService.createMappingSuggestion(entity, ontoTerm, provenance);
+        OntologyTerm ontoTerm = curie != null ? ontologyTermService.retrieveTermByCurie(curie) : null;
+        List<String> ontoTermIds = mappingService.deleteMapping(mappingId, ontoTerm != null ? ontoTerm.getId() : null, provenance);
+
+        /**
+         * Re-create mapping suggestions.
+         */
+        for (String ontoTermId : ontoTermIds) {
+            OntologyTerm ontologyTerm = ontologyTermService.retrieveTermById(ontoTermId);
+            mappingSuggestionsService.createMappingSuggestion(entity, ontologyTerm, provenance);
         }
 
-        return packAndSend(entity, projectId);
     }
 
     private EntityDto packAndSend(Entity entity, String projectId) {
