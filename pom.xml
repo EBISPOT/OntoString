@@ -26,6 +26,7 @@
         <spring.test>5.3.3</spring.test>
         <javax.servlet>4.0.1</javax.servlet>
         <javax.validation>2.0.1.Final</javax.validation>
+        <jaxb.version>2.3.1</jaxb.version>
 
         <joda.time>2.10.9</joda.time>
         <lombok.version>1.18.18</lombok.version>
@@ -214,6 +215,11 @@
             <version>${httpclient.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxb.version}</version>
+        </dependency>
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>

@@ -33,4 +33,8 @@ public class OntologyTerm {
 
     private String crossRefs;
 
+    @Override
+    public String toString() {
+        return curie + " (" + label + ")";
+    }
 }

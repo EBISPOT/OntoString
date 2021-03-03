@@ -128,6 +128,7 @@ public class MatchmakerServiceImpl implements MatchmakerService {
             }
         }
 
+        log.info(" -- Final IRIs and terms created: {}", finalIRIs, termsCreated);
         List<OntologyTerm> newTerms = findExactMapping(entity, termsCreated, highConfidenceIRIs, project, provenance);
         if (!newTerms.isEmpty() && termsCreated.isEmpty()) {
             entity = entityService.updateMappingStatus(entity, EntityStatus.SUGGESTIONS_PROVIDED);
@@ -161,9 +162,11 @@ public class MatchmakerServiceImpl implements MatchmakerService {
             }
         }
 
+        log.info(" -- Got to the OXO part: {} | {} | {}", entity.getName(), termsCreated, highConfidenceIRIs);
         for (String iri : highConfidenceIRIs) {
             String ontoId = CurationUtil.ontoFromIRI(iri);
             List<OLSTermDto> olsTerms = olsService.retrieveTerms(ontoId, iri);
+            log.info(" --- OntoId | OLS results: {} | {}", ontoId, olsTerms.size());
             if (olsTerms.isEmpty()) {
                 log.warn("Found no OLS results. Cannot continue mapping for: {}", entity.getName());
                 continue;
@@ -179,6 +182,7 @@ public class MatchmakerServiceImpl implements MatchmakerService {
                     CurationUtil.configForField(entity, project.getOntologies()));
             for (OXOMappingResponseDto oxoMappingResponseDto : oxoMappings) {
                 String targetOntoId = oxoMappingResponseDto.getTargetPrefix().toLowerCase();
+                log.info(" ---- OXO onto: {} | {}", targetOntoId, oxoMappingResponseDto.getCurie());
                 olsTerms = olsService.retrieveTerms(targetOntoId, oxoMappingResponseDto.getCurie());
                 if (olsTerms.isEmpty()) {
                     continue;
