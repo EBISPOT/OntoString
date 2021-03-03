@@ -114,7 +114,7 @@ public class MatchmakerServiceImpl implements MatchmakerService {
                 termsCreated.add(ontologyTerm);
                 mappingSuggestionsService.createMappingSuggestion(entity, ontologyTerm, provenance);
 
-                if (highConfidenceIRIs.contains(iri)) {
+                if (highConfidenceIRIs.contains(ontologyTerm.getIri())) {
                     if (entity.getMappingStatus().equals(EntityStatus.UNMAPPED) || entity.getMappingStatus().equals(EntityStatus.SUGGESTIONS_PROVIDED)) {
                         mappingService.createMapping(entity, ontologyTerm, provenance);
                         entity = entityService.updateMappingStatus(entity, EntityStatus.AUTO_MAPPED);

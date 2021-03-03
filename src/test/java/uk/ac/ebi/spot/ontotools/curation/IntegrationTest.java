@@ -31,6 +31,8 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.repository.*;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.*;
 import uk.ac.ebi.spot.ontotools.curation.service.MatchmakerService;
+import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
+import uk.ac.ebi.spot.ontotools.curation.service.ZoomaService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
 import javax.annotation.PreDestroy;
@@ -64,6 +66,24 @@ public abstract class IntegrationTest {
         @Bean
         public MatchmakerService matchmakerService() {
             return mock(MatchmakerService.class);
+        }
+    }
+
+    @Configuration
+    public static class MockZoomaServiceConfig {
+
+        @Bean
+        public ZoomaService zoomaService() {
+            return mock(ZoomaService.class);
+        }
+    }
+
+    @Configuration
+    public static class MockOLSServiceConfig {
+
+        @Bean
+        public OLSService olsService() {
+            return mock(OLSService.class);
         }
     }
 
