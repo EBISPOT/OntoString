@@ -61,7 +61,7 @@ public class MappingCommentsControllerTest extends IntegrationTest {
      * POST /v1/projects/{projectId}/mappings/{mappingId}/comments
      */
     @Test
-    public void shouldCreateReview() throws Exception {
+    public void shouldCreateComment() throws Exception {
         EntityDto actual = super.retrieveEntity(project.getId());
         MappingDto mappingDto = actual.getMappings().get(0);
 
@@ -88,7 +88,7 @@ public class MappingCommentsControllerTest extends IntegrationTest {
      * GET /v1/projects/{projectId}/mappings/{mappingId}/comments
      */
     @Test
-    public void shouldGetReviews() throws Exception {
+    public void shouldGetComments() throws Exception {
         EntityDto actual = super.retrieveEntity(project.getId());
         MappingDto mappingDto = actual.getMappings().get(0);
         mappingService.addCommentToMapping(mappingDto.getId(), "New comment", ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
@@ -107,5 +107,39 @@ public class MappingCommentsControllerTest extends IntegrationTest {
         });
         assertEquals(1, commentDtos.size());
         assertEquals("New comment", commentDtos.get(0).getBody());
+    }
+
+    /**
+     * POST /v1/projects/{projectId}/mappings/{mappingId}/comments
+     */
+    @Test
+    public void shouldNotCreateComment() throws Exception {
+        EntityDto actual = super.retrieveEntity(project.getId());
+        MappingDto mappingDto = actual.getMappings().get(0);
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_COMMENTS;
+        mockMvc.perform(post(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("New comment")
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * GET /v1/projects/{projectId}/mappings/{mappingId}/comments
+     */
+    @Test
+    public void shouldNotGetComments() throws Exception {
+        EntityDto actual = super.retrieveEntity(project.getId());
+        MappingDto mappingDto = actual.getMappings().get(0);
+        mappingService.addCommentToMapping(mappingDto.getId(), "New comment", ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_COMMENTS;
+        mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
     }
 }

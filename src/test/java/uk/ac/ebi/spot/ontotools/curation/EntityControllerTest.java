@@ -10,7 +10,10 @@ import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.*;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
@@ -128,5 +131,30 @@ public class EntityControllerTest extends IntegrationTest {
 
         assertEquals(2, foundCuries);
         assertEquals(sourceDto.getId(), actual.getSource().getId());
+    }
+
+    /**
+     * GET /v1/projects/{projectId}/entities
+     */
+    @Test
+    public void shouldNotGetEntities() throws Exception {
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_ENTITIES;
+        mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * GET /v1/projects/{projectId}/entities/{entityId}
+     */
+    @Test
+    public void shouldNotGetEntity() throws Exception {
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_ENTITIES + "/" + entity.getId();
+        mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.test.context.ContextConfiguration;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
+import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.ProvenanceDtoAssembler;
@@ -137,5 +138,75 @@ public class MappingReviewsControllerTest extends IntegrationTest {
         });
         assertEquals(1, reviewDtos.size());
         assertEquals("New review", reviewDtos.get(0).getComment());
+    }
+
+    /**
+     * POST /v1/projects/{projectId}/mappings/{mappingId}/reviews
+     */
+    @Test
+    public void shouldNotCreateReview() throws Exception {
+        EntityDto actual = super.retrieveEntity(project.getId());
+        MappingDto mappingDto = actual.getMappings().get(0);
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_REVIEWS;
+        mockMvc.perform(post(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("New review")
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * GET /v1/projects/{projectId}/mappings/{mappingId}/reviews
+     */
+    @Test
+    public void shouldNotGetReviews() throws Exception {
+        EntityDto actual = super.retrieveEntity(project.getId());
+        MappingDto mappingDto = actual.getMappings().get(0);
+        mappingService.addReviewToMapping(mappingDto.getId(), "New review", 3, ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_REVIEWS;
+        mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * POST /v1/projects/{projectId}/mappings/{mappingId}/reviews
+     */
+    @Test
+    public void shouldNotCreateReviewAsConsumer() throws Exception {
+        EntityDto actual = super.retrieveEntity(project.getId());
+        MappingDto mappingDto = actual.getMappings().get(0);
+        userService.addUserToProject(super.user2, project.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_REVIEWS;
+        mockMvc.perform(post(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("New review")
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * GET /v1/projects/{projectId}/mappings/{mappingId}/reviews
+     */
+    @Test
+    public void shouldNotGetReviewsAsConsumer() throws Exception {
+        EntityDto actual = super.retrieveEntity(project.getId());
+        MappingDto mappingDto = actual.getMappings().get(0);
+        mappingService.addReviewToMapping(mappingDto.getId(), "New review", 3, ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
+        userService.addUserToProject(super.user2, project.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_REVIEWS;
+        mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
     }
 }

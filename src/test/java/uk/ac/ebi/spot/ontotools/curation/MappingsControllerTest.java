@@ -5,10 +5,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
-import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
-import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
-import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
+import uk.ac.ebi.spot.ontotools.curation.constants.*;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
@@ -133,4 +130,52 @@ public class MappingsControllerTest extends IntegrationTest {
         assertEquals(sourceDto.getId(), actual.getSource().getId());
     }
 
+    /**
+     * POST /v1/projects/{projectId}/mappings
+     */
+    @Test
+    public void shouldNotCreateMapping() throws Exception {
+        EntityDto entityDto = super.retrieveEntity(project.getId());
+        OntologyTermDto ontologyTermDto = null;
+        for (MappingSuggestionDto mappingSuggestionDto : entityDto.getMappingSuggestions()) {
+            if (mappingSuggestionDto.getOntologyTerm().getCurie().equalsIgnoreCase("MONDO:0007037")) {
+                ontologyTermDto = mappingSuggestionDto.getOntologyTerm();
+                break;
+            }
+        }
+        assertNotNull(ontologyTermDto);
+        MappingCreationDto mappingCreationDto = new MappingCreationDto(entityDto.getId(), ontologyTermDto);
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
+        mockMvc.perform(post(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(mappingCreationDto))
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * POST /v1/projects/{projectId}/mappings
+     */
+    @Test
+    public void shouldNotCreateMappingAsConsumer() throws Exception {
+        EntityDto entityDto = super.retrieveEntity(project.getId());
+        OntologyTermDto ontologyTermDto = null;
+        for (MappingSuggestionDto mappingSuggestionDto : entityDto.getMappingSuggestions()) {
+            if (mappingSuggestionDto.getOntologyTerm().getCurie().equalsIgnoreCase("MONDO:0007037")) {
+                ontologyTermDto = mappingSuggestionDto.getOntologyTerm();
+                break;
+            }
+        }
+        assertNotNull(ontologyTermDto);
+        MappingCreationDto mappingCreationDto = new MappingCreationDto(entityDto.getId(), ontologyTermDto);
+        userService.addUserToProject(super.user2, project.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
+        mockMvc.perform(post(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(mappingCreationDto))
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
+    }
 }
