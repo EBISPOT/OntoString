@@ -8,7 +8,6 @@ import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.Role;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
-import uk.ac.ebi.spot.ontotools.curation.exception.AuthorizationException;
 import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.ontotools.curation.repository.ProjectRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
@@ -62,7 +61,7 @@ public class ProjectServiceImpl implements ProjectService {
             return projectRepository.save(existing);
         } else {
             log.error("User [{}] cannot change project [{}]. Required access is missing.", user.getEmail(), projectId);
-            throw new AuthorizationException("User [" + user.getEmail() + "] cannot change project [" + projectId + "]. Required access is missing.");
+            throw new EntityNotFoundException("No project [" + projectId + "] found for user [" + user.getEmail() + "]");
         }
     }
 
@@ -83,7 +82,7 @@ public class ProjectServiceImpl implements ProjectService {
              */
         } else {
             log.error("User [{}] cannot delete project [{}]. Required access is missing.", user.getEmail(), projectId);
-            throw new AuthorizationException("User [" + user.getEmail() + "] cannot delete project [" + projectId + "]. Required access is missing.");
+            throw new EntityNotFoundException("No project [" + projectId + "] found for user [" + user.getEmail() + "]");
         }
     }
 

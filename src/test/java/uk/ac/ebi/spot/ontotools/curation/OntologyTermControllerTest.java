@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
+import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
@@ -70,5 +71,38 @@ public class OntologyTermControllerTest extends IntegrationTest {
         assertEquals(toCreate.getIri(), actual.getIri());
         assertEquals(TermStatus.NEEDS_IMPORT.toString(), actual.getStatus());
 
+    }
+
+    /**
+     * POST /v1/projects/{projectId}/ontology-terms
+     */
+    @Test
+    public void shouldNotCreateOntologyTerm() throws Exception {
+        OntologyTermDto toCreate = new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
+                "Achondroplasia", null, null, null);
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_ONTOLOGY_TERMS;
+        mockMvc.perform(post(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(toCreate))
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * POST /v1/projects/{projectId}/ontology-terms
+     */
+    @Test
+    public void shouldNotCreateOntologyTermAsConsumer() throws Exception {
+        OntologyTermDto toCreate = new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
+                "Achondroplasia", null, null, null);
+        userService.addUserToProject(super.user2, project.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_ONTOLOGY_TERMS;
+        mockMvc.perform(post(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(toCreate))
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
     }
 }

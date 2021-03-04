@@ -7,17 +7,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
+import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.OntologyTermDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.JWTService;
 import uk.ac.ebi.spot.ontotools.curation.service.OntologyTermService;
+import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Arrays;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS)
@@ -31,6 +34,9 @@ public class OntologyTermController {
     @Autowired
     private OntologyTermService ontologyTermService;
 
+    @Autowired
+    private ProjectService projectService;
+
     /**
      * POST /v1/projects/{projectId}/ontology-terms
      */
@@ -41,6 +47,7 @@ public class OntologyTermController {
     public OntologyTermDto createOntologyTerm(@PathVariable String projectId, @RequestBody @Valid OntologyTermDto ontologyTermDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to create ontology term: {} | {}", user.getEmail(), projectId, ontologyTermDto.getCurie());
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
         OntologyTerm created = ontologyTermService.createTerm(OntologyTermDtoAssembler.disassemble(ontologyTermDto));
         return OntologyTermDtoAssembler.assemble(created);
     }

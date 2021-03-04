@@ -32,6 +32,7 @@ import uk.ac.ebi.spot.ontotools.curation.repository.*;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.*;
 import uk.ac.ebi.spot.ontotools.curation.service.MatchmakerService;
 import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
+import uk.ac.ebi.spot.ontotools.curation.service.UserService;
 import uk.ac.ebi.spot.ontotools.curation.service.ZoomaService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
@@ -110,6 +111,9 @@ public abstract class IntegrationTest {
 
     @Autowired
     private EntityRepository entityRepository;
+
+    @Autowired
+    protected UserService userService;
 
     protected MockMvc mockMvc;
 

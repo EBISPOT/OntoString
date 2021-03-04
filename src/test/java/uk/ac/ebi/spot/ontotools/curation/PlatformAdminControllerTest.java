@@ -57,7 +57,6 @@ public class PlatformAdminControllerTest extends IntegrationTest {
         assertEquals(newMap, actual.getAliases());
     }
 
-
     /**
      * GET /v1/platform-admin
      */
@@ -90,6 +89,23 @@ public class PlatformAdminControllerTest extends IntegrationTest {
     public void shouldNotGetConfigs() throws Exception {
         mockMvc.perform(get(GeneralCommon.API_V1 + CurationConstants.API_PLATFORM_ADMIN)
                 .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isForbidden());
+    }
+
+    /**
+     * PUT /v1/platform-admin
+     */
+    @Test
+    public void shouldNotUpdateConfig() throws Exception {
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PLATFORM_ADMIN;
+        Map<String, String> newMap = new HashMap<>();
+        newMap.put("orphanet", "ordo");
+        newMap.put("efox", "efo");
+        ExternalServiceConfigDto toUpdate = new ExternalServiceConfigDto("OLS", newMap);
+        mockMvc.perform(put(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(toUpdate))
                 .header(IDPConstants.JWT_TOKEN, "token1"))
                 .andExpect(status().isForbidden());
     }
