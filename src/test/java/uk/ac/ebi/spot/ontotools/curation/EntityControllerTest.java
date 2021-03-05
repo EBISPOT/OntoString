@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -74,9 +75,9 @@ public class EntityControllerTest extends IntegrationTest {
         assertEquals("Achondroplasia", actual.getName());
         assertEquals(EntityStatus.AUTO_MAPPED.name(), actual.getMappingStatus());
 
-        assertEquals(1, actual.getMappings().size());
-        assertEquals("Orphanet:15", actual.getMappings().get(0).getOntologyTerms().get(0).getCurie());
-        assertEquals(MappingStatus.AWAITING_REVIEW.name(), actual.getMappings().get(0).getStatus());
+        assertNotNull(actual.getMapping());
+        assertEquals("Orphanet:15", actual.getMapping().getOntologyTerms().get(0).getCurie());
+        assertEquals(MappingStatus.AWAITING_REVIEW.name(), actual.getMapping().getStatus());
 
         assertEquals(2, actual.getMappingSuggestions().size());
         int foundCuries = 0;
@@ -114,9 +115,9 @@ public class EntityControllerTest extends IntegrationTest {
         assertEquals("Achondroplasia", actual.getName());
         assertEquals(EntityStatus.AUTO_MAPPED.name(), actual.getMappingStatus());
 
-        assertEquals(1, actual.getMappings().size());
-        assertEquals("Orphanet:15", actual.getMappings().get(0).getOntologyTerms().get(0).getCurie());
-        assertEquals(MappingStatus.AWAITING_REVIEW.name(), actual.getMappings().get(0).getStatus());
+        assertNotNull(actual.getMapping());
+        assertEquals("Orphanet:15", actual.getMapping().getOntologyTerms().get(0).getCurie());
+        assertEquals(MappingStatus.AWAITING_REVIEW.name(), actual.getMapping().getStatus());
 
         assertEquals(2, actual.getMappingSuggestions().size());
         int foundCuries = 0;

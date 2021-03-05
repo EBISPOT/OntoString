@@ -30,6 +30,7 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.repository.*;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.*;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 import uk.ac.ebi.spot.ontotools.curation.service.MatchmakerService;
 import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
@@ -101,13 +102,13 @@ public abstract class IntegrationTest {
     private AuthTokenRepository authTokenRepository;
 
     @Autowired
-    private OntologyTermRepository ontologyTermRepository;
+    protected OntologyTermRepository ontologyTermRepository;
 
     @Autowired
-    private MappingSuggestionRepository mappingSuggestionRepository;
+    protected MappingSuggestionRepository mappingSuggestionRepository;
 
     @Autowired
-    private MappingRepository mappingRepository;
+    protected MappingRepository mappingRepository;
 
     @Autowired
     private EntityRepository entityRepository;
@@ -237,7 +238,7 @@ public abstract class IntegrationTest {
                 projectId, false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
     }
 
-    protected EntityDto retrieveEntity(String projectId) throws Exception {
+    protected List<MappingDto> retrieveMapping(String projectId) throws Exception {
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectId + CurationConstants.API_MAPPINGS
                 + "?entityId=" + entity.getId();
         String response = mockMvc.perform(get(endpoint)
@@ -248,9 +249,8 @@ public abstract class IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        EntityDto actual = mapper.readValue(response, new TypeReference<EntityDto>() {
+        List<MappingDto> actual = mapper.readValue(response, new TypeReference<List<MappingDto>>() {
         });
         return actual;
     }
-
 }

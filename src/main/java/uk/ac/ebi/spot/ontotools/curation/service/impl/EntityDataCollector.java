@@ -34,16 +34,14 @@ public class EntityDataCollector {
         this.exportEntityDtos = new ArrayList<>();
     }
 
-    public void add(Entity entity, List<Mapping> mappingList, List<MappingSuggestion> mappingSuggestionList) {
+    public void add(Entity entity, Mapping mapping, List<MappingSuggestion> mappingSuggestionList) {
         List<ExportMappingSuggestionDto> mappingSuggestions = new ArrayList<>();
-        List<ExportMappingDto> mappings = new ArrayList<>();
+        ExportMappingDto exportMappingDto = null;
 
-        if (mappingList != null) {
-            for (Mapping mapping : mappingList) {
-                List<OntologyTermDto> ontologyTermDtos = mapping.getOntologyTerms().stream().map(OntologyTermDtoAssembler::assemble).collect(Collectors.toList());
-                mappings.add(new ExportMappingDto(ontologyTermDtos, mapping.isReviewed(),
-                        mapping.getStatus(), ProvenanceDtoAssembler.assemble(mapping.getCreated())));
-            }
+        if (mapping != null) {
+            List<OntologyTermDto> ontologyTermDtos = mapping.getOntologyTerms().stream().map(OntologyTermDtoAssembler::assemble).collect(Collectors.toList());
+            exportMappingDto = new ExportMappingDto(ontologyTermDtos, mapping.isReviewed(),
+                    mapping.getStatus(), ProvenanceDtoAssembler.assemble(mapping.getCreated()));
         }
         if (mappingSuggestionList != null) {
             for (MappingSuggestion mappingSuggestion : mappingSuggestionList) {
@@ -56,7 +54,7 @@ public class EntityDataCollector {
                 entity.getBaseId(),
                 entity.getBaseField(),
                 mappingSuggestions,
-                mappings
+                exportMappingDto
         ));
     }
 

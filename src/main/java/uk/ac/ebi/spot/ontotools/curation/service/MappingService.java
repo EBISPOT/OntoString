@@ -12,9 +12,9 @@ public interface MappingService {
 
     Mapping createMapping(Entity entity, OntologyTerm ontologyTerm, Provenance provenance);
 
-    Map<String, List<Mapping>> retrieveMappingsForEntities(List<String> entityIds);
+    Map<String, Mapping> retrieveMappingsForEntities(List<String> entityIds);
 
-    List<Mapping> retrieveMappingsForEntity(String entityId);
+    Mapping retrieveMappingForEntity(String entityId);
 
     Mapping addReviewToMapping(String mappingId, String comment, int noReviewsRequired, Provenance provenance);
 
@@ -22,7 +22,7 @@ public interface MappingService {
 
     Mapping addCommentToMapping(String mappingId, String body, Provenance provenance);
 
-    void updateMapping(String mappingId, OntologyTerm ontologyTerm, Provenance provenance);
+    Mapping updateMapping(String mappingId, List<String> ontologyTermIds);
 
-    List<String> deleteMapping(String mappingId, String ontoTermId, Provenance provenance);
+    void deleteMapping(String mappingId);
 }

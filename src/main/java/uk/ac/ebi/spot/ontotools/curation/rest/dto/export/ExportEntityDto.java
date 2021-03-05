@@ -26,20 +26,20 @@ public final class ExportEntityDto implements Serializable {
     @JsonProperty("mappingSuggestions")
     private final List<ExportMappingSuggestionDto> mappingSuggestions;
 
-    @JsonProperty("mappings")
-    private final List<ExportMappingDto> mappings;
+    @JsonProperty("mapping")
+    private final ExportMappingDto mapping;
 
     @JsonCreator
     public ExportEntityDto(@JsonProperty("name") String name,
                            @JsonProperty("upstreamId") String upstreamId,
                            @JsonProperty("upstreamField") String upstreamField,
                            @JsonProperty("mappingSuggestions") List<ExportMappingSuggestionDto> mappingSuggestions,
-                           @JsonProperty("mappings") List<ExportMappingDto> mappings) {
+                           @JsonProperty("mapping") ExportMappingDto mapping) {
         this.name = name;
         this.upstreamId = upstreamId;
         this.upstreamField = upstreamField;
         this.mappingSuggestions = mappingSuggestions;
-        this.mappings = mappings;
+        this.mapping = mapping;
     }
 
     public String getName() {
@@ -59,7 +59,7 @@ public final class ExportEntityDto implements Serializable {
         return mappingSuggestions;
     }
 
-    public List<ExportMappingDto> getMappings() {
-        return mappings;
+    public ExportMappingDto getMapping() {
+        return mapping;
     }
 }

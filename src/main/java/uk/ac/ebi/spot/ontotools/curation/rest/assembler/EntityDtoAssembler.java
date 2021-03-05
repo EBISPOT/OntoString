@@ -8,14 +8,15 @@ import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class EntityDtoAssembler {
 
-    public static EntityDto assemble(Entity entity, SourceDto source, List<Mapping> mappings, List<MappingSuggestion> mappingSuggestions) {
-        List<MappingSuggestionDto> mappingSuggestionDtos = mappingSuggestions.stream().map(MappingSuggestionDtoAssembler::assemble).collect(Collectors.toList());
-        List<MappingDto> mappingDtos = mappings.stream().map(MappingDtoAssembler::assemble).collect(Collectors.toList());
+    public static EntityDto assemble(Entity entity, SourceDto source, Mapping mapping, List<MappingSuggestion> mappingSuggestions) {
+        List<MappingSuggestionDto> mappingSuggestionDtos = mappingSuggestions != null ? mappingSuggestions.stream().map(MappingSuggestionDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>();
+        MappingDto mappingDto = mapping != null ? MappingDtoAssembler.assemble(mapping) : null;
 
         return new EntityDto(entity.getId(),
                 source,
@@ -24,7 +25,7 @@ public class EntityDtoAssembler {
                 entity.getBaseField(),
                 entity.getMappingStatus().name(),
                 mappingSuggestionDtos,
-                mappingDtos,
+                mappingDto,
                 ProvenanceDtoAssembler.assemble(entity.getCreated()));
     }
 }

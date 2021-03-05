@@ -129,8 +129,8 @@ public class ExportExecutorServiceImpl implements ExportExecutorService {
     }
 
     private void processEntity(Entity entity, EntityDataCollector entityDataCollector) {
-        List<Mapping> mappingList = mappingService.retrieveMappingsForEntity(entity.getId());
+        Mapping mapping = mappingService.retrieveMappingForEntity(entity.getId());
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntity(entity.getId());
-        entityDataCollector.add(entity, mappingList, mappingSuggestions);
+        entityDataCollector.add(entity, mapping, mappingSuggestions);
     }
 }

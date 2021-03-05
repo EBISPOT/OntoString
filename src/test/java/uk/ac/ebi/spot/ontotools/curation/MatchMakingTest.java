@@ -8,8 +8,8 @@ import org.springframework.test.context.ContextConfiguration;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
-import uk.ac.ebi.spot.ontotools.curation.domain.*;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
+import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.config.ExternalServiceConfig;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
@@ -25,8 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @ContextConfiguration(classes = {IntegrationTest.MockTaskExecutorConfig.class})
 public class MatchMakingTest extends IntegrationTest {
@@ -112,14 +111,9 @@ public class MatchMakingTest extends IntegrationTest {
             assertTrue(ontoMap.containsKey(mappingSuggestion.getOntologyTermId()));
         }
 
-        Map<String, List<Mapping>> mappingMap = mappingService.retrieveMappingsForEntities(Arrays.asList(new String[]{entity.getId()}));
-        assertEquals(1, mappingMap.size());
-        List<Mapping> mappings = mappingMap.get(entity.getId());
-        assertEquals(1, mappings.size());
-
-        for (Mapping mapping : mappings) {
-            assertTrue(ontoMap.containsKey(mapping.getOntologyTermIds().get(0)));
-            assertEquals(MappingStatus.AWAITING_REVIEW.name(), mapping.getStatus());
-        }
+        Mapping mapping = mappingService.retrieveMappingForEntity(entity.getId());
+        assertNotNull(mapping);
+        assertTrue(ontoMap.containsKey(mapping.getOntologyTermIds().get(0)));
+        assertEquals(MappingStatus.AWAITING_REVIEW.name(), mapping.getStatus());
     }
 }

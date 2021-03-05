@@ -32,39 +32,24 @@ public class MappingServiceImpl implements MappingService {
     @Override
     public Mapping createMapping(Entity entity, OntologyTerm ontologyTerm, Provenance provenance) {
         log.info("Creating mapping for entity [{}]: {}", entity.getName(), ontologyTerm.getCurie());
-        List<Mapping> mappings = mappingRepository.findByEntityId(entity.getId());
-        for (Mapping mapping : mappings) {
-            if (mapping.getOntologyTermIds().contains(ontologyTerm.getId())) {
-                log.warn("Mapping for between entity [{}] and ontology term [{}] already exists: {}", entity.getName(), ontologyTerm.getCurie(), mapping.getId());
-                return mapping;
+        Optional<Mapping> mappingOptional = mappingRepository.findByEntityId(entity.getId());
+        if (mappingOptional.isPresent()) {
+            if (mappingOptional.get().getOntologyTermIds().contains(ontologyTerm.getId())) {
+                log.warn("Mapping for between entity [{}] and ontology term [{}] already exists: {}", entity.getName(), ontologyTerm.getCurie(), mappingOptional.get().getId());
+                return mappingOptional.get();
             }
         }
 
         Mapping created = mappingRepository.insert(new Mapping(null, entity.getId(), Arrays.asList(new String[]{ontologyTerm.getId()}), entity.getProjectId(),
                 false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
+        created.setOntologyTerms(Arrays.asList(new OntologyTerm[]{ontologyTerm}));
         log.info("Mapping for between entity [{}] and ontology term [{}] created: {}", entity.getName(), ontologyTerm.getCurie(), created.getId());
         return created;
     }
 
     @Override
-    public void updateMapping(String mappingId, OntologyTerm ontologyTerm, Provenance provenance) {
-        log.info("Updating mapping [{}]: {}", mappingId, ontologyTerm.getCurie());
-        Optional<Mapping> mappingOp = mappingRepository.findById(mappingId);
-        if (!mappingOp.isPresent()) {
-            log.error("Mapping not found: {}", mappingId);
-            throw new EntityNotFoundException("Mapping not found: " + mappingId);
-        }
-
-        /**
-         * TODO: Associate the provenance to the ontology term rather than the entire mapping !?
-         */
-        Mapping mapping = mappingOp.get();
-        mapping.getOntologyTermIds().add(ontologyTerm.getId());
-        mappingRepository.save(mapping);
-    }
-
-    @Override
-    public List<String> deleteMapping(String mappingId, String ontoTermId, Provenance provenance) {
+    public Mapping updateMapping(String mappingId, List<String> ontologyTermIds) {
+        log.info("Updating mapping [{}]: {}", mappingId, ontologyTermIds);
         Optional<Mapping> mappingOp = mappingRepository.findById(mappingId);
         if (!mappingOp.isPresent()) {
             log.error("Mapping not found: {}", mappingId);
@@ -72,21 +57,23 @@ public class MappingServiceImpl implements MappingService {
         }
 
         Mapping mapping = mappingOp.get();
-        List<String> result = new ArrayList<>();
-        if (ontoTermId != null) {
-            mapping.getOntologyTermIds().remove(ontoTermId);
-            result.add(ontoTermId);
-            mappingRepository.save(mapping);
-        } else {
-            result.addAll(mapping.getOntologyTermIds());
-            mappingRepository.delete(mapping);
-        }
-
-        return result;
+        mapping.setOntologyTermIds(ontologyTermIds);
+        return mappingRepository.save(mapping);
     }
 
     @Override
-    public Map<String, List<Mapping>> retrieveMappingsForEntities(List<String> entityIds) {
+    public void deleteMapping(String mappingId) {
+        Optional<Mapping> mappingOp = mappingRepository.findById(mappingId);
+        if (!mappingOp.isPresent()) {
+            log.error("Mapping not found: {}", mappingId);
+            throw new EntityNotFoundException("Mapping not found: " + mappingId);
+        }
+
+        mappingRepository.delete(mappingOp.get());
+    }
+
+    @Override
+    public Map<String, Mapping> retrieveMappingsForEntities(List<String> entityIds) {
         log.info("Retrieving mappings for entities: {}", entityIds);
         List<Mapping> mappings = mappingRepository.findByEntityIdIn(entityIds);
         List<String> ontologyTermIds = new ArrayList<>();
@@ -99,7 +86,7 @@ public class MappingServiceImpl implements MappingService {
         }
         Map<String, OntologyTerm> ontologyTermMap = ontologyTermService.retrieveTerms(ontologyTermIds);
         log.info("Found {} mappings.", mappings.size());
-        Map<String, List<Mapping>> result = new HashMap<>();
+        Map<String, Mapping> result = new HashMap<>();
         for (Mapping mapping : mappings) {
             List<OntologyTerm> ontologyTerms = new ArrayList<>();
             for (String oId : mapping.getOntologyTermIds()) {
@@ -110,31 +97,20 @@ public class MappingServiceImpl implements MappingService {
                     ontologyTerms.add(ontologyTermMap.get(oId));
                 }
             }
-            List<Mapping> list = result.containsKey(mapping.getEntityId()) ? result.get(mapping.getEntityId()) : new ArrayList<>();
             mapping.setOntologyTerms(ontologyTerms);
-            list.add(mapping);
-            result.put(mapping.getEntityId(), list);
+            result.put(mapping.getEntityId(), mapping);
         }
         return result;
     }
 
     @Override
-    public List<Mapping> retrieveMappingsForEntity(String entityId) {
-        log.info("Retrieving mappings for entity: {}", entityId);
-        List<Mapping> mappings = mappingRepository.findByEntityId(entityId);
-        List<String> ontologyTermIds = new ArrayList<>();
-        for (Mapping mapping : mappings) {
-            for (String oId : mapping.getOntologyTermIds()) {
-                if (!ontologyTermIds.contains(oId)) {
-                    ontologyTermIds.add(oId);
-                }
-            }
-        }
+    public Mapping retrieveMappingForEntity(String entityId) {
+        log.info("Retrieving mapping for entity: {}", entityId);
+        Optional<Mapping> mappingOptional = mappingRepository.findByEntityId(entityId);
+        if (mappingOptional.isPresent()) {
+            Mapping mapping = mappingOptional.get();
+            Map<String, OntologyTerm> ontologyTermMap = ontologyTermService.retrieveTerms(mapping.getOntologyTermIds());
 
-        Map<String, OntologyTerm> ontologyTermMap = ontologyTermService.retrieveTerms(ontologyTermIds);
-        log.info("Found {} mappings.", mappings.size());
-        List<Mapping> result = new ArrayList<>();
-        for (Mapping mapping : mappings) {
             List<OntologyTerm> ontologyTerms = new ArrayList<>();
             for (String oId : mapping.getOntologyTermIds()) {
                 if (!ontologyTermMap.containsKey(oId)) {
@@ -145,9 +121,11 @@ public class MappingServiceImpl implements MappingService {
                 }
             }
             mapping.setOntologyTerms(ontologyTerms);
-            result.add(mapping);
+            return mapping;
         }
-        return result;
+
+        log.warn("Unable to find mapping for entity: {}", entityId);
+        return null;
     }
 
 

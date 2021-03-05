@@ -12,7 +12,6 @@ import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.ProvenanceDtoAssembler;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
@@ -64,8 +63,8 @@ public class MappingReviewsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldCreateReview() throws Exception {
-        EntityDto actual = super.retrieveEntity(project.getId());
-        MappingDto mappingDto = actual.getMappings().get(0);
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = actual.get(0);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
                 CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_REVIEWS;
@@ -93,8 +92,8 @@ public class MappingReviewsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldCreateReviewedMapping() throws Exception {
-        EntityDto actual = super.retrieveEntity(project.getId());
-        MappingDto mappingDto = actual.getMappings().get(0);
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = actual.get(0);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
                 CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_REVIEWS;
@@ -120,8 +119,8 @@ public class MappingReviewsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetReviews() throws Exception {
-        EntityDto actual = super.retrieveEntity(project.getId());
-        MappingDto mappingDto = actual.getMappings().get(0);
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = actual.get(0);
         mappingService.addReviewToMapping(mappingDto.getId(), "New review", 3, ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
@@ -145,8 +144,8 @@ public class MappingReviewsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotCreateReview() throws Exception {
-        EntityDto actual = super.retrieveEntity(project.getId());
-        MappingDto mappingDto = actual.getMappings().get(0);
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = actual.get(0);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
                 CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_REVIEWS;
@@ -162,8 +161,8 @@ public class MappingReviewsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotGetReviews() throws Exception {
-        EntityDto actual = super.retrieveEntity(project.getId());
-        MappingDto mappingDto = actual.getMappings().get(0);
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = actual.get(0);
         mappingService.addReviewToMapping(mappingDto.getId(), "New review", 3, ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
@@ -179,8 +178,8 @@ public class MappingReviewsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotCreateReviewAsConsumer() throws Exception {
-        EntityDto actual = super.retrieveEntity(project.getId());
-        MappingDto mappingDto = actual.getMappings().get(0);
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = actual.get(0);
         userService.addUserToProject(super.user2, project.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
@@ -197,8 +196,8 @@ public class MappingReviewsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotGetReviewsAsConsumer() throws Exception {
-        EntityDto actual = super.retrieveEntity(project.getId());
-        MappingDto mappingDto = actual.getMappings().get(0);
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = actual.get(0);
         mappingService.addReviewToMapping(mappingDto.getId(), "New review", 3, ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
         userService.addUserToProject(super.user2, project.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
 

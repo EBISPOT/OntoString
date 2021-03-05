@@ -42,8 +42,8 @@ public final class EntityDto implements Serializable {
     @JsonProperty("mappingSuggestions")
     private final List<MappingSuggestionDto> mappingSuggestions;
 
-    @JsonProperty("mappings")
-    private final List<MappingDto> mappings;
+    @JsonProperty("mapping")
+    private final MappingDto mapping;
 
     @JsonCreator
     public EntityDto(@JsonProperty("id") String id,
@@ -53,7 +53,7 @@ public final class EntityDto implements Serializable {
                      @JsonProperty("upstreamField") String upstreamField,
                      @JsonProperty("mappingStatus") String mappingStatus,
                      @JsonProperty("mappingSuggestions") List<MappingSuggestionDto> mappingSuggestions,
-                     @JsonProperty("mappings") List<MappingDto> mappings,
+                     @JsonProperty("mapping") MappingDto mapping,
                      @JsonProperty("created") ProvenanceDto created) {
         this.id = id;
         this.source = source;
@@ -62,7 +62,7 @@ public final class EntityDto implements Serializable {
         this.upstreamField = upstreamField;
         this.mappingStatus = mappingStatus;
         this.mappingSuggestions = mappingSuggestions;
-        this.mappings = mappings;
+        this.mapping = mapping;
         this.created = created;
     }
 
@@ -90,8 +90,9 @@ public final class EntityDto implements Serializable {
         return mappingSuggestions;
     }
 
-    public List<MappingDto> getMappings() {
-        return mappings;
+
+    public MappingDto getMapping() {
+        return mapping;
     }
 
     public String getUpstreamId() {
