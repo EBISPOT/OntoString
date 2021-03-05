@@ -32,7 +32,7 @@ public class Mapping {
     private String entityId;
 
     @Indexed
-    private String ontologyTermId;
+    private List<String> ontologyTermIds;
 
     @Indexed
     private String projectId;
@@ -49,7 +49,7 @@ public class Mapping {
     private Provenance created;
 
     @Transient
-    private OntologyTerm ontologyTerm;
+    private List<OntologyTerm> ontologyTerms;
 
     public void addReview(Review review, int noReviewsRequired) {
         if (reviews == null) {

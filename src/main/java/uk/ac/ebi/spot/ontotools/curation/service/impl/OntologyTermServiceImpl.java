@@ -110,12 +110,12 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     }
 
     @Override
-    public OntologyTerm retrieveTermByIri(String iri) {
-        log.info("Retrieving ontology term: {}", iri);
-        Optional<OntologyTerm> ontologyTermOp = ontologyTermRepository.findByIriHash(DigestUtils.sha256Hex(iri));
+    public OntologyTerm retrieveTermByCurie(String curie) {
+        log.info("Retrieving ontology term: {}", curie);
+        Optional<OntologyTerm> ontologyTermOp = ontologyTermRepository.findByCurie(curie);
         if (!ontologyTermOp.isPresent()) {
-            log.error("Unable to find ontology term: {}", iri);
-            throw new EntityNotFoundException("Unable to find ontology term: " + iri);
+            log.error("Unable to find ontology term: {}", curie);
+            throw new EntityNotFoundException("Unable to find ontology term: " + curie);
         }
         return ontologyTermOp.get();
     }

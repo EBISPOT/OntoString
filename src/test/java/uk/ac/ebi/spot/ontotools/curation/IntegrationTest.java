@@ -125,6 +125,8 @@ public abstract class IntegrationTest {
 
     protected Entity entity;
 
+    protected Mapping orphaTermMapping;
+
     @Before
     public void setup() throws Exception {
         mongoTemplate.getDb().drop();
@@ -231,7 +233,8 @@ public abstract class IntegrationTest {
 
         mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), orphaTerm.getId(), projectId, provenance, null));
         mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), mondoTerm.getId(), projectId, provenance, null));
-        mappingRepository.insert(new Mapping(null, entity.getId(), orphaTerm.getId(), projectId, false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
+        orphaTermMapping = mappingRepository.insert(new Mapping(null, entity.getId(), Arrays.asList(new String[]{orphaTerm.getId()}),
+                projectId, false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
     }
 
     protected EntityDto retrieveEntity(String projectId) throws Exception {

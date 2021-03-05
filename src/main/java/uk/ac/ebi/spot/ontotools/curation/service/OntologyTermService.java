@@ -15,7 +15,7 @@ public interface OntologyTermService {
 
     List<OntologyTerm> retrieveAllTerms();
 
-    OntologyTerm retrieveTermByIri(String iri);
+    OntologyTerm retrieveTermByCurie(String curie);
 
     OntologyTerm retrieveTermById(String ontologyTermId);
 }

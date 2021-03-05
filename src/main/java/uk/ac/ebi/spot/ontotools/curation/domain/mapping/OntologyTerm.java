@@ -18,6 +18,7 @@ public class OntologyTerm {
     @Id
     private String id;
 
+    @Indexed
     private String curie;
 
     private String iri;
@@ -32,7 +33,7 @@ public class OntologyTerm {
     private String description;
 
     private String crossRefs;
-
+  
     @Override
     public String toString() {
         return curie + " (" + label + ")";

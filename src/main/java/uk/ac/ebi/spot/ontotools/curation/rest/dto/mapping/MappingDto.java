@@ -25,8 +25,8 @@ public final class MappingDto implements Serializable {
     private final String entityId;
 
     @NotNull
-    @JsonProperty("ontologyTerm")
-    private final OntologyTermDto ontologyTerm;
+    @JsonProperty("ontologyTerms")
+    private final List<OntologyTermDto> ontologyTerms;
 
     @JsonProperty("reviewed")
     private final boolean reviewed;
@@ -47,7 +47,7 @@ public final class MappingDto implements Serializable {
     @JsonCreator
     public MappingDto(@JsonProperty("id") String id,
                       @JsonProperty("entityId") String entityId,
-                      @JsonProperty("ontologyTerm") OntologyTermDto ontologyTerm,
+                      @JsonProperty("ontologyTerms") List<OntologyTermDto> ontologyTerms,
                       @JsonProperty("reviewed") boolean reviewed,
                       @JsonProperty("status") String status,
                       @JsonProperty("reviews") List<ReviewDto> reviews,
@@ -55,7 +55,7 @@ public final class MappingDto implements Serializable {
                       @JsonProperty("created") ProvenanceDto created) {
         this.id = id;
         this.entityId = entityId;
-        this.ontologyTerm = ontologyTerm;
+        this.ontologyTerms = ontologyTerms;
         this.reviewed = reviewed;
         this.status = status;
         this.reviews = reviews;
@@ -67,8 +67,8 @@ public final class MappingDto implements Serializable {
         return id;
     }
 
-    public OntologyTermDto getOntologyTerm() {
-        return ontologyTerm;
+    public List<OntologyTermDto> getOntologyTerms() {
+        return ontologyTerms;
     }
 
     public String getEntityId() {

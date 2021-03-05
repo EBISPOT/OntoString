@@ -118,7 +118,7 @@ public class MatchMakingTest extends IntegrationTest {
         assertEquals(1, mappings.size());
 
         for (Mapping mapping : mappings) {
-            assertTrue(ontoMap.containsKey(mapping.getOntologyTermId()));
+            assertTrue(ontoMap.containsKey(mapping.getOntologyTermIds().get(0)));
             assertEquals(MappingStatus.AWAITING_REVIEW.name(), mapping.getStatus());
         }
     }
