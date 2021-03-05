@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
+import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectMappingConfigDto;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
@@ -53,6 +54,27 @@ public class ProjectsControllerTest extends IntegrationTest {
     }
 
     /**
+     * GET /v1/projects
+     */
+    @Test
+    public void shouldNotGetProjects() throws Exception {
+        super.createProject("New Project 1", "token1", null, null, null, 0);
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS;
+        String response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        List<ProjectDto> projectList = mapper.readValue(response, new TypeReference<List<ProjectDto>>() {
+        });
+        assertEquals(0, projectList.size());
+    }
+
+    /**
      * GET /v1/projects/{projectId}
      */
     @Test
@@ -71,6 +93,19 @@ public class ProjectsControllerTest extends IntegrationTest {
         });
         assertEquals(projectDto.getName(), actual.getName());
         assertEquals(projectDto.getDescription(), actual.getDescription());
+    }
+
+    /**
+     * GET /v1/projects/{projectId}
+     */
+    @Test
+    public void shouldNotGetProject() throws Exception {
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null, 0);
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();
+        mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
     }
 
     /**
@@ -126,7 +161,32 @@ public class ProjectsControllerTest extends IntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(updatedProject))
                 .header(IDPConstants.JWT_TOKEN, "token2"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * PUT /v1/projects/{projectId}
+     */
+    @Test
+    public void shouldNotUpdateProjectAsConsumer() throws Exception {
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null, 0);
+        ProjectDto updatedProject = new ProjectDto(projectDto.getId(),
+                "New Name",
+                projectDto.getDescription(),
+                Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"gwas"}))}),
+                Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"ordo"}))}),
+                projectDto.getPreferredMappingOntologies(),
+                0,
+                projectDto.getCreated());
+
+        userService.addUserToProject(super.user2, projectDto.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();
+        mockMvc.perform(put(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(updatedProject))
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
     }
 
     /**
@@ -143,6 +203,32 @@ public class ProjectsControllerTest extends IntegrationTest {
         mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * DELETE /v1/projects/{projectId}
+     */
+    @Test
+    public void shouldNotDeleteProject() throws Exception {
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null, 0);
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();
+        mockMvc.perform(delete(endpoint)
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * DELETE /v1/projects/{projectId}
+     */
+    @Test
+    public void shouldNotDeleteProjectAsConsumer() throws Exception {
+        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null, 0);
+        userService.addUserToProject(super.user2, projectDto.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();
+        mockMvc.perform(delete(endpoint)
+                .header(IDPConstants.JWT_TOKEN, "token2"))
                 .andExpect(status().isNotFound());
     }
 }

@@ -83,7 +83,7 @@ public class OntologyTermServiceImpl implements OntologyTermService {
                         DigestUtils.sha256Hex(iri), olsTermDto.getLabel(), TermStatus.CURRENT.name(), null, null);
             } else {
                 OLSTermDto olsTermDto = parentOntoResponse.get(0);
-                ot = new OntologyTerm(null, olsTermDto.getCurie(), iri, DigestUtils.sha256Hex(iri), olsTermDto.getLabel(), termStatus, null, null);
+                ot = new OntologyTerm(null, olsTermDto.getCurie(), olsTermDto.getIri(), DigestUtils.sha256Hex(olsTermDto.getIri()), olsTermDto.getLabel(), termStatus, null, null);
             }
         }
 

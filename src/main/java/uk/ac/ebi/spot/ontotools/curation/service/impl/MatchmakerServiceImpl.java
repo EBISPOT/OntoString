@@ -12,13 +12,14 @@ import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.oxo.OXOMappingResponseDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.zooma.ZoomaResponseDto;
 import uk.ac.ebi.spot.ontotools.curation.service.*;
 import uk.ac.ebi.spot.ontotools.curation.util.CurationUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants.ZOOMA_CONFIDENCE_HIGH;
@@ -42,12 +43,6 @@ public class MatchmakerServiceImpl implements MatchmakerService {
 
     @Autowired
     private OntologyTermService ontologyTermService;
-
-    @Autowired
-    private OLSService olsService;
-
-    @Autowired
-    private OXOService oxoService;
 
     @Autowired
     private UserService userService;
@@ -118,81 +113,33 @@ public class MatchmakerServiceImpl implements MatchmakerService {
             if (ontologyTerm != null) {
                 termsCreated.add(ontologyTerm);
                 mappingSuggestionsService.createMappingSuggestion(entity, ontologyTerm, provenance);
+
+                if (highConfidenceIRIs.contains(ontologyTerm.getIri())) {
+                    if (entity.getMappingStatus().equals(EntityStatus.UNMAPPED) || entity.getMappingStatus().equals(EntityStatus.SUGGESTIONS_PROVIDED)) {
+                        mappingService.createMapping(entity, ontologyTerm, provenance);
+                        entity = entityService.updateMappingStatus(entity, EntityStatus.AUTO_MAPPED);
+                        log.info("Found high confidence mapping for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
+                    }
+                } else {
+                    if (entity.getName().equalsIgnoreCase(ontologyTerm.getLabel()) &&
+                            (entity.getMappingStatus().equals(EntityStatus.UNMAPPED) || entity.getMappingStatus().equals(EntityStatus.SUGGESTIONS_PROVIDED))) {
+                        mappingService.createMapping(entity, ontologyTerm, provenance);
+                        entity = entityService.updateMappingStatus(entity, EntityStatus.AUTO_MAPPED);
+                        log.info("Found exact text matching for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
+                    }
+                }
             }
         }
 
-        if (!termsCreated.isEmpty()) {
+        if (!termsCreated.isEmpty() && entity.getMappingStatus().equals(EntityStatus.UNMAPPED)) {
             entity = entityService.updateMappingStatus(entity, EntityStatus.SUGGESTIONS_PROVIDED);
             if (entity == null) {
                 return;
             }
         }
 
-        List<OntologyTerm> newTerms = findExactMapping(entity, termsCreated, highConfidenceIRIs, project, provenance);
-        if (!newTerms.isEmpty() && termsCreated.isEmpty()) {
-            entity = entityService.updateMappingStatus(entity, EntityStatus.SUGGESTIONS_PROVIDED);
-        }
-        termsCreated.addAll(newTerms);
+        log.info(" -- Final IRIs and terms created: {}", finalIRIs, termsCreated);
         mappingSuggestionsService.deleteMappingSuggestionsExcluding(entity, termsCreated);
-    }
-
-    private List<OntologyTerm> findExactMapping(Entity entity, List<OntologyTerm> termsCreated, List<String> highConfidenceIRIs, Project project, Provenance provenance) {
-        List<OntologyTerm> ontoSuggestions = new ArrayList<>();
-
-        if (!entity.getMappingStatus().equals(EntityStatus.UNMAPPED)) {
-            log.warn("Entity has an existing mapping.");
-        }
-
-        for (OntologyTerm ontologyTerm : termsCreated) {
-            if (highConfidenceIRIs.contains(ontologyTerm.getIri())) {
-                mappingService.createMapping(entity, ontologyTerm, provenance);
-                entity = entityService.updateMappingStatus(entity, EntityStatus.AUTO_MAPPED);
-                log.info("Found high confidence mapping for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
-                return ontoSuggestions;
-            }
-        }
-
-        for (OntologyTerm ontologyTerm : termsCreated) {
-            if (entity.getName().equalsIgnoreCase(ontologyTerm.getLabel())) {
-                mappingService.createMapping(entity, ontologyTerm, provenance);
-                entity = entityService.updateMappingStatus(entity, EntityStatus.AUTO_MAPPED);
-                log.info("Found exact text matching for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
-                return ontoSuggestions;
-            }
-        }
-
-        for (String iri : highConfidenceIRIs) {
-            String ontoId = CurationUtil.ontoFromIRI(iri);
-            List<OLSTermDto> olsTerms = olsService.retrieveTerms(ontoId, iri);
-            if (olsTerms.isEmpty()) {
-                log.warn("Found no OLS results. Cannot continue mapping for: {}", entity.getName());
-                continue;
-            }
-            if (olsTerms.size() > 1) {
-                log.warn("Found {} OLS results. Using only the first one to map to: {}", olsTerms.size(), entity.getName());
-            }
-
-            /**
-             * TODO: Discuss why are so many calls to OLS required
-             */
-            List<OXOMappingResponseDto> oxoMappings = oxoService.findMapping(Arrays.asList(new String[]{olsTerms.get(0).getCurie()}),
-                    CurationUtil.configForField(entity, project.getOntologies()));
-            for (OXOMappingResponseDto oxoMappingResponseDto : oxoMappings) {
-                String targetOntoId = oxoMappingResponseDto.getTargetPrefix().toLowerCase();
-                olsTerms = olsService.retrieveTerms(targetOntoId, oxoMappingResponseDto.getCurie());
-                if (olsTerms.isEmpty()) {
-                    continue;
-                }
-                String resultIri = olsTerms.get(0).getIri();
-                OntologyTerm ontologyTerm = ontologyTermService.createTerm(resultIri, project);
-                if (ontologyTerm != null) {
-                    ontoSuggestions.add(ontologyTerm);
-                    mappingSuggestionsService.createMappingSuggestion(entity, ontologyTerm, provenance);
-                }
-            }
-        }
-
-        return ontoSuggestions;
     }
 
 }

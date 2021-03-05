@@ -34,7 +34,7 @@ public class ZoomaServiceImpl implements ZoomaService {
     private RestTemplate restTemplate;
 
     public List<ZoomaResponseDto> annotate(String entityValue, List<String> datasources, List<String> ontologies) {
-        log.info("Calling Zooma for entity value: {}", entityValue);
+        log.info("Calling Zooma for entity value: {} | {} | {}", entityValue, datasources, ontologies);
         String encodedString;
         try {
             encodedString = URLEncoder.encode(entityValue, StandardCharsets.UTF_8.toString());
