@@ -10,7 +10,6 @@ import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.ProvenanceDtoAssembler;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.CommentDto;
@@ -62,8 +61,8 @@ public class MappingCommentsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldCreateComment() throws Exception {
-        EntityDto actual = super.retrieveEntity(project.getId());
-        MappingDto mappingDto = actual.getMappings().get(0);
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = actual.get(0);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
                 CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_COMMENTS;
@@ -89,8 +88,8 @@ public class MappingCommentsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetComments() throws Exception {
-        EntityDto actual = super.retrieveEntity(project.getId());
-        MappingDto mappingDto = actual.getMappings().get(0);
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = actual.get(0);
         mappingService.addCommentToMapping(mappingDto.getId(), "New comment", ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
@@ -114,8 +113,8 @@ public class MappingCommentsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotCreateComment() throws Exception {
-        EntityDto actual = super.retrieveEntity(project.getId());
-        MappingDto mappingDto = actual.getMappings().get(0);
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = actual.get(0);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
                 CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_COMMENTS;
@@ -131,8 +130,8 @@ public class MappingCommentsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotGetComments() throws Exception {
-        EntityDto actual = super.retrieveEntity(project.getId());
-        MappingDto mappingDto = actual.getMappings().get(0);
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = actual.get(0);
         mappingService.addCommentToMapping(mappingDto.getId(), "New comment", ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +

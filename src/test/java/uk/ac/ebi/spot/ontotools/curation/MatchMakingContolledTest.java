@@ -24,8 +24,7 @@ import uk.ac.ebi.spot.ontotools.curation.util.CurationUtil;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -142,10 +141,8 @@ public class MatchMakingContolledTest extends IntegrationTest {
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionMap.get(entity.getId());
         assertEquals(2, mappingSuggestions.size());
 
-        Map<String, List<Mapping>> mappingMap = mappingService.retrieveMappingsForEntities(Arrays.asList(new String[]{entity.getId()}));
-        assertEquals(1, mappingMap.size());
-        List<Mapping> mappings = mappingMap.get(entity.getId());
-        assertEquals(1, mappings.size());
+        Mapping mapping = mappingService.retrieveMappingForEntity(entity.getId());
+        assertNotNull(mapping);
     }
 
     /**
@@ -191,8 +188,8 @@ public class MatchMakingContolledTest extends IntegrationTest {
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionMap.get(entity.getId());
         assertEquals(2, mappingSuggestions.size());
 
-        Map<String, List<Mapping>> mappingMap = mappingService.retrieveMappingsForEntities(Arrays.asList(new String[]{entity.getId()}));
-        assertEquals(0, mappingMap.size());
+        Mapping mapping = mappingService.retrieveMappingForEntity(entity.getId());
+        assertNull(mapping);
     }
 
     /**
@@ -240,8 +237,8 @@ public class MatchMakingContolledTest extends IntegrationTest {
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionMap.get(entity.getId());
         assertEquals(1, mappingSuggestions.size());
 
-        Map<String, List<Mapping>> mappingMap = mappingService.retrieveMappingsForEntities(Arrays.asList(new String[]{entity.getId()}));
-        assertEquals(0, mappingMap.size());
+        Mapping mapping = mappingService.retrieveMappingForEntity(entity.getId());
+        assertNull(mapping);
     }
 
     /**
@@ -286,10 +283,8 @@ public class MatchMakingContolledTest extends IntegrationTest {
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionMap.get(entity.getId());
         assertEquals(2, mappingSuggestions.size());
 
-        Map<String, List<Mapping>> mappingMap = mappingService.retrieveMappingsForEntities(Arrays.asList(new String[]{entity.getId()}));
-        assertEquals(1, mappingMap.size());
-        List<Mapping> mappings = mappingMap.get(entity.getId());
-        assertEquals(1, mappings.size());
+        Mapping mapping = mappingService.retrieveMappingForEntity(entity.getId());
+        assertNotNull(mapping);
     }
 
     /**
@@ -334,7 +329,7 @@ public class MatchMakingContolledTest extends IntegrationTest {
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionMap.get(entity.getId());
         assertEquals(2, mappingSuggestions.size());
 
-        Map<String, List<Mapping>> mappingMap = mappingService.retrieveMappingsForEntities(Arrays.asList(new String[]{entity.getId()}));
-        assertEquals(0, mappingMap.size());
+        Mapping mapping = mappingService.retrieveMappingForEntity(entity.getId());
+        assertNull(mapping);
     }
 }

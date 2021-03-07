@@ -7,6 +7,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import uk.ac.ebi.spot.ontotools.curation.constants.*;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
+import uk.ac.ebi.spot.ontotools.curation.rest.assembler.OntologyTermDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
@@ -18,6 +20,7 @@ import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -56,27 +59,10 @@ public class MappingsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetMappings() throws Exception {
-        EntityDto actual = super.retrieveEntity(project.getId());
-        assertEquals("Achondroplasia", actual.getName());
-        assertEquals(EntityStatus.AUTO_MAPPED.name(), actual.getMappingStatus());
-
-        assertEquals(1, actual.getMappings().size());
-        assertEquals("Orphanet:15", actual.getMappings().get(0).getOntologyTerms().get(0).getCurie());
-        assertEquals(MappingStatus.AWAITING_REVIEW.name(), actual.getMappings().get(0).getStatus());
-
-        assertEquals(2, actual.getMappingSuggestions().size());
-        int foundCuries = 0;
-        for (MappingSuggestionDto mappingSuggestion : actual.getMappingSuggestions()) {
-            if (mappingSuggestion.getOntologyTerm().getCurie().equalsIgnoreCase("Orphanet:15")) {
-                foundCuries++;
-            }
-            if (mappingSuggestion.getOntologyTerm().getCurie().equalsIgnoreCase("MONDO:0007037")) {
-                foundCuries++;
-            }
-        }
-
-        assertEquals(2, foundCuries);
-        assertEquals(sourceDto.getId(), actual.getSource().getId());
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        assertEquals(1, actual.size());
+        assertEquals("Orphanet:15", actual.get(0).getOntologyTerms().get(0).getCurie());
+        assertEquals(MappingStatus.AWAITING_REVIEW.name(), actual.get(0).getStatus());
     }
 
     /**
@@ -84,16 +70,10 @@ public class MappingsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldCreateMapping() throws Exception {
-        EntityDto entityDto = super.retrieveEntity(project.getId());
-        OntologyTermDto ontologyTermDto = null;
-        for (MappingSuggestionDto mappingSuggestionDto : entityDto.getMappingSuggestions()) {
-            if (mappingSuggestionDto.getOntologyTerm().getCurie().equalsIgnoreCase("MONDO:0007037")) {
-                ontologyTermDto = mappingSuggestionDto.getOntologyTerm();
-                break;
-            }
-        }
-        assertNotNull(ontologyTermDto);
-        MappingCreationDto mappingCreationDto = new MappingCreationDto(entityDto.getId(), ontologyTermDto);
+        OntologyTerm ontologyTerm = ontologyTermRepository.findByCurie("MONDO:0007037").get();
+        OntologyTermDto ontologyTermDto = OntologyTermDtoAssembler.assemble(ontologyTerm);
+        MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(), ontologyTermDto);
+        mappingRepository.deleteAll();
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
         String response = mockMvc.perform(post(endpoint)
@@ -105,32 +85,37 @@ public class MappingsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        EntityDto actual = mapper.readValue(response, new TypeReference<EntityDto>() {
+        MappingDto actual = mapper.readValue(response, new TypeReference<MappingDto>() {
         });
 
-        assertEquals("Achondroplasia", actual.getName());
-        assertEquals(EntityStatus.MANUALLY_MAPPED.name(), actual.getMappingStatus());
+        assertEquals(1, actual.getOntologyTerms().size());
+        assertEquals("Achondroplasia", actual.getOntologyTerms().get(0).getLabel());
+        assertEquals("MONDO:0007037", actual.getOntologyTerms().get(0).getCurie());
 
-        assertEquals(2, actual.getMappings().size());
-        int foundCuries = 0;
-        for (MappingDto mappingDto : actual.getMappings()) {
-            if (mappingDto.getOntologyTerms().get(0).getCurie().equalsIgnoreCase("Orphanet:15")) {
-                foundCuries++;
-            }
-            if (mappingDto.getOntologyTerms().get(0).getCurie().equalsIgnoreCase("MONDO:0007037")) {
-                foundCuries++;
-            }
-        }
+        endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_ENTITIES + "/" + entity.getId();
+        response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        assertEquals(2, foundCuries);
-        for (MappingDto mappingDto : actual.getMappings()) {
-            assertEquals(MappingStatus.AWAITING_REVIEW.name(), mappingDto.getStatus());
-        }
+        EntityDto actualEntity = mapper.readValue(response, new TypeReference<EntityDto>() {
+        });
 
-        assertEquals(1, actual.getMappingSuggestions().size());
-        assertEquals("Orphanet:15", actual.getMappingSuggestions().get(0).getOntologyTerm().getCurie());
+        assertEquals(EntityStatus.MANUALLY_MAPPED.name(), actualEntity.getMappingStatus());
 
-        assertEquals(sourceDto.getId(), actual.getSource().getId());
+        assertNotNull(actualEntity.getMapping());
+        assertEquals(1, actualEntity.getMapping().getOntologyTerms().size());
+        assertEquals("Achondroplasia", actualEntity.getMapping().getOntologyTerms().get(0).getLabel());
+        assertEquals("MONDO:0007037", actualEntity.getMapping().getOntologyTerms().get(0).getCurie());
+
+        assertEquals(1, actualEntity.getMappingSuggestions().size());
+        assertEquals("Orphanet:15", actualEntity.getMappingSuggestions().get(0).getOntologyTerm().getCurie());
+
+        assertEquals(sourceDto.getId(), actualEntity.getSource().getId());
     }
 
     /**
@@ -138,106 +123,91 @@ public class MappingsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldUpdateMapping() throws Exception {
-        EntityDto entityDto = super.retrieveEntity(project.getId());
-        OntologyTermDto ontologyTermDto = null;
-        for (MappingSuggestionDto mappingSuggestionDto : entityDto.getMappingSuggestions()) {
-            if (mappingSuggestionDto.getOntologyTerm().getCurie().equalsIgnoreCase("MONDO:0007037")) {
-                ontologyTermDto = mappingSuggestionDto.getOntologyTerm();
-                break;
-            }
-        }
-        assertNotNull(ontologyTermDto);
-        MappingCreationDto mappingCreationDto = new MappingCreationDto(entityDto.getId(), ontologyTermDto);
+        List<MappingDto> mappingDtos = super.retrieveMapping(project.getId());
+        List<OntologyTermDto> ontologyTermDtos = new ArrayList<>();
+        ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("MONDO:0007037").get()));
+        ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("Orphanet:15").get()));
 
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + orphaTermMapping.getId();
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + mappingDtos.get(0).getId();
         String response = mockMvc.perform(put(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(mappingCreationDto))
+                .content(mapper.writeValueAsString(ontologyTermDtos))
                 .header(IDPConstants.JWT_TOKEN, "token1"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        EntityDto actual = mapper.readValue(response, new TypeReference<EntityDto>() {
+        MappingDto actual = mapper.readValue(response, new TypeReference<MappingDto>() {
         });
-
-        assertEquals("Achondroplasia", actual.getName());
-        assertEquals(EntityStatus.MANUALLY_MAPPED.name(), actual.getMappingStatus());
-
-        assertEquals(1, actual.getMappings().size());
-        int foundCuries = 0;
-        for (OntologyTermDto ontologyTerm : actual.getMappings().get(0).getOntologyTerms()) {
-            if (ontologyTerm.getCurie().equalsIgnoreCase("Orphanet:15")) {
-                foundCuries++;
-            }
-            if (ontologyTerm.getCurie().equalsIgnoreCase("MONDO:0007037")) {
-                foundCuries++;
-            }
+        assertEquals(2, actual.getOntologyTerms().size());
+        List<String> curies = new ArrayList<>();
+        for (OntologyTermDto ontologyTermDto : actual.getOntologyTerms()) {
+            curies.add(ontologyTermDto.getCurie());
         }
 
-        assertEquals(2, foundCuries);
-        assertEquals(1, actual.getMappingSuggestions().size());
-        assertEquals("Orphanet:15", actual.getMappingSuggestions().get(0).getOntologyTerm().getCurie());
+        assertTrue(curies.contains("Orphanet:15"));
+        assertTrue(curies.contains("MONDO:0007037"));
+
+        endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_ENTITIES + "/" + entity.getId();
+        response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        EntityDto actualEntity = mapper.readValue(response, new TypeReference<EntityDto>() {
+        });
+
+        assertEquals(EntityStatus.MANUALLY_MAPPED.name(), actualEntity.getMappingStatus());
+
+        assertNotNull(actualEntity.getMapping());
+        assertEquals(2, actualEntity.getMapping().getOntologyTerms().size());
+
+        assertEquals(0, actualEntity.getMappingSuggestions().size());
     }
 
     /**
-     * DELETE /v1/projects/{projectId}/mappings/{mappingId}?curie=<CURIE>
+     * DELETE /v1/projects/{projectId}/mappings/{mappingId}
      */
     @Test
-    public void shouldDeleteMappingByCurie() throws Exception {
-        EntityDto entityDto = super.retrieveEntity(project.getId());
-        OntologyTermDto ontologyTermDto = null;
-        for (MappingSuggestionDto mappingSuggestionDto : entityDto.getMappingSuggestions()) {
-            if (mappingSuggestionDto.getOntologyTerm().getCurie().equalsIgnoreCase("MONDO:0007037")) {
-                ontologyTermDto = mappingSuggestionDto.getOntologyTerm();
-                break;
-            }
-        }
-        assertNotNull(ontologyTermDto);
-        MappingCreationDto mappingCreationDto = new MappingCreationDto(entityDto.getId(), ontologyTermDto);
+    public void shouldDeleteMapping() throws Exception {
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
 
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + orphaTermMapping.getId();
-        String response = mockMvc.perform(put(endpoint)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(mappingCreationDto))
-                .header(IDPConstants.JWT_TOKEN, "token1"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        EntityDto actual = mapper.readValue(response, new TypeReference<EntityDto>() {
-        });
-
-        assertEquals(1, actual.getMappings().size());
-        int foundCuries = 0;
-        for (OntologyTermDto ontologyTerm : actual.getMappings().get(0).getOntologyTerms()) {
-            if (ontologyTerm.getCurie().equalsIgnoreCase("Orphanet:15")) {
-                foundCuries++;
-            }
-            if (ontologyTerm.getCurie().equalsIgnoreCase("MONDO:0007037")) {
-                foundCuries++;
-            }
-        }
-
-        assertEquals(2, foundCuries);
-        assertEquals(1, actual.getMappingSuggestions().size());
-        assertEquals("Orphanet:15", actual.getMappingSuggestions().get(0).getOntologyTerm().getCurie());
-
-        endpoint += "?curie=MONDO:0007037";
-
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + actual.get(0).getId();
         mockMvc.perform(delete(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token1"))
                 .andExpect(status().isOk());
 
-        entityDto = super.retrieveEntity(project.getId());
-        assertEquals(1, entityDto.getMappings().size());
-        assertEquals(1, entityDto.getMappings().get(0).getOntologyTerms().size());
-        assertEquals("Orphanet:15", entityDto.getMappings().get(0).getOntologyTerms().get(0).getCurie());
+        endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_ENTITIES + "/" + entity.getId();
+        String response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        assertEquals(2, entityDto.getMappingSuggestions().size());
+        EntityDto actualEntity = mapper.readValue(response, new TypeReference<EntityDto>() {
+        });
+
+        assertEquals(EntityStatus.SUGGESTIONS_PROVIDED.name(), actualEntity.getMappingStatus());
+
+        assertNull(actualEntity.getMapping());
+
+        assertEquals(2, actualEntity.getMappingSuggestions().size());
+        List<String> curies = new ArrayList<>();
+        for (MappingSuggestionDto mappingSuggestionDto : actualEntity.getMappingSuggestions()) {
+            curies.add(mappingSuggestionDto.getOntologyTerm().getCurie());
+        }
+
+        assertTrue(curies.contains("Orphanet:15"));
+        assertTrue(curies.contains("MONDO:0007037"));
     }
 
     /**
@@ -245,17 +215,8 @@ public class MappingsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotCreateMapping() throws Exception {
-        EntityDto entityDto = super.retrieveEntity(project.getId());
-        OntologyTermDto ontologyTermDto = null;
-        for (MappingSuggestionDto mappingSuggestionDto : entityDto.getMappingSuggestions()) {
-            if (mappingSuggestionDto.getOntologyTerm().getCurie().equalsIgnoreCase("MONDO:0007037")) {
-                ontologyTermDto = mappingSuggestionDto.getOntologyTerm();
-                break;
-            }
-        }
-        assertNotNull(ontologyTermDto);
-        MappingCreationDto mappingCreationDto = new MappingCreationDto(entityDto.getId(), ontologyTermDto);
-
+        MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(),
+                new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037", "Achondroplasia", TermStatus.NEEDS_IMPORT.name(), null, null));
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
         mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -269,22 +230,44 @@ public class MappingsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotCreateMappingAsConsumer() throws Exception {
-        EntityDto entityDto = super.retrieveEntity(project.getId());
-        OntologyTermDto ontologyTermDto = null;
-        for (MappingSuggestionDto mappingSuggestionDto : entityDto.getMappingSuggestions()) {
-            if (mappingSuggestionDto.getOntologyTerm().getCurie().equalsIgnoreCase("MONDO:0007037")) {
-                ontologyTermDto = mappingSuggestionDto.getOntologyTerm();
-                break;
-            }
-        }
-        assertNotNull(ontologyTermDto);
-        MappingCreationDto mappingCreationDto = new MappingCreationDto(entityDto.getId(), ontologyTermDto);
+        MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(),
+                new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037", "Achondroplasia", TermStatus.NEEDS_IMPORT.name(), null, null));
         userService.addUserToProject(super.user2, project.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
         mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(mappingCreationDto))
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * DELETE /v1/projects/{projectId}/mappings/{mappingId}
+     */
+    @Test
+    public void shouldNotDeleteMapping() throws Exception {
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = actual.get(0);
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + mappingDto.getId();
+        mockMvc.perform(delete(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token2"))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * DELETE /v1/projects/{projectId}/mappings/{mappingId}
+     */
+    @Test
+    public void shouldNotDeleteMappingAsConsumer() throws Exception {
+        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = actual.get(0);
+        userService.addUserToProject(super.user2, project.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + mappingDto.getId();
+        mockMvc.perform(delete(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token2"))
                 .andExpect(status().isNotFound());
     }

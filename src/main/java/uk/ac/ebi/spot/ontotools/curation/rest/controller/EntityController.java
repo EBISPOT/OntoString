@@ -71,7 +71,7 @@ public class EntityController {
 
         Page<Entity> entities = entityService.retrieveEntitiesForProject(projectId, pageable);
         List<String> entityIds = entities.get().map(Entity::getId).collect(Collectors.toList());
-        Map<String, List<Mapping>> mappings = mappingService.retrieveMappingsForEntities(entityIds);
+        Map<String, Mapping> mappings = mappingService.retrieveMappingsForEntities(entityIds);
         Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(entityIds);
         List<EntityDto> entityDtos = new ArrayList<>();
         for (Entity entity : entities.getContent()) {
@@ -92,8 +92,8 @@ public class EntityController {
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
         Entity entity = entityService.retrieveEntity(entityId);
         Source source = sourceService.getSource(entity.getSourceId(), projectId);
-        Map<String, List<Mapping>> mappings = mappingService.retrieveMappingsForEntities(Arrays.asList(new String[]{entityId}));
+        Mapping mapping = mappingService.retrieveMappingForEntity(entityId);
         Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entityId}));
-        return EntityDtoAssembler.assemble(entity, SourceDtoAssembler.assemble(source), mappings.get(entityId), mappingSuggestions.get(entityId));
+        return EntityDtoAssembler.assemble(entity, SourceDtoAssembler.assemble(source), mapping, mappingSuggestions.get(entityId));
     }
 }
