@@ -139,7 +139,7 @@ public class MatchmakerServiceImpl implements MatchmakerService {
         }
 
         log.info(" -- Final IRIs and terms created: {}", finalIRIs, termsCreated);
-        mappingSuggestionsService.deleteMappingSuggestionsExcluding(entity, termsCreated);
+        mappingSuggestionsService.deleteMappingSuggestionsExcluding(entity, termsCreated, provenance);
     }
 
 }

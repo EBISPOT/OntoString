@@ -12,11 +12,11 @@ public interface MappingSuggestionsService {
 
     MappingSuggestion createMappingSuggestion(Entity entity, OntologyTerm ontologyTerm, Provenance provenance);
 
-    void deleteMappingSuggestionsExcluding(Entity entity, List<OntologyTerm> ontologyTerms);
+    void deleteMappingSuggestionsExcluding(Entity entity, List<OntologyTerm> ontologyTerms, Provenance provenance);
 
     Map<String, List<MappingSuggestion>> retrieveMappingSuggestionsForEntities(List<String> entityIds);
 
     List<MappingSuggestion> retrieveMappingSuggestionsForEntity(String entityId);
 
-    void deleteMappingSuggestions(String entityId, String ontologyTermId);
+    void deleteMappingSuggestions(String entityId, OntologyTerm ontologyTerm, Provenance provenance);
 }

@@ -53,6 +53,9 @@ public class EntityController {
     @Autowired
     private MappingService mappingService;
 
+    @Autowired
+    private AuditEntryService auditEntryService;
+
     /**
      * GET /v1/projects/{projectId}/entities
      */
@@ -75,7 +78,10 @@ public class EntityController {
         Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(entityIds);
         List<EntityDto> entityDtos = new ArrayList<>();
         for (Entity entity : entities.getContent()) {
-            entityDtos.add(EntityDtoAssembler.assemble(entity, sourceMap.get(entity.getSourceId()), mappings.get(entity.getId()), mappingSuggestions.get(entity.getId())));
+            entityDtos.add(EntityDtoAssembler.assemble(entity, sourceMap.get(entity.getSourceId()),
+                    mappings.get(entity.getId()),
+                    mappingSuggestions.get(entity.getId()),
+                    auditEntryService.retrieveAuditEntries(entity.getId())));
         }
         return new RestResponsePage<>(entityDtos, pageable, entities.getTotalElements());
     }
@@ -94,6 +100,8 @@ public class EntityController {
         Source source = sourceService.getSource(entity.getSourceId(), projectId);
         Mapping mapping = mappingService.retrieveMappingForEntity(entityId);
         Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entityId}));
-        return EntityDtoAssembler.assemble(entity, SourceDtoAssembler.assemble(source), mapping, mappingSuggestions.get(entityId));
+        return EntityDtoAssembler.assemble(entity, SourceDtoAssembler.assemble(source),
+                mapping, mappingSuggestions.get(entityId),
+                auditEntryService.retrieveAuditEntries(entity.getId()));
     }
 }
