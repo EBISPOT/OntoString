@@ -187,7 +187,7 @@ public class MappingsController {
         for (String ontoTermId : ontoTermIds) {
             OntologyTerm ontologyTerm = ontologyTermService.retrieveTermById(ontoTermId);
             ontologyTermMap.put(ontoTermId, ontologyTerm);
-            metadata.put(ontologyTerm.getCurie(), ontologyTerm.getLabel());
+            metadata.put(ontologyTerm.getIri(), ontologyTerm.getLabel());
         }
 
         /**
