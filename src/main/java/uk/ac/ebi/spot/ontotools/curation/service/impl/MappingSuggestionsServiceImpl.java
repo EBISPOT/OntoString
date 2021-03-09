@@ -5,11 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.spot.ontotools.curation.constants.AuditEntryConstants;
+import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
-import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.repository.MappingSuggestionRepository;
+import uk.ac.ebi.spot.ontotools.curation.service.AuditEntryService;
 import uk.ac.ebi.spot.ontotools.curation.service.MappingSuggestionsService;
 import uk.ac.ebi.spot.ontotools.curation.service.OntologyTermService;
 
@@ -27,6 +29,9 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
     @Autowired
     private OntologyTermService ontologyTermService;
 
+    @Autowired
+    private AuditEntryService auditEntryService;
+
     @Override
     public MappingSuggestion createMappingSuggestion(Entity entity, OntologyTerm ontologyTerm, Provenance provenance) {
         log.info("Creating mapping suggestion for entity [{}]: {}", entity.getName(), ontologyTerm.getCurie());
@@ -37,18 +42,26 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
         }
 
         MappingSuggestion created = mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), ontologyTerm.getId(), entity.getProjectId(), provenance, null));
+        auditEntryService.addEntry(AuditEntryConstants.ADDED_SUGGESTION.name(), entity.getId(), provenance, Map.of(ontologyTerm.getIri(), ontologyTerm.getLabel()));
         log.info("[{} | {}] Mapping suggestion created: {}", entity.getName(), ontologyTerm.getCurie(), created.getId());
         return created;
     }
 
     @Override
     @Async
-    public void deleteMappingSuggestionsExcluding(Entity entity, List<OntologyTerm> ontologyTerms) {
+    public void deleteMappingSuggestionsExcluding(Entity entity, List<OntologyTerm> ontologyTerms, Provenance provenance) {
         log.info("Deleting [{}] old mapping suggestions for: {}", ontologyTerms.size(), entity.getName());
-        List<String> ontologyTermIds = ontologyTerms.stream().map(OntologyTerm::getId).collect(Collectors.toList());
+        List<String> ontologyTermIds = new ArrayList<>();
+        Map<String, String> metadata = new LinkedHashMap<>();
+        for (OntologyTerm ontologyTerm : ontologyTerms) {
+            ontologyTermIds.add(ontologyTerm.getId());
+            metadata.put(ontologyTerm.getCurie(), ontologyTerm.getLabel());
+        }
         List<MappingSuggestion> toDelete = mappingSuggestionRepository.findByEntityIdAndOntologyTermIdNotIn(entity.getId(), ontologyTermIds);
         log.info("[{}] Found {} mapping suggestions to delete.", entity.getName(), toDelete.size());
         mappingSuggestionRepository.deleteAll(toDelete);
+
+        auditEntryService.addEntry(AuditEntryConstants.REMOVED_SUGGESTION.name(), entity.getId(), provenance, metadata);
     }
 
     @Override
@@ -92,13 +105,14 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
     }
 
     @Override
-    public void deleteMappingSuggestions(String entityId, String ontologyTermId) {
-        log.info("Deleting mapping suggestions for entity [{}] with ontology term: {}", entityId, ontologyTermId);
+    public void deleteMappingSuggestions(String entityId, OntologyTerm ontologyTerm, Provenance provenance) {
+        log.info("Deleting mapping suggestions for entity [{}] with ontology term: {}", entityId, ontologyTerm.getId());
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionRepository.findByEntityId(entityId);
         for (MappingSuggestion mappingSuggestion : mappingSuggestions) {
-            if (mappingSuggestion.getOntologyTermId().equalsIgnoreCase(ontologyTermId)) {
+            if (mappingSuggestion.getOntologyTermId().equalsIgnoreCase(ontologyTerm.getId())) {
                 mappingSuggestionRepository.delete(mappingSuggestion);
             }
         }
+        auditEntryService.addEntry(AuditEntryConstants.REMOVED_SUGGESTION.name(), entityId, provenance, Map.of(ontologyTerm.getIri(), ontologyTerm.getLabel()));
     }
 }

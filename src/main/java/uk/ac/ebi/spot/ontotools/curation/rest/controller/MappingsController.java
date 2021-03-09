@@ -26,9 +26,7 @@ import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS)
@@ -47,9 +45,6 @@ public class MappingsController {
 
     @Autowired
     private MappingService mappingService;
-
-    @Autowired
-    private SourceService sourceService;
 
     @Autowired
     private MappingSuggestionsService mappingSuggestionsService;
@@ -113,7 +108,7 @@ public class MappingsController {
         /**
          * Deleting mapping suggestions associated with the current ontology term.
          */
-        mappingSuggestionsService.deleteMappingSuggestions(entity.getId(), ontologyTerm.getId());
+        mappingSuggestionsService.deleteMappingSuggestions(entity.getId(), ontologyTerm, provenance);
         return MappingDtoAssembler.assemble(created);
     }
 
@@ -130,20 +125,20 @@ public class MappingsController {
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
 
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
-        List<String> ontologyTermIds = new ArrayList<>();
+        Map<String, OntologyTerm> ontologyTermMap = new LinkedHashMap<>();
         List<OntologyTerm> ontologyTerms = new ArrayList<>();
         for (OntologyTermDto ontologyTermDto : ontologyTermsDtos) {
             OntologyTerm ontologyTerm = ontologyTermService.retrieveTermByCurie(ontologyTermDto.getCurie());
-            ontologyTermIds.add(ontologyTerm.getId());
+            ontologyTermMap.put(ontologyTerm.getId(), ontologyTerm);
             ontologyTerms.add(ontologyTerm);
         }
         Mapping existing = mappingService.retrieveMappingById(mappingId);
         List<String> existingOntoIds = existing.getOntologyTermIds();
-        Mapping updated = mappingService.updateMapping(mappingId, ontologyTermIds);
+        Mapping updated = mappingService.updateMapping(mappingId, ontologyTerms, provenance);
 
         List<OntologyTerm> old = new ArrayList<>();
         for (String oId : existingOntoIds) {
-            if (!ontologyTermIds.contains(oId)) {
+            if (!ontologyTermMap.containsKey(oId)) {
                 old.add(ontologyTermService.retrieveTermById(oId));
             }
         }
@@ -157,8 +152,8 @@ public class MappingsController {
         /**
          * Deleting mapping suggestions associated with the new ontology terms
          */
-        for (String oId : ontologyTermIds) {
-            mappingSuggestionsService.deleteMappingSuggestions(entity.getId(), oId);
+        for (String oId : ontologyTermMap.keySet()) {
+            mappingSuggestionsService.deleteMappingSuggestions(entity.getId(), ontologyTermMap.get(oId), provenance);
         }
         /**
          * Create mapping suggestions associated with the old ontology terms
@@ -187,18 +182,25 @@ public class MappingsController {
         Entity entity = entityService.retrieveEntity(mapping.getEntityId());
         List<String> ontoTermIds = mapping.getOntologyTermIds();
 
+        Map<String, OntologyTerm> ontologyTermMap = new LinkedHashMap<>();
+        Map<String, String> metadata = new LinkedHashMap<>();
+        for (String ontoTermId : ontoTermIds) {
+            OntologyTerm ontologyTerm = ontologyTermService.retrieveTermById(ontoTermId);
+            ontologyTermMap.put(ontoTermId, ontologyTerm);
+            metadata.put(ontologyTerm.getIri(), ontologyTerm.getLabel());
+        }
+
         /**
          * Delete mapping.
          */
-        mappingService.deleteMapping(mappingId);
+        mappingService.deleteMapping(mappingId, provenance, metadata);
         entity = entityService.updateMappingStatus(entity, EntityStatus.SUGGESTIONS_PROVIDED);
 
         /**
          * Re-create mapping suggestions.
          */
-        for (String ontoTermId : ontoTermIds) {
-            OntologyTerm ontologyTerm = ontologyTermService.retrieveTermById(ontoTermId);
-            mappingSuggestionsService.createMappingSuggestion(entity, ontologyTerm, provenance);
+        for (String ontoTermId : ontologyTermMap.keySet()) {
+            mappingSuggestionsService.createMappingSuggestion(entity, ontologyTermMap.get(ontoTermId), provenance);
         }
 
     }

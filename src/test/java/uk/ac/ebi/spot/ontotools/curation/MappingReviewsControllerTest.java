@@ -5,13 +5,11 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
-import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
-import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
-import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
+import uk.ac.ebi.spot.ontotools.curation.constants.*;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.ProvenanceDtoAssembler;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
@@ -77,7 +75,7 @@ public class MappingReviewsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        ReviewDto reviewDto = mapper.readValue(response, new TypeReference<ReviewDto>() {
+        ReviewDto reviewDto = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals("New review", reviewDto.getComment());
         Mapping mapping = mappingService.retrieveMappingById(mappingDto.getId());
@@ -85,6 +83,22 @@ public class MappingReviewsControllerTest extends IntegrationTest {
         assertEquals("New review", mapping.getReviews().get(0).getComment());
         assertFalse(mapping.isReviewed());
         assertEquals(MappingStatus.REVIEW_IN_PROGRESS.name(), mapping.getStatus());
+
+
+        endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_ENTITIES + "/" + entity.getId();
+        response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        EntityDto actualEntity = mapper.readValue(response, new TypeReference<>() {
+        });
+        assertEquals(1, actualEntity.getAuditTrail().size());
+        assertEquals(AuditEntryConstants.REVIEWED.name(), actualEntity.getAuditTrail().get(0).getAction());
     }
 
     /**

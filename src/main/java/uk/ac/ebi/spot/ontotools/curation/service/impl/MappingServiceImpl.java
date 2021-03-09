@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.spot.ontotools.curation.constants.AuditEntryConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.Review;
@@ -13,6 +14,7 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.ontotools.curation.repository.MappingRepository;
+import uk.ac.ebi.spot.ontotools.curation.service.AuditEntryService;
 import uk.ac.ebi.spot.ontotools.curation.service.MappingService;
 import uk.ac.ebi.spot.ontotools.curation.service.OntologyTermService;
 
@@ -29,6 +31,9 @@ public class MappingServiceImpl implements MappingService {
     @Autowired
     private OntologyTermService ontologyTermService;
 
+    @Autowired
+    private AuditEntryService auditEntryService;
+
     @Override
     public Mapping createMapping(Entity entity, OntologyTerm ontologyTerm, Provenance provenance) {
         log.info("Creating mapping for entity [{}]: {}", entity.getName(), ontologyTerm.getCurie());
@@ -43,13 +48,15 @@ public class MappingServiceImpl implements MappingService {
         Mapping created = mappingRepository.insert(new Mapping(null, entity.getId(), Arrays.asList(new String[]{ontologyTerm.getId()}), entity.getProjectId(),
                 false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
         created.setOntologyTerms(Arrays.asList(new OntologyTerm[]{ontologyTerm}));
+
+        auditEntryService.addEntry(AuditEntryConstants.ADDED_MAPPING.name(), entity.getId(), provenance, Map.of(ontologyTerm.getIri(), ontologyTerm.getLabel()));
         log.info("Mapping for between entity [{}] and ontology term [{}] created: {}", entity.getName(), ontologyTerm.getCurie(), created.getId());
         return created;
     }
 
     @Override
-    public Mapping updateMapping(String mappingId, List<String> ontologyTermIds) {
-        log.info("Updating mapping [{}]: {}", mappingId, ontologyTermIds);
+    public Mapping updateMapping(String mappingId, List<OntologyTerm> ontologyTerms, Provenance provenance) {
+        log.info("Updating mapping [{}]: {}", mappingId, ontologyTerms);
         Optional<Mapping> mappingOp = mappingRepository.findById(mappingId);
         if (!mappingOp.isPresent()) {
             log.error("Mapping not found: {}", mappingId);
@@ -57,12 +64,20 @@ public class MappingServiceImpl implements MappingService {
         }
 
         Mapping mapping = mappingOp.get();
+        List<String> ontologyTermIds = new ArrayList<>();
         mapping.setOntologyTermIds(ontologyTermIds);
+        Map<String, String> metadata = new LinkedHashMap<>();
+        for (OntologyTerm ontologyTerm : ontologyTerms) {
+            ontologyTermIds.add(ontologyTerm.getId());
+            metadata.put(ontologyTerm.getCurie(), ontologyTerm.getLabel());
+        }
+
+        auditEntryService.addEntry(AuditEntryConstants.UPDATED_MAPPING.name(), mappingOp.get().getEntityId(), provenance, metadata);
         return mappingRepository.save(mapping);
     }
 
     @Override
-    public void deleteMapping(String mappingId) {
+    public void deleteMapping(String mappingId, Provenance provenance, Map<String, String> metadata) {
         Optional<Mapping> mappingOp = mappingRepository.findById(mappingId);
         if (!mappingOp.isPresent()) {
             log.error("Mapping not found: {}", mappingId);
@@ -70,6 +85,7 @@ public class MappingServiceImpl implements MappingService {
         }
 
         mappingRepository.delete(mappingOp.get());
+        auditEntryService.addEntry(AuditEntryConstants.REMOVED_MAPPING.name(), mappingOp.get().getEntityId(), provenance, metadata);
     }
 
     @Override
@@ -128,23 +144,6 @@ public class MappingServiceImpl implements MappingService {
         return null;
     }
 
-
-    /*
-    @Override
-    public List<String> deleteMappingExcluding(Entity entity, String ontologyTermId) {
-        log.info("Deleting mappings for entity [{}] excluding ontology term: {}", entity.getId(), ontologyTermId);
-        List<Mapping> mappings = mappingRepository.findByEntityId(entity.getId());
-        List<String> result = new ArrayList<>();
-        for (Mapping mapping : mappings) {
-            if (!mapping.getOntologyTermIds().contains(ontologyTermId)) {
-                result.add(mapping.getOntologyTermId());
-                mappingRepository.delete(mapping);
-            }
-        }
-        return result;
-    }
-    */
-
     @Override
     public Mapping addReviewToMapping(String mappingId, String comment, int noReviewsRequired, Provenance provenance) {
         log.info("Adding review to mapping: {}", mappingId);
@@ -157,6 +156,8 @@ public class MappingServiceImpl implements MappingService {
         mapping.setStatus(MappingStatus.REVIEW_IN_PROGRESS.name());
         mapping.addReview(new Review(comment, provenance), noReviewsRequired);
         mapping = mappingRepository.save(mapping);
+        auditEntryService.addEntry(AuditEntryConstants.REVIEWED.name(), mappingOp.get().getEntityId(), provenance,
+                comment != null ? Map.of("COMMENT", comment) : new HashMap<>());
         return mapping;
     }
 

@@ -171,7 +171,7 @@ public abstract class IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        ProjectDto actual = mapper.readValue(response, new TypeReference<ProjectDto>() {
+        ProjectDto actual = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(projectCreationDto.getName(), actual.getName());
         assertEquals(projectCreationDto.getDescription(), actual.getDescription());
@@ -213,7 +213,7 @@ public abstract class IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        SourceDto actual = mapper.readValue(response, new TypeReference<SourceDto>() {
+        SourceDto actual = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(sourceCreationDto.getName(), actual.getName());
         assertEquals(sourceCreationDto.getDescription(), actual.getDescription());
@@ -249,7 +249,7 @@ public abstract class IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<MappingDto> actual = mapper.readValue(response, new TypeReference<List<MappingDto>>() {
+        List<MappingDto> actual = mapper.readValue(response, new TypeReference<>() {
         });
         return actual;
     }

@@ -12,6 +12,7 @@ import uk.ac.ebi.spot.ontotools.curation.rest.assembler.OntologyTermDtoAssembler
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.audit.AuditEntryDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
@@ -85,7 +86,7 @@ public class MappingsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        MappingDto actual = mapper.readValue(response, new TypeReference<MappingDto>() {
+        MappingDto actual = mapper.readValue(response, new TypeReference<>() {
         });
 
         assertEquals(1, actual.getOntologyTerms().size());
@@ -102,7 +103,7 @@ public class MappingsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        EntityDto actualEntity = mapper.readValue(response, new TypeReference<EntityDto>() {
+        EntityDto actualEntity = mapper.readValue(response, new TypeReference<>() {
         });
 
         assertEquals(EntityStatus.MANUALLY_MAPPED.name(), actualEntity.getMappingStatus());
@@ -116,6 +117,20 @@ public class MappingsControllerTest extends IntegrationTest {
         assertEquals("Orphanet:15", actualEntity.getMappingSuggestions().get(0).getOntologyTerm().getCurie());
 
         assertEquals(sourceDto.getId(), actualEntity.getSource().getId());
+
+        assertEquals(2, actualEntity.getAuditTrail().size());
+        for (AuditEntryDto auditEntryDto : actualEntity.getAuditTrail()) {
+            assertTrue(auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.ADDED_MAPPING.name()) ||
+                    auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.REMOVED_SUGGESTION.name()));
+            if (auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.REMOVED_SUGGESTION.name())) {
+                assertEquals(1, auditEntryDto.getMetadata().size());
+                assertEquals("http://purl.obolibrary.org/obo/MONDO_0007037", auditEntryDto.getMetadata().get(0).getKey());
+            }
+            if (auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.ADDED_MAPPING.name())) {
+                assertEquals(1, auditEntryDto.getMetadata().size());
+                assertEquals("http://purl.obolibrary.org/obo/MONDO_0007037", auditEntryDto.getMetadata().get(0).getKey());
+            }
+        }
     }
 
     /**
@@ -138,7 +153,7 @@ public class MappingsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        MappingDto actual = mapper.readValue(response, new TypeReference<MappingDto>() {
+        MappingDto actual = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(2, actual.getOntologyTerms().size());
         List<String> curies = new ArrayList<>();
@@ -159,7 +174,7 @@ public class MappingsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        EntityDto actualEntity = mapper.readValue(response, new TypeReference<EntityDto>() {
+        EntityDto actualEntity = mapper.readValue(response, new TypeReference<>() {
         });
 
         assertEquals(EntityStatus.MANUALLY_MAPPED.name(), actualEntity.getMappingStatus());
@@ -168,6 +183,21 @@ public class MappingsControllerTest extends IntegrationTest {
         assertEquals(2, actualEntity.getMapping().getOntologyTerms().size());
 
         assertEquals(0, actualEntity.getMappingSuggestions().size());
+        assertEquals(3, actualEntity.getAuditTrail().size());
+
+        int noRemovedSuggestions = 0;
+        int noUpdatedMapping = 0;
+        for (AuditEntryDto auditEntryDto : actualEntity.getAuditTrail()) {
+            if (auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.UPDATED_MAPPING.name())) {
+                noUpdatedMapping++;
+            }
+            if (auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.REMOVED_SUGGESTION.name())) {
+                noRemovedSuggestions++;
+            }
+        }
+
+        assertEquals(2, noRemovedSuggestions);
+        assertEquals(1, noUpdatedMapping);
     }
 
     /**
@@ -175,6 +205,7 @@ public class MappingsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldDeleteMapping() throws Exception {
+        mappingSuggestionRepository.deleteAll();
         List<MappingDto> actual = super.retrieveMapping(project.getId());
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + actual.get(0).getId();
@@ -193,21 +224,29 @@ public class MappingsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        EntityDto actualEntity = mapper.readValue(response, new TypeReference<EntityDto>() {
+        EntityDto actualEntity = mapper.readValue(response, new TypeReference<>() {
         });
 
         assertEquals(EntityStatus.SUGGESTIONS_PROVIDED.name(), actualEntity.getMappingStatus());
 
         assertNull(actualEntity.getMapping());
 
-        assertEquals(2, actualEntity.getMappingSuggestions().size());
-        List<String> curies = new ArrayList<>();
-        for (MappingSuggestionDto mappingSuggestionDto : actualEntity.getMappingSuggestions()) {
-            curies.add(mappingSuggestionDto.getOntologyTerm().getCurie());
-        }
+        assertEquals(1, actualEntity.getMappingSuggestions().size());
+        assertEquals("Orphanet:15", actualEntity.getMappingSuggestions().get(0).getOntologyTerm().getCurie());
 
-        assertTrue(curies.contains("Orphanet:15"));
-        assertTrue(curies.contains("MONDO:0007037"));
+        assertEquals(2, actualEntity.getAuditTrail().size());
+        for (AuditEntryDto auditEntryDto : actualEntity.getAuditTrail()) {
+            assertTrue(auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.REMOVED_MAPPING.name()) ||
+                    auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.ADDED_SUGGESTION.name()));
+            if (auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.ADDED_SUGGESTION.name())) {
+                assertEquals(1, auditEntryDto.getMetadata().size());
+                assertEquals("http://www.orpha.net/ORDO/Orphanet_15", auditEntryDto.getMetadata().get(0).getKey());
+            }
+            if (auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.REMOVED_MAPPING.name())) {
+                assertEquals(1, auditEntryDto.getMetadata().size());
+                assertEquals("http://www.orpha.net/ORDO/Orphanet_15", auditEntryDto.getMetadata().get(0).getKey());
+            }
+        }
     }
 
     /**

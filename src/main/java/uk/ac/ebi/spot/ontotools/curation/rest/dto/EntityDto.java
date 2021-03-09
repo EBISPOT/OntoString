@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.audit.AuditEntryDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
 
@@ -45,6 +46,9 @@ public final class EntityDto implements Serializable {
     @JsonProperty("mapping")
     private final MappingDto mapping;
 
+    @JsonProperty("auditTrail")
+    private final List<AuditEntryDto> auditTrail;
+
     @JsonCreator
     public EntityDto(@JsonProperty("id") String id,
                      @JsonProperty("source") SourceDto source,
@@ -54,6 +58,7 @@ public final class EntityDto implements Serializable {
                      @JsonProperty("mappingStatus") String mappingStatus,
                      @JsonProperty("mappingSuggestions") List<MappingSuggestionDto> mappingSuggestions,
                      @JsonProperty("mapping") MappingDto mapping,
+                     @JsonProperty("auditTrail") List<AuditEntryDto> auditTrail,
                      @JsonProperty("created") ProvenanceDto created) {
         this.id = id;
         this.source = source;
@@ -63,6 +68,7 @@ public final class EntityDto implements Serializable {
         this.mappingStatus = mappingStatus;
         this.mappingSuggestions = mappingSuggestions;
         this.mapping = mapping;
+        this.auditTrail = auditTrail;
         this.created = created;
     }
 
@@ -101,5 +107,9 @@ public final class EntityDto implements Serializable {
 
     public String getUpstreamField() {
         return upstreamField;
+    }
+
+    public List<AuditEntryDto> getAuditTrail() {
+        return auditTrail;
     }
 }

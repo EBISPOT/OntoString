@@ -22,7 +22,7 @@ public interface MappingService {
 
     Mapping addCommentToMapping(String mappingId, String body, Provenance provenance);
 
-    Mapping updateMapping(String mappingId, List<String> ontologyTermIds);
+    Mapping updateMapping(String mappingId, List<OntologyTerm> ontologyTerms, Provenance provenance);
 
-    void deleteMapping(String mappingId);
+    void deleteMapping(String mappingId, Provenance provenance, Map<String, String> metadata);
 }
