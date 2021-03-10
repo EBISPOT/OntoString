@@ -81,7 +81,7 @@ public class MatchMakingTest extends IntegrationTest {
          * - Retinal dystrophy
          */
         entity = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
-                RandomStringUtils.randomAlphabetic(10), sourceDto.getId(), project.getId(), provenance, EntityStatus.UNMAPPED));
+                RandomStringUtils.randomAlphabetic(10), sourceDto.getId(), project.getId(), 10, provenance, EntityStatus.UNMAPPED));
     }
 
     @Test

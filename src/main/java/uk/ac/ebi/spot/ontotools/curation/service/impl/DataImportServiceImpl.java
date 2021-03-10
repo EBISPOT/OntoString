@@ -59,8 +59,9 @@ public class DataImportServiceImpl implements DataImportService {
             log.info("Creating entities ...");
             int count = 0;
             for (ImportDataElementDto importDataElementDto : importDataPackageDto.getData()) {
-                entityService.createEntity(new Entity(null, importDataElementDto.getText(), importDataElementDto.getUpstreamId(), importDataElementDto.getUpstreamField(),
-                        sourceId, projectId, provenance, EntityStatus.UNMAPPED));
+                entityService.createEntity(new Entity(null, importDataElementDto.getText(),
+                        importDataElementDto.getUpstreamId(), importDataElementDto.getUpstreamField(),
+                        sourceId, projectId, importDataElementDto.getPriority(), provenance, EntityStatus.UNMAPPED));
                 count++;
                 if (count % 100 == 0) {
                     log.info(" -- [{} | {}] Progress: {} of {}", projectId, sourceId, count, importDataPackageDto.getData().size());
