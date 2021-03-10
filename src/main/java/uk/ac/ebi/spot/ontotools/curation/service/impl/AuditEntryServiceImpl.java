@@ -21,7 +21,7 @@ public class AuditEntryServiceImpl implements AuditEntryService {
     private AuditEntryRepository auditEntryRepository;
 
     @Override
-    @Async
+    @Async(value = "applicationTaskExecutor")
     public void addEntry(String action, String entityId, Provenance provenance, Map<String, String> metadata) {
         List<MetadataEntry> metadataEntryList = new ArrayList<>();
         for (String key : metadata.keySet()) {

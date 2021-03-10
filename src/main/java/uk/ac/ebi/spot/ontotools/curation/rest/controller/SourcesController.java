@@ -111,7 +111,7 @@ public class SourcesController {
         Source source = sourceService.getSource(sourceId, projectId);
         for (String entity : entities) {
             entityService.createEntity(new Entity(null, entity, null, null, source.getId(),
-                    projectId, new Provenance(user.getName(), user.getEmail(), DateTime.now()), EntityStatus.UNMAPPED));
+                    projectId, null, new Provenance(user.getName(), user.getEmail(), DateTime.now()), EntityStatus.UNMAPPED));
         }
         matchmakerService.runMatchmaking(sourceId, projectService.retrieveProject(projectId, user));
     }

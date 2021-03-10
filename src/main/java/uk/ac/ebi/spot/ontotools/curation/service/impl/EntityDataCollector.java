@@ -53,6 +53,7 @@ public class EntityDataCollector {
         exportEntityDtos.add(new ExportEntityDto(entity.getName(),
                 entity.getBaseId(),
                 entity.getBaseField(),
+                entity.getPriority(),
                 mappingSuggestions,
                 exportMappingDto
         ));
