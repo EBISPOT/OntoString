@@ -1,0 +1,46 @@
+image: docker:latest
+services:
+  - docker:dind
+
+stages:
+  - build
+  - docker
+  - docker-release
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  REGISTRY_IMAGE: ebispot/ontotools-curation-service
+  SERVICE_NAME: ontotools-curation-service
+
+maven-build:
+  image: maven:3-jdk-12
+  stage: build
+  script:
+    - mvn -clean package -B -Dspring.profiles.active=dev
+  artifacts:
+    paths:
+      - target/*.jar
+
+build-container:
+  stage: docker
+  script:
+    - echo "$DOCKER_HUB_PASSWORD" > dhpw.txt
+    - docker login -u "${DOCKER_HUB_USER}" --password-stdin < dhpw.txt
+    - docker build --cache-from $REGISTRY_IMAGE:latest -t $REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker push $REGISTRY_IMAGE:$CI_COMMIT_SHA
+
+build-release:
+  variables:
+    GIT_STRATEGY: none
+  stage: docker-release
+  script:
+  - echo "$DOCKER_HUB_PASSWORD" > dhpw.txt
+  - docker login -u "${DOCKER_HUB_USER}" --password-stdin < dhpw.txt
+  - docker pull $REGISTRY_IMAGE:$CI_COMMIT_SHA
+  - docker tag $REGISTRY_IMAGE:$CI_COMMIT_SHA $REGISTRY_IMAGE:latest
+  - docker tag $REGISTRY_IMAGE:$CI_COMMIT_SHA $REGISTRY_IMAGE:$CI_COMMIT_TAG
+  - docker push $REGISTRY_IMAGE:latest
+  - docker push $REGISTRY_IMAGE:$CI_COMMIT_TAG
+  only:
+  - tags
