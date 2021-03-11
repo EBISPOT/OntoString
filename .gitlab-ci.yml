@@ -6,6 +6,9 @@ stages:
   - build
   - docker
   - docker-release
+  - deploy-sandbox
+  - deploy-fallback
+  - deploy-live
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -42,5 +45,54 @@ build-release:
   - docker tag $REGISTRY_IMAGE:$CI_COMMIT_SHA $REGISTRY_IMAGE:$CI_COMMIT_TAG
   - docker push $REGISTRY_IMAGE:latest
   - docker push $REGISTRY_IMAGE:$CI_COMMIT_TAG
+  only:
+  - tags
+
+deploy-sandbox:
+  image: dtzar/helm-kubectl:2.13.1
+  stage: deploy-sandbox
+  script:
+  - echo "Deploy to sandbox server"
+  - mkdir -p /root/.kube
+  - echo ${SANBOX_KUBECONF} | base64 -d > /root/.kube/config
+  - helm init
+  - helm delete --purge ontotools-curation-service || true
+  - helm install --name ontotools-curation-service --set k8Namespace=ontotools,image.repository=$REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.secretsName=ontotools-secrets,image.env.secretsKey=db-pwd ./k8chart/ --wait
+  environment:
+    name: sandbox
+  when: manual
+  only:
+  - develop
+
+
+deploy-fallback:
+  image: dtzar/helm-kubectl:2.13.1
+  stage: deploy-fallback
+  script:
+  - echo "Deploy to Production fallback server"
+  - mkdir -p /root/.kube
+  - echo ${PFALLBACK_KUBECONFIG} | base64 -d > /root/.kube/config
+  - helm init
+  - helm delete --purge ontotools-curation-service || true
+  - helm install --name ontotools-curation-service --set k8Namespace=ontotools,replicaCount=1,image.env.envName=prod,image.repository=$REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.dbUser=ontotoolscurator,image.env.secretsName=ontotools-secrets,image.env.secretsKey=db-pwd ./k8chart/ --wait
+  environment:
+    name: prod
+  when: manual
+  only:
+  - tags
+
+deploy-live:
+  image: dtzar/helm-kubectl:2.13.1
+  stage: deploy-live
+  script:
+  - echo "Deploy to Production server"
+  - mkdir -p /root/.kube
+  - echo ${PLIVE_KUBECONFIG} | base64 -d > /root/.kube/config
+  - helm init
+  - helm delete --purge ontotools-curation-service || true
+  - helm install --name ontotools-curation-service --set k8Namespace=ontotools,replicaCount=1,image.env.envName=prod,image.repository=$REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.dbUser=ontotoolscurator,image.env.secretsName=ontotools-secrets,image.env.secretsKey=db-pwd ./k8chart/ --wait
+  environment:
+    name: prod
+  when: manual
   only:
   - tags
