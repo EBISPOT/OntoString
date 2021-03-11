@@ -18,7 +18,7 @@ public class MongoConfig {
     @Configuration
     @EnableMongoRepositories(basePackages = {"uk.ac.ebi.spot.ontotools.curation.repository"})
     @EnableTransactionManagement
-    @Profile({"dev","sandbox"})
+    @Profile({"dev","sandbox", "test"})
     public static class MongoConfigDevSandbox extends AbstractMongoClientConfiguration {
 
         @Autowired

@@ -46,6 +46,19 @@ ontotools-curation:
 spring:
   config:
     activate:
+      on-profile: "test"
+  data:
+    mongodb:
+      uri: snoopy.ebi.ac.uk:27017
+
+ontotools-curation:
+  db: ontotools-curation-test
+
+---
+
+spring:
+  config:
+    activate:
       on-profile: "sandbox"
   data:
     mongodb:

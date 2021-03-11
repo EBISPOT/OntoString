@@ -17,7 +17,7 @@ maven-build:
   image: maven:3-jdk-12
   stage: build
   script:
-    - mvn -clean package -B -Dspring.profiles.active=dev
+    - mvn clean install -B -Dspring.profiles.active=test
   artifacts:
     paths:
       - target/*.jar
