@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import uk.ac.ebi.spot.ontotools.curation.exception.AuthenticationException;
-import uk.ac.ebi.spot.ontotools.curation.exception.AuthorizationException;
-import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
-import uk.ac.ebi.spot.ontotools.curation.exception.FileProcessingException;
+import uk.ac.ebi.spot.ontotools.curation.exception.*;
 
 @ControllerAdvice(annotations = RestController.class)
 public class ExceptionHandlerAdvice {
@@ -35,6 +32,13 @@ public class ExceptionHandlerAdvice {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_PLAIN);
         return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<String> handleBadRequestException(BadRequestException e) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
+        return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(FileProcessingException.class)

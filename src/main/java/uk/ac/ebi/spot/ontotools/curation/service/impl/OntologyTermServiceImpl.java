@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
-import uk.ac.ebi.spot.ontotools.curation.domain.Project;
+import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermRepository;
@@ -44,7 +44,7 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     }
 
     @Override
-    public OntologyTerm createTerm(String iri, Project project) {
+    public OntologyTerm createTerm(String iri, ProjectContext projectContext) {
         log.info("Creating term: {}", iri);
         Optional<OntologyTerm> ontologyTermOp = ontologyTermRepository.findByIriHash(DigestUtils.sha256Hex(iri));
         if (ontologyTermOp.isPresent()) {
@@ -53,13 +53,13 @@ public class OntologyTermServiceImpl implements OntologyTermService {
         }
 
         List<OLSTermDto> preferredOntoResponse = new ArrayList<>();
-        for (String preferredOntology : project.getPreferredMappingOntologies()) {
+        for (String preferredOntology : projectContext.getPreferredMappingOntologies()) {
             preferredOntoResponse.addAll(olsService.retrieveTerms(preferredOntology, iri));
         }
         List<OLSTermDto> parentOntoResponse = new ArrayList<>();
         String ontoId = CurationUtil.ontoFromIRI(iri);
         String termStatus;
-        if (!project.getPreferredMappingOntologies().contains(ontoId.toLowerCase())) {
+        if (!projectContext.getPreferredMappingOntologies().contains(ontoId.toLowerCase())) {
             parentOntoResponse = olsService.retrieveTerms(ontoId, iri);
             termStatus = parseStatus(preferredOntoResponse, parentOntoResponse, null);
         } else {

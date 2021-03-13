@@ -1,7 +1,7 @@
 package uk.ac.ebi.spot.ontotools.curation.service;
 
+import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
-import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 
 import java.util.List;
 import java.util.Map;
@@ -9,7 +9,7 @@ import java.util.Map;
 public interface OntologyTermService {
     OntologyTerm createTerm(OntologyTerm term);
 
-    OntologyTerm createTerm(String iri, Project project);
+    OntologyTerm createTerm(String iri, ProjectContext projectContext);
 
     Map<String, OntologyTerm> retrieveTerms(List<String> ontologyTermIds);
 

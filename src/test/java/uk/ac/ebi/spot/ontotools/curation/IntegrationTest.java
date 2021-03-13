@@ -29,7 +29,10 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.repository.*;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.*;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectCreationDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceCreationDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 import uk.ac.ebi.spot.ontotools.curation.service.MatchmakerService;
 import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
@@ -157,10 +160,10 @@ public abstract class IntegrationTest {
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS;
 
 
-        ProjectCreationDto projectCreationDto = new ProjectCreationDto(name, "Description",
-                datasources != null ? Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", datasources)}) : new ArrayList<>(),
-                ontologies != null ? Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", ontologies)}) : new ArrayList<>(),
-                preferredMappingOntology != null ? Arrays.asList(new String[]{preferredMappingOntology}) : new ArrayList<>(), noReviewsRequired);
+        ProjectCreationDto projectCreationDto = new ProjectCreationDto(name, "Description", noReviewsRequired,
+                datasources != null ? datasources : new ArrayList<>(),
+                ontologies != null ? ontologies : new ArrayList<>(),
+                preferredMappingOntology != null ? Arrays.asList(new String[]{preferredMappingOntology}) : new ArrayList<>());
 
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -175,24 +178,23 @@ public abstract class IntegrationTest {
         });
         assertEquals(projectCreationDto.getName(), actual.getName());
         assertEquals(projectCreationDto.getDescription(), actual.getDescription());
-        assertNotNull(actual.getDatasources());
-        assertNotNull(actual.getOntologies());
+        assertEquals(1, actual.getContexts().size());
+        assertEquals(CurationConstants.CONTEXT_DEFAULT, actual.getContexts().get(0).getName());
+        assertNotNull(actual.getContexts().get(0).getDatasources());
+        assertNotNull(actual.getContexts().get(0).getOntologies());
+
         if (datasources == null) {
-            assertTrue(actual.getDatasources().isEmpty());
+            assertTrue(actual.getContexts().get(0).getDatasources().isEmpty());
         } else {
-            assertEquals(1, actual.getDatasources().size());
-            assertEquals("ALL", actual.getDatasources().get(0).getField());
-            assertEquals(datasources.size(), actual.getDatasources().get(0).getMappingList().size());
+            assertEquals(datasources.size(), actual.getContexts().get(0).getDatasources().size());
         }
         if (ontologies == null) {
-            assertTrue(actual.getOntologies().isEmpty());
+            assertTrue(actual.getContexts().get(0).getOntologies().isEmpty());
         } else {
-            assertEquals(1, actual.getOntologies().size());
-            assertEquals("ALL", actual.getOntologies().get(0).getField());
-            assertEquals(ontologies.size(), actual.getOntologies().get(0).getMappingList().size());
+            assertEquals(ontologies.size(), actual.getContexts().get(0).getOntologies().size());
         }
         if (preferredMappingOntology != null) {
-            assertEquals(preferredMappingOntology, actual.getPreferredMappingOntologies().get(0));
+            assertEquals(preferredMappingOntology, actual.getContexts().get(0).getPreferredMappingOntologies().get(0));
         }
         return actual;
     }

@@ -113,7 +113,7 @@ public class SourcesController {
             entityService.createEntity(new Entity(null, entity, null, null, source.getId(),
                     projectId, null, new Provenance(user.getName(), user.getEmail(), DateTime.now()), EntityStatus.UNMAPPED));
         }
-        matchmakerService.runMatchmaking(sourceId, projectService.retrieveProject(projectId, user));
+        matchmakerService.runMatchmaking(source, projectService.retrieveProject(projectId, user));
     }
 
     /**
@@ -126,10 +126,11 @@ public class SourcesController {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to import data from file [{} - {}] to source: {} | {}", user.getEmail(), file.getOriginalFilename(), file.getSize(), projectId, sourceId);
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        Source source = sourceService.getSource(sourceId, projectId);
 
         try {
             String fileData = IOUtils.toString(file.getInputStream(), "UTF-8");
-            dataImportService.importData(fileData, projectId, sourceId, user);
+            dataImportService.importData(fileData, projectId, source, user);
         } catch (IOException e) {
             log.error("Unable to deserialize import data file: {}", e.getMessage(), e);
         }

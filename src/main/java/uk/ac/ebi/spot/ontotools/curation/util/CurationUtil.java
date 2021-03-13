@@ -1,8 +1,6 @@
 package uk.ac.ebi.spot.ontotools.curation.util;
 
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
-import uk.ac.ebi.spot.ontotools.curation.domain.config.ProjectMappingConfig;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,38 +68,4 @@ public class CurationUtil {
         return map;
     }
 
-    public static List<ProjectMappingConfig> configListtoLowerCase(List<ProjectMappingConfig> projectMappingConfigs) {
-        List<ProjectMappingConfig> result = new ArrayList<>();
-        for (ProjectMappingConfig projectMappingConfig : projectMappingConfigs) {
-            result.add(new ProjectMappingConfig(projectMappingConfig.getField().toLowerCase(), listToLowerCase(projectMappingConfig.getMappingList())));
-        }
-        return result;
-    }
-
-    public static List<String> configForField(Entity entity, List<ProjectMappingConfig> projectMappingConfigs) {
-        if (entity.getBaseField() == null) {
-            for (ProjectMappingConfig projectMappingConfig : projectMappingConfigs) {
-                if (projectMappingConfig.getField().equalsIgnoreCase(ProjectMappingConfig.ALL)) {
-                    return projectMappingConfig.getMappingList();
-                }
-            }
-
-            if (!projectMappingConfigs.isEmpty()) {
-                return projectMappingConfigs.get(0).getMappingList();
-            }
-        } else {
-            for (ProjectMappingConfig projectMappingConfig : projectMappingConfigs) {
-                if (projectMappingConfig.getField().equalsIgnoreCase(entity.getBaseField())) {
-                    return projectMappingConfig.getMappingList();
-                }
-            }
-            for (ProjectMappingConfig projectMappingConfig : projectMappingConfigs) {
-                if (projectMappingConfig.getField().equalsIgnoreCase(ProjectMappingConfig.ALL)) {
-                    return projectMappingConfig.getMappingList();
-                }
-            }
-        }
-
-        return new ArrayList<>();
-    }
 }

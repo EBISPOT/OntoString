@@ -17,7 +17,8 @@ import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@CompoundIndexes({@CompoundIndex(name = "ppIdx", def = "{'projectId': 1, 'priority': 1}")})
+@CompoundIndexes({@CompoundIndex(name = "ppIdx", def = "{'projectId': 1, 'priority': 1}"),
+        @CompoundIndex(name = "ppCon", def = "{'projectId': 1, 'context': 1}")})
 public class Entity {
 
     @Id
@@ -27,7 +28,7 @@ public class Entity {
 
     private String baseId;
 
-    private String baseField;
+    private String context;
 
     @Indexed
     private String sourceId;

@@ -75,7 +75,7 @@ spring:
       on-profile: "prod"
   data:
     mongodb:
-      uri: mongos-hx-ontotoolscuratorprors-001.ebi.ac.uk:27017,mongos-hl-ontotoolscuratorprors-002.ebi.ac.uk:27017/admin?replicaSet=ontotoolscuratorprors071
+      uri: mongos-hx-ontotoolscuratorprors071-01.ebi.ac.uk:27017,mongos-hl-ontotoolscuratorprors071-02.ebi.ac.uk:27017/admin?replicaSet=ontotoolscuratorprors071
 
 ontotools-curation:
   db: ontotoolscurator

@@ -25,7 +25,7 @@ public class EntityDtoAssembler {
                 source,
                 entity.getName(),
                 entity.getBaseId(),
-                entity.getBaseField(),
+                entity.getContext(),
                 entity.getMappingStatus().name(),
                 mappingSuggestionDtos,
                 mappingDto,

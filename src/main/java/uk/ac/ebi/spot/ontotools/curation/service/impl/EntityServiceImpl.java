@@ -75,4 +75,17 @@ public class EntityServiceImpl implements EntityService {
         return entityOptional.get();
     }
 
+    @Override
+    public void moveEntities(String projectId, String fromContext, String toContext) {
+        log.info("Moving entities in project [{}] from context [{}] to context: {}", projectId, fromContext, toContext);
+        Stream<Entity> entityStream = entityRepository.readByProjectIdAndContext(projectId, fromContext);
+        entityStream.forEach(entity -> updateContext(entity, toContext));
+        entityStream.close();
+    }
+
+    private void updateContext(Entity entity, String toContext) {
+        entity.setContext(toContext);
+        entityRepository.save(entity);
+    }
+
 }

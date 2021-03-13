@@ -26,14 +26,8 @@ public final class ProjectDto implements Serializable {
     @JsonProperty("description")
     private final String description;
 
-    @JsonProperty("datasources")
-    private final List<ProjectMappingConfigDto> datasources;
-
-    @JsonProperty("ontologies")
-    private final List<ProjectMappingConfigDto> ontologies;
-
-    @JsonProperty("preferredMappingOntologies")
-    private final List<String> preferredMappingOntologies;
+    @JsonProperty("contexts")
+    private final List<ProjectContextDto> contexts;
 
     @JsonProperty("numberOfReviewsRequired")
     private final Integer numberOfReviewsRequired;
@@ -45,17 +39,13 @@ public final class ProjectDto implements Serializable {
     public ProjectDto(@JsonProperty("id") String id,
                       @JsonProperty("name") String name,
                       @JsonProperty("description") String description,
-                      @JsonProperty("datasources") List<ProjectMappingConfigDto> datasources,
-                      @JsonProperty("ontologies") List<ProjectMappingConfigDto> ontologies,
-                      @JsonProperty("preferredMappingOntologies") List<String> preferredMappingOntologies,
+                      @JsonProperty("contexts") List<ProjectContextDto> contexts,
                       @JsonProperty("numberOfReviewsRequired") Integer numberOfReviewsRequired,
                       @JsonProperty("created") ProvenanceDto created) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.datasources = datasources;
-        this.ontologies = ontologies;
-        this.preferredMappingOntologies = preferredMappingOntologies;
+        this.contexts = contexts;
         this.numberOfReviewsRequired = numberOfReviewsRequired;
         this.created = created;
     }
@@ -72,16 +62,8 @@ public final class ProjectDto implements Serializable {
         return description;
     }
 
-    public List<ProjectMappingConfigDto> getDatasources() {
-        return datasources;
-    }
-
-    public List<ProjectMappingConfigDto> getOntologies() {
-        return ontologies;
-    }
-
-    public List<String> getPreferredMappingOntologies() {
-        return preferredMappingOntologies;
+    public List<ProjectContextDto> getContexts() {
+        return contexts;
     }
 
     public Integer getNumberOfReviewsRequired() {

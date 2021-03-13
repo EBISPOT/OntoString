@@ -7,7 +7,6 @@ import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectMappingConfigDto;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
 import java.util.Arrays;
@@ -44,7 +43,7 @@ public class ProjectsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<ProjectDto> projectList = mapper.readValue(response, new TypeReference<List<ProjectDto>>() {
+        List<ProjectDto> projectList = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(1, projectList.size());
 
@@ -69,7 +68,7 @@ public class ProjectsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<ProjectDto> projectList = mapper.readValue(response, new TypeReference<List<ProjectDto>>() {
+        List<ProjectDto> projectList = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(0, projectList.size());
     }
@@ -117,9 +116,7 @@ public class ProjectsControllerTest extends IntegrationTest {
         ProjectDto updatedProject = new ProjectDto(projectDto.getId(),
                 "New Name",
                 projectDto.getDescription(),
-                Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"gwas"}))}),
-                Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"ordo"}))}),
-                projectDto.getPreferredMappingOntologies(),
+                null,
                 0,
                 projectDto.getCreated());
 
@@ -133,12 +130,10 @@ public class ProjectsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        ProjectDto actual = mapper.readValue(response, new TypeReference<ProjectDto>() {
+        ProjectDto actual = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(updatedProject.getName(), actual.getName());
         assertEquals(updatedProject.getDescription(), actual.getDescription());
-        assertEquals(updatedProject.getDatasources(), actual.getDatasources());
-        assertEquals(updatedProject.getOntologies(), actual.getOntologies());
     }
 
     /**
@@ -150,9 +145,7 @@ public class ProjectsControllerTest extends IntegrationTest {
         ProjectDto updatedProject = new ProjectDto(projectDto.getId(),
                 "New Name",
                 projectDto.getDescription(),
-                Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"gwas"}))}),
-                Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"ordo"}))}),
-                projectDto.getPreferredMappingOntologies(),
+                null,
                 0,
                 projectDto.getCreated());
 
@@ -173,9 +166,7 @@ public class ProjectsControllerTest extends IntegrationTest {
         ProjectDto updatedProject = new ProjectDto(projectDto.getId(),
                 "New Name",
                 projectDto.getDescription(),
-                Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"gwas"}))}),
-                Arrays.asList(new ProjectMappingConfigDto[]{new ProjectMappingConfigDto("ALL", Arrays.asList(new String[]{"ordo"}))}),
-                projectDto.getPreferredMappingOntologies(),
+                null,
                 0,
                 projectDto.getCreated());
 
