@@ -27,6 +27,17 @@ public class ProjectsControllerTest extends IntegrationTest {
     }
 
     /**
+     * POST /v1/projects
+     */
+    @Test
+    public void shouldCreateProjectWithDatasources() throws Exception {
+        super.createProject("New Project", "token1",
+                Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"}),
+                Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"}),
+                "efo", 0);
+    }
+
+    /**
      * GET /v1/projects
      */
     @Test

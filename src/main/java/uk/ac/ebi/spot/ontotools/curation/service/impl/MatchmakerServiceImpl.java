@@ -11,7 +11,6 @@ import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
-import uk.ac.ebi.spot.ontotools.curation.domain.Source;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
@@ -52,16 +51,16 @@ public class MatchmakerServiceImpl implements MatchmakerService {
 
     @Override
     @Async(value = "applicationTaskExecutor")
-    public void runMatchmaking(Source source, Project project) {
-        log.info("Running auto-mapping for source: {}", source.getId());
+    public void runMatchmaking(String sourceId, Project project) {
+        log.info("Running auto-mapping for source: {}", sourceId);
         User robotUser = userService.retrieveRobotUser();
 
         long sTime = System.currentTimeMillis();
-        Stream<Entity> entityStream = entityService.retrieveEntitiesForSource(source.getId());
+        Stream<Entity> entityStream = entityService.retrieveEntitiesForSource(sourceId);
         entityStream.forEach(entity -> this.autoMap(entity, project, robotUser));
         entityStream.close();
         long eTime = System.currentTimeMillis();
-        log.info("[{}] Auto-mapping done in {}s", source.getId(), (eTime - sTime) / 1000);
+        log.info("[{}] Auto-mapping done in {}s", sourceId, (eTime - sTime) / 1000);
     }
 
     private ProjectContext findContext(String contextName, String entityName, Project project) {

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
@@ -61,7 +62,8 @@ public class DataImportServiceImpl implements DataImportService {
             int count = 0;
             for (ImportDataElementDto importDataElementDto : importDataPackageDto.getData()) {
                 entityService.createEntity(new Entity(null, importDataElementDto.getText(),
-                        importDataElementDto.getUpstreamId(), importDataElementDto.getContext(),
+                        importDataElementDto.getUpstreamId(),
+                        importDataElementDto.getContext() == null ? CurationConstants.CONTEXT_DEFAULT : importDataElementDto.getContext(),
                         source.getId(), projectId, importDataElementDto.getPriority(), provenance, EntityStatus.UNMAPPED));
                 count++;
                 if (count % 100 == 0) {
@@ -70,7 +72,7 @@ public class DataImportServiceImpl implements DataImportService {
             }
             long eTime = System.currentTimeMillis();
             log.info("{} entities created [{}s]", count, (eTime - sTime) / 1000);
-            matchmakerService.runMatchmaking(source, project);
+            matchmakerService.runMatchmaking(source.getId(), project);
         } catch (IOException e) {
             log.error("Unable to deserialize import data file: {}", e.getMessage(), e);
         }

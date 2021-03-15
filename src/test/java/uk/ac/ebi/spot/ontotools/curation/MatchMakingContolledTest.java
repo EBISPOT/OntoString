@@ -5,8 +5,10 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
+import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.config.ExternalServiceConfig;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
@@ -94,7 +96,7 @@ public class MatchMakingContolledTest extends IntegrationTest {
          * - Retinal dystrophy
          */
         entity = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
-                RandomStringUtils.randomAlphabetic(10), sourceDto.getId(), project.getId(), 10, provenance, EntityStatus.UNMAPPED));
+                CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), 10, provenance, EntityStatus.UNMAPPED));
     }
 
 
@@ -215,8 +217,10 @@ public class MatchMakingContolledTest extends IntegrationTest {
         );
 
         this.ontologies = Arrays.asList(new String[]{"efo", "mondo", "hp"});
-        this.project.setOntologies(Arrays.asList(new ProjectMappingConfig[]{new ProjectMappingConfig(ProjectMappingConfig.ALL, this.ontologies)}));
-        this.projectService.updateProject(this.project, this.project.getId(), this.user1);
+        ProjectContext projectContext = project.getContexts().get(0);
+        projectContext.setOntologies(this.ontologies);
+        projectService.updateProjectContext(projectContext, project.getId(), user1);
+        project = projectService.retrieveProject(project.getId(), user1);
 
         matchmakerService.runMatchmaking(sourceDto.getId(), project);
 

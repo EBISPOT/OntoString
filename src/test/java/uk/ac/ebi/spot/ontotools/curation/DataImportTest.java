@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.repository.EntityRepository;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
@@ -62,6 +63,9 @@ public class DataImportTest extends IntegrationTest {
                 .andExpect(status().isCreated());
 
         assertEquals(12443, entityRepository.findAll().size());
+        for (Entity entity : entityRepository.findAll()) {
+            assertEquals(CurationConstants.CONTEXT_DEFAULT, entity.getContext());
+        }
     }
 
     @Test

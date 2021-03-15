@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
+import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.exception.BadRequestException;
@@ -22,6 +23,7 @@ import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Arrays;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS)
@@ -49,6 +51,7 @@ public class ProjectContextsController {
                                            @RequestBody @Valid ProjectContextDto projectContextDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to create project context [{}]: {}", user.getEmail(), projectId, projectContextDto.getName());
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
         Project project = projectService.createProjectContext(ProjectContextDtoAssembler.disassemble(projectContextDto), projectId, user);
         return ProjectDtoAssembler.assemble(project);
     }
@@ -63,6 +66,7 @@ public class ProjectContextsController {
     public ProjectDto updateProjectContext(@RequestBody @Valid ProjectContextDto projectContextDto, @PathVariable String projectId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to update project context [{}]: {}", user.getEmail(), projectId, projectContextDto.getName());
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
         Project updated = projectService.updateProjectContext(ProjectContextDtoAssembler.disassemble(projectContextDto), projectId, user);
         return ProjectDtoAssembler.assemble(updated);
     }
@@ -76,6 +80,7 @@ public class ProjectContextsController {
     public void deleteProjectContext(@PathVariable String projectId, @PathVariable String contextName, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to delete project context [{}]: {}", user.getEmail(), projectId, contextName);
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
         if (contextName.equalsIgnoreCase(CurationConstants.CONTEXT_DEFAULT)) {
             log.error("Cannot delete DEFAULT context for any project.");
             throw new BadRequestException("Cannot delete DEFAULT context for any project.");

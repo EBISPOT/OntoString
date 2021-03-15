@@ -226,7 +226,7 @@ public abstract class IntegrationTest {
     protected void createEntityTestData(String sourceId, String projectId, User user) {
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         entity = entityRepository.insert(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
-                RandomStringUtils.randomAlphabetic(10), sourceId, projectId, null, provenance, EntityStatus.AUTO_MAPPED));
+                CurationConstants.CONTEXT_DEFAULT, sourceId, projectId, null, provenance, EntityStatus.AUTO_MAPPED));
 
         OntologyTerm orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
                 DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia", TermStatus.CURRENT.name(), null, null));

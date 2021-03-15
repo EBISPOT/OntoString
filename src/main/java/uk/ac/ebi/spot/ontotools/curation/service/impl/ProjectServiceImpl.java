@@ -57,6 +57,7 @@ public class ProjectServiceImpl implements ProjectService {
         created.setContextIds(Arrays.asList(new String[]{projectContext.getId()}));
         created = projectRepository.save(created);
         log.info("[{}] Project created: {}", created.getName(), created.getId());
+        created.setContexts(Arrays.asList(new ProjectContext[]{projectContext}));
         return created;
     }
 
