@@ -88,7 +88,7 @@ public class PublicDataControllerTest extends IntegrationTest {
          * - Retinal dystrophy
          */
         entity = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
-                RandomStringUtils.randomAlphabetic(10), sourceDto.getId(), project.getId(), 10, provenance, EntityStatus.UNMAPPED));
+                CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), 10, provenance, EntityStatus.UNMAPPED));
         matchmakerService.runMatchmaking(sourceDto.getId(), project);
     }
 

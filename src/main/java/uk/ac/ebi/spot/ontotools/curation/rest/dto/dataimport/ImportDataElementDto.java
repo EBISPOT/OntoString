@@ -21,8 +21,8 @@ public final class ImportDataElementDto implements Serializable {
     @JsonProperty("text")
     private final String text;
 
-    @JsonProperty("upstreamField")
-    private final String upstreamField;
+    @JsonProperty("context")
+    private final String context;
 
     @JsonProperty("priority")
     private final Integer priority;
@@ -30,11 +30,11 @@ public final class ImportDataElementDto implements Serializable {
     @JsonCreator
     public ImportDataElementDto(@JsonProperty("text") String text,
                                 @JsonProperty("upstreamId") String upstreamId,
-                                @JsonProperty("upstreamField") String upstreamField,
+                                @JsonProperty("context") String context,
                                 @JsonProperty("priority") Integer priority) {
         this.upstreamId = upstreamId;
         this.text = text;
-        this.upstreamField = upstreamField;
+        this.context = context;
         this.priority = priority;
     }
 
@@ -46,8 +46,8 @@ public final class ImportDataElementDto implements Serializable {
         return upstreamId;
     }
 
-    public String getUpstreamField() {
-        return upstreamField;
+    public String getContext() {
+        return context;
     }
 
     public Integer getPriority() {

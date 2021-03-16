@@ -1,6 +1,9 @@
 package uk.ac.ebi.spot.ontotools.curation.rest.assembler;
 
+import org.apache.commons.lang3.tuple.Pair;
+import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
+import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
@@ -14,9 +17,7 @@ public class ProjectDtoAssembler {
         return new ProjectDto(project.getId(),
                 project.getName(),
                 project.getDescription(),
-                project.getDatasources() != null ? project.getDatasources().stream().map(ProjectMappingConfigDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>(),
-                project.getOntologies() != null ? project.getOntologies().stream().map(ProjectMappingConfigDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>(),
-                project.getPreferredMappingOntologies(),
+                project.getContexts().stream().map(ProjectContextDtoAssembler::assemble).collect(Collectors.toList()),
                 project.getNumberOfReviewsRequired(),
                 ProvenanceDtoAssembler.assemble(project.getCreated()));
     }
@@ -25,21 +26,20 @@ public class ProjectDtoAssembler {
         return new Project(project.getId(),
                 project.getName(),
                 project.getDescription(),
-                project.getDatasources() != null ? project.getDatasources().stream().map(ProjectMappingConfigDtoAssembler::disassemble).collect(Collectors.toList()) : new ArrayList<>(),
-                project.getOntologies() != null ? project.getOntologies().stream().map(ProjectMappingConfigDtoAssembler::disassemble).collect(Collectors.toList()) : new ArrayList<>(),
-                project.getPreferredMappingOntologies(),
                 project.getNumberOfReviewsRequired(),
-                ProvenanceDtoAssembler.disassemble(project.getCreated()));
+                null,
+                ProvenanceDtoAssembler.disassemble(project.getCreated()),
+                null);
     }
 
-    public static Project disassemble(ProjectCreationDto project, Provenance provenance) {
-        return new Project(null,
-                project.getName(),
-                project.getDescription(),
-                project.getDatasources() != null ? project.getDatasources().stream().map(ProjectMappingConfigDtoAssembler::disassemble).collect(Collectors.toList()) : new ArrayList<>(),
-                project.getOntologies() != null ? project.getOntologies().stream().map(ProjectMappingConfigDtoAssembler::disassemble).collect(Collectors.toList()) : new ArrayList<>(),
-                project.getPreferredMappingOntologies(),
-                project.getNumberOfReviewsRequired(),
-                provenance);
+    public static Pair<Project, ProjectContext> disassemble(ProjectCreationDto project, Provenance provenance) {
+        return Pair.of(new Project(null,
+                        project.getName(),
+                        project.getDescription(),
+                        project.getNumberOfReviewsRequired(),
+                        new ArrayList<>(),
+                        provenance, null),
+                new ProjectContext(null, CurationConstants.CONTEXT_DEFAULT, null, "Default context",
+                        project.getDatasources(), project.getOntologies(), project.getPreferredMappingOntologies()));
     }
 }

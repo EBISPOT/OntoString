@@ -22,4 +22,6 @@ public interface EntityService {
     Page<Entity> retrieveEntitiesForProject(String projectId, Pageable page);
 
     Entity retrieveEntity(String entityId);
+
+    void moveEntities(String projectId, String fromContext, String toContext);
 }

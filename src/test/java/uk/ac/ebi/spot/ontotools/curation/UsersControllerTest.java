@@ -36,7 +36,7 @@ public class UsersControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<UserDto> actual = mapper.readValue(response, new TypeReference<List<UserDto>>() {
+        List<UserDto> actual = mapper.readValue(response, new TypeReference<>() {
         });
 
         assertEquals(1, actual.size());
@@ -111,7 +111,7 @@ public class UsersControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        UserDto actual = mapper.readValue(response, new TypeReference<UserDto>() {
+        UserDto actual = mapper.readValue(response, new TypeReference<>() {
         });
 
         assertEquals(user2.getEmail(), actual.getEmail());
@@ -127,7 +127,7 @@ public class UsersControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<UserDto> actualList = mapper.readValue(response, new TypeReference<List<UserDto>>() {
+        List<UserDto> actualList = mapper.readValue(response, new TypeReference<>() {
         });
 
         assertEquals(2, actualList.size());
@@ -146,7 +146,7 @@ public class UsersControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        ProjectDto actualProject = mapper.readValue(response, new TypeReference<ProjectDto>() {
+        ProjectDto actualProject = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(projectDto.getName(), actualProject.getName());
         assertEquals(projectDto.getDescription(), actualProject.getDescription());
@@ -222,7 +222,7 @@ public class UsersControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        UserDto actual = mapper.readValue(response, new TypeReference<UserDto>() {
+        UserDto actual = mapper.readValue(response, new TypeReference<>() {
         });
 
         assertEquals(user2.getEmail(), actual.getEmail());
@@ -241,7 +241,7 @@ public class UsersControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        actual = mapper.readValue(response, new TypeReference<UserDto>() {
+        actual = mapper.readValue(response, new TypeReference<>() {
         });
 
         assertEquals(user2.getEmail(), actual.getEmail());
@@ -321,7 +321,7 @@ public class UsersControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        UserDto actual = mapper.readValue(response, new TypeReference<UserDto>() {
+        UserDto actual = mapper.readValue(response, new TypeReference<>() {
         });
 
         assertEquals(user2.getEmail(), actual.getEmail());
@@ -350,7 +350,7 @@ public class UsersControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<UserDto> actualList = mapper.readValue(response, new TypeReference<List<UserDto>>() {
+        List<UserDto> actualList = mapper.readValue(response, new TypeReference<>() {
         });
 
         assertEquals(1, actualList.size());

@@ -5,6 +5,7 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
@@ -81,7 +82,7 @@ public class MatchMakingTest extends IntegrationTest {
          * - Retinal dystrophy
          */
         entity = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
-                RandomStringUtils.randomAlphabetic(10), sourceDto.getId(), project.getId(), 10, provenance, EntityStatus.UNMAPPED));
+                CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), 10, provenance, EntityStatus.UNMAPPED));
     }
 
     @Test

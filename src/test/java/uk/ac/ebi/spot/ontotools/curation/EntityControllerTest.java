@@ -67,13 +67,14 @@ public class EntityControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        RestResponsePage<EntityDto> entitiesPage = mapper.readValue(response, new TypeReference<RestResponsePage<EntityDto>>() {
+        RestResponsePage<EntityDto> entitiesPage = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(1, entitiesPage.getTotalElements());
 
         EntityDto actual = entitiesPage.getContent().get(0);
         assertEquals("Achondroplasia", actual.getName());
         assertEquals(EntityStatus.AUTO_MAPPED.name(), actual.getMappingStatus());
+        assertEquals(CurationConstants.CONTEXT_DEFAULT, actual.getContext());
 
         assertNotNull(actual.getMapping());
         assertEquals("Orphanet:15", actual.getMapping().getOntologyTerms().get(0).getCurie());
@@ -109,11 +110,12 @@ public class EntityControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        EntityDto actual = mapper.readValue(response, new TypeReference<EntityDto>() {
+        EntityDto actual = mapper.readValue(response, new TypeReference<>() {
         });
 
         assertEquals("Achondroplasia", actual.getName());
         assertEquals(EntityStatus.AUTO_MAPPED.name(), actual.getMappingStatus());
+        assertEquals(CurationConstants.CONTEXT_DEFAULT, actual.getContext());
 
         assertNotNull(actual.getMapping());
         assertEquals("Orphanet:15", actual.getMapping().getOntologyTerms().get(0).getCurie());

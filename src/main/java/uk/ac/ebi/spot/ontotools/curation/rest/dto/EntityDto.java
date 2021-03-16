@@ -31,8 +31,11 @@ public final class EntityDto implements Serializable {
     @JsonProperty("upstreamId")
     private final String upstreamId;
 
-    @JsonProperty("upstreamField")
-    private final String upstreamField;
+    @JsonProperty("context")
+    private final String context;
+
+    @JsonProperty("priority")
+    private final Integer priority;
 
     @JsonProperty("mappingStatus")
     private final String mappingStatus;
@@ -54,7 +57,8 @@ public final class EntityDto implements Serializable {
                      @JsonProperty("source") SourceDto source,
                      @JsonProperty("name") String name,
                      @JsonProperty("upstreamId") String upstreamId,
-                     @JsonProperty("upstreamField") String upstreamField,
+                     @JsonProperty("context") String context,
+                     @JsonProperty("priority") Integer priority,
                      @JsonProperty("mappingStatus") String mappingStatus,
                      @JsonProperty("mappingSuggestions") List<MappingSuggestionDto> mappingSuggestions,
                      @JsonProperty("mapping") MappingDto mapping,
@@ -64,7 +68,8 @@ public final class EntityDto implements Serializable {
         this.source = source;
         this.name = name;
         this.upstreamId = upstreamId;
-        this.upstreamField = upstreamField;
+        this.priority = priority;
+        this.context = context;
         this.mappingStatus = mappingStatus;
         this.mappingSuggestions = mappingSuggestions;
         this.mapping = mapping;
@@ -105,8 +110,12 @@ public final class EntityDto implements Serializable {
         return upstreamId;
     }
 
-    public String getUpstreamField() {
-        return upstreamField;
+    public String getContext() {
+        return context;
+    }
+
+    public Integer getPriority() {
+        return priority;
     }
 
     public List<AuditEntryDto> getAuditTrail() {
