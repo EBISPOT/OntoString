@@ -34,6 +34,9 @@ public final class EntityDto implements Serializable {
     @JsonProperty("context")
     private final String context;
 
+    @JsonProperty("priority")
+    private final Integer priority;
+
     @JsonProperty("mappingStatus")
     private final String mappingStatus;
 
@@ -55,6 +58,7 @@ public final class EntityDto implements Serializable {
                      @JsonProperty("name") String name,
                      @JsonProperty("upstreamId") String upstreamId,
                      @JsonProperty("context") String context,
+                     @JsonProperty("priority") Integer priority,
                      @JsonProperty("mappingStatus") String mappingStatus,
                      @JsonProperty("mappingSuggestions") List<MappingSuggestionDto> mappingSuggestions,
                      @JsonProperty("mapping") MappingDto mapping,
@@ -64,6 +68,7 @@ public final class EntityDto implements Serializable {
         this.source = source;
         this.name = name;
         this.upstreamId = upstreamId;
+        this.priority = priority;
         this.context = context;
         this.mappingStatus = mappingStatus;
         this.mappingSuggestions = mappingSuggestions;
@@ -107,6 +112,10 @@ public final class EntityDto implements Serializable {
 
     public String getContext() {
         return context;
+    }
+
+    public Integer getPriority() {
+        return priority;
     }
 
     public List<AuditEntryDto> getAuditTrail() {
