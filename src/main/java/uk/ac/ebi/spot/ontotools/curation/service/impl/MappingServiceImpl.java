@@ -19,6 +19,7 @@ import uk.ac.ebi.spot.ontotools.curation.service.MappingService;
 import uk.ac.ebi.spot.ontotools.curation.service.OntologyTermService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MappingServiceImpl implements MappingService {
@@ -35,22 +36,17 @@ public class MappingServiceImpl implements MappingService {
     private AuditEntryService auditEntryService;
 
     @Override
-    public Mapping createMapping(Entity entity, OntologyTerm ontologyTerm, Provenance provenance) {
-        log.info("Creating mapping for entity [{}]: {}", entity.getName(), ontologyTerm.getCurie());
-        Optional<Mapping> mappingOptional = mappingRepository.findByEntityId(entity.getId());
-        if (mappingOptional.isPresent()) {
-            if (mappingOptional.get().getOntologyTermIds().contains(ontologyTerm.getId())) {
-                log.warn("Mapping for between entity [{}] and ontology term [{}] already exists: {}", entity.getName(), ontologyTerm.getCurie(), mappingOptional.get().getId());
-                return mappingOptional.get();
-            }
-        }
-
-        Mapping created = mappingRepository.insert(new Mapping(null, entity.getId(), Arrays.asList(new String[]{ontologyTerm.getId()}), entity.getProjectId(),
+    public Mapping createMapping(Entity entity, List<OntologyTerm> ontologyTerms, Provenance provenance) {
+        log.info("Creating mapping for entity [{}]: {}", entity.getName(), ontologyTerms);
+        List<String> ontologyTermIds = ontologyTerms.stream().map(OntologyTerm::getId).collect(Collectors.toList());
+        Mapping created = mappingRepository.insert(new Mapping(null, entity.getId(), ontologyTermIds, entity.getProjectId(),
                 false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
-        created.setOntologyTerms(Arrays.asList(new OntologyTerm[]{ontologyTerm}));
+        created.setOntologyTerms(ontologyTerms);
 
-        auditEntryService.addEntry(AuditEntryConstants.ADDED_MAPPING.name(), entity.getId(), provenance, Map.of(ontologyTerm.getIri(), ontologyTerm.getLabel()));
-        log.info("Mapping for between entity [{}] and ontology term [{}] created: {}", entity.getName(), ontologyTerm.getCurie(), created.getId());
+        for (OntologyTerm ontologyTerm : ontologyTerms) {
+            auditEntryService.addEntry(AuditEntryConstants.ADDED_MAPPING.name(), entity.getId(), provenance, Map.of(ontologyTerm.getIri(), ontologyTerm.getLabel()));
+        }
+        log.info("Mapping for between entity [{}] and ontology term [{}] created: {}", entity.getName(), ontologyTerms, created.getId());
         return created;
     }
 

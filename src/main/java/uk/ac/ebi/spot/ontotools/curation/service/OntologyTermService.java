@@ -18,4 +18,6 @@ public interface OntologyTermService {
     OntologyTerm retrieveTermByCurie(String curie);
 
     OntologyTerm retrieveTermById(String ontologyTermId);
+
+    List<OntologyTerm> retrieveTermByCuries(List<String> curies);
 }

@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS)
@@ -79,26 +80,27 @@ public class MappingsController {
     @ResponseStatus(HttpStatus.CREATED)
     public MappingDto createMapping(@PathVariable String projectId, @RequestBody @Valid MappingCreationDto mappingCreationDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
-        log.info("[{}] Request to create mapping: {} | {} | {}", user.getEmail(), projectId, mappingCreationDto.getEntityId(), mappingCreationDto.getOntologyTerm());
+        log.info("[{}] Request to create mapping: {} | {} | {}", user.getEmail(), projectId, mappingCreationDto.getEntityId(), mappingCreationDto.getOntologyTerms());
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
 
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         Entity entity = entityService.retrieveEntity(mappingCreationDto.getEntityId());
-        OntologyTerm ontologyTerm = ontologyTermService.retrieveTermByCurie(mappingCreationDto.getOntologyTerm().getCurie());
-
         /**
          * Check if a mapping to this term already exists
          */
         Mapping existingMapping = mappingService.retrieveMappingForEntity(entity.getId());
         if (existingMapping != null) {
-            log.warn("[{}] Mapping to term [{}] already exists.", entity.getName(), ontologyTerm.getCurie());
+            log.warn("Entity [{}] already has a mapping.", entity.getName());
             return MappingDtoAssembler.assemble(existingMapping);
         }
+
+        List<String> curies = mappingCreationDto.getOntologyTerms().stream().map(OntologyTermDto::getCurie).collect(Collectors.toList());
+        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveTermByCuries(curies);
 
         /**
          * Create new mapping.
          */
-        Mapping created = mappingService.createMapping(entity, ontologyTerm, provenance);
+        Mapping created = mappingService.createMapping(entity, ontologyTerms, provenance);
 
         /**
          * Updating mapping status to MANUAL.
@@ -108,7 +110,9 @@ public class MappingsController {
         /**
          * Deleting mapping suggestions associated with the current ontology term.
          */
-        mappingSuggestionsService.deleteMappingSuggestions(entity.getId(), ontologyTerm, provenance);
+        for (OntologyTerm ontologyTerm : ontologyTerms) {
+            mappingSuggestionsService.deleteMappingSuggestions(entity.getId(), ontologyTerm, provenance);
+        }
         return MappingDtoAssembler.assemble(created);
     }
 

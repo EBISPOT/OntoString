@@ -137,6 +137,14 @@ public class OntologyTermServiceImpl implements OntologyTermService {
         return ontologyTermOp.get();
     }
 
+    @Override
+    public List<OntologyTerm> retrieveTermByCuries(List<String> curies) {
+        log.info("Retrieving ontology terms: {}", curies);
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findByCurieIn(curies);
+        log.info("Found {} ontology terms.", ontologyTerms.size());
+        return ontologyTerms;
+    }
+
     private String parseStatus(List<OLSTermDto> preferredOntoResponse, List<OLSTermDto> parentOntoResponse, String previousState) {
         if (CollectionUtils.isEmpty(preferredOntoResponse) && CollectionUtils.isEmpty(parentOntoResponse)) {
             return TermStatus.DELETED.name();

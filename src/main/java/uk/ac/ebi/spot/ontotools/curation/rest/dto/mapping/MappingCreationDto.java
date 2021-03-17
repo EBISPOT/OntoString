@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 @EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -19,18 +20,19 @@ public final class MappingCreationDto implements Serializable {
     private final String entityId;
 
     @NotNull
-    @JsonProperty("ontologyTerm")
-    private final OntologyTermDto ontologyTerm;
+    @JsonProperty("ontologyTerms")
+    private final List<OntologyTermDto> ontologyTerms;
 
     @JsonCreator
     public MappingCreationDto(@JsonProperty("entityId") String entityId,
-                              @JsonProperty("ontologyTerm") OntologyTermDto ontologyTerm) {
+                              @JsonProperty("ontologyTerms") List<OntologyTermDto> ontologyTerms) {
         this.entityId = entityId;
-        this.ontologyTerm = ontologyTerm;
+        this.ontologyTerms = ontologyTerms;
     }
 
-    public OntologyTermDto getOntologyTerm() {
-        return ontologyTerm;
+
+    public List<OntologyTermDto> getOntologyTerms() {
+        return ontologyTerms;
     }
 
     public String getEntityId() {
