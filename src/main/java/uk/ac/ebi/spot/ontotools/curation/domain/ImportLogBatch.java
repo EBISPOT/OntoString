@@ -29,7 +29,7 @@ public class ImportLogBatch {
 
     private DateTime timestamp;
 
-    private long totalTime;
+    private int totalTime;
 
     private int totalCount;
 

@@ -8,5 +8,5 @@ public interface ImportLogService {
 
     String createBatch(String projectId, String sourceId);
 
-    void updateBatch(String batchId, long tTime, int count, int successful);
+    void updateBatch(String batchId, int tTime, int count, int successful);
 }

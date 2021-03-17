@@ -36,7 +36,7 @@ public class ImportLogServiceImpl implements ImportLogService {
 
     @Async(value = "applicationTaskExecutor")
     @Override
-    public void updateBatch(String batchId, long tTime, int count, int successful) {
+    public void updateBatch(String batchId, int tTime, int count, int successful) {
         Optional<ImportLogBatch> importLogBatchOptional = importLogBatchRepository.findById(batchId);
         if (importLogBatchOptional.isPresent()) {
             ImportLogBatch importLogBatch = importLogBatchOptional.get();

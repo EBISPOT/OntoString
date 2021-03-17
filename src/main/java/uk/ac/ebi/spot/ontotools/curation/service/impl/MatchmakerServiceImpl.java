@@ -58,10 +58,11 @@ public class MatchmakerServiceImpl implements MatchmakerService {
     public void runMatchmaking(String sourceId, Project project) {
         log.info("Running auto-mapping for source: {}", sourceId);
         User robotUser = userService.retrieveRobotUser();
+        String batchId = matchmakingLogService.createBatch(project.getId());
 
         long sTime = System.currentTimeMillis();
         Stream<Entity> entityStream = entityService.retrieveEntitiesForSource(sourceId);
-        entityStream.forEach(entity -> this.autoMap(entity, project, robotUser, matchmakingLogService.createBatch(project.getId())));
+        entityStream.forEach(entity -> this.autoMap(entity, project, robotUser, batchId));
         entityStream.close();
         long eTime = System.currentTimeMillis();
         log.info("[{}] Auto-mapping done in {}s", sourceId, (eTime - sTime) / 1000);

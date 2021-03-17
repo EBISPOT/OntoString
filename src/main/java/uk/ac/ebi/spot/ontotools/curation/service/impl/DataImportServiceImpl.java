@@ -85,7 +85,7 @@ public class DataImportServiceImpl implements DataImportService {
             long eTime = System.currentTimeMillis();
             long tTime = (eTime - sTime) / 1000;
             log.info("{} entities created [{}s]", count, tTime);
-            importLogService.updateBatch(batchId, tTime, count, successful);
+            importLogService.updateBatch(batchId, (int) tTime, count, successful);
             matchmakerService.runMatchmaking(source.getId(), project);
         } catch (IOException e) {
             log.error("Unable to deserialize import data file: {}", e.getMessage(), e);
