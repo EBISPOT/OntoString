@@ -54,12 +54,12 @@ public class MappingsController {
     private OntologyTermService ontologyTermService;
 
     /**
-     * GET /v1/projects/{projectId}/mappings?entityId=<entityId>
+     * GET /v1/projects/{projectId}/entities/{entityId}/mapping
      */
-    @GetMapping(value = "/{projectId}" + CurationConstants.API_MAPPINGS,
+    @GetMapping(value = "/{projectId}" + CurationConstants.API_ENTITIES + "/{entityId}" + CurationConstants.API_MAPPING,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public List<MappingDto> getMappings(@PathVariable String projectId, @RequestParam(value = CurationConstants.PARAM_ENTITY_ID) String entityId, HttpServletRequest request) {
+    public MappingDto getMapping(@PathVariable String projectId, @PathVariable String entityId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve mappings: {} | {}", user.getEmail(), projectId, entityId);
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
@@ -68,23 +68,24 @@ public class MappingsController {
         if (mapping == null) {
             return null;
         }
-        return Arrays.asList(new MappingDto[]{MappingDtoAssembler.assemble(mapping)});
+        return MappingDtoAssembler.assemble(mapping);
     }
 
     /**
-     * POST /v1/projects/{projectId}/mappings
+     * POST /v1/projects/{projectId}/entities/{entityId}/mapping
      */
-    @PostMapping(value = "/{projectId}" + CurationConstants.API_MAPPINGS,
+    @PostMapping(value = "/{projectId}" + CurationConstants.API_ENTITIES + "/{entityId}" + CurationConstants.API_MAPPING,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public MappingDto createMapping(@PathVariable String projectId, @RequestBody @Valid MappingCreationDto mappingCreationDto, HttpServletRequest request) {
+    public MappingDto createMapping(@PathVariable String projectId, @PathVariable String entityId,
+                                    @RequestBody @Valid MappingCreationDto mappingCreationDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
-        log.info("[{}] Request to create mapping: {} | {} | {}", user.getEmail(), projectId, mappingCreationDto.getEntityId(), mappingCreationDto.getOntologyTerms());
+        log.info("[{}] Request to create mapping: {} | {} | {}", user.getEmail(), projectId, entityId, mappingCreationDto.getOntologyTerms());
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
 
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
-        Entity entity = entityService.retrieveEntity(mappingCreationDto.getEntityId());
+        Entity entity = entityService.retrieveEntity(entityId);
         /**
          * Check if a mapping to this term already exists
          */
