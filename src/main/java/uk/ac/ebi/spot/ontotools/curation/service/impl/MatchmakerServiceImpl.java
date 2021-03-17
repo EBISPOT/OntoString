@@ -19,10 +19,7 @@ import uk.ac.ebi.spot.ontotools.curation.rest.dto.zooma.ZoomaResponseDto;
 import uk.ac.ebi.spot.ontotools.curation.service.*;
 import uk.ac.ebi.spot.ontotools.curation.util.CurationUtil;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants.ZOOMA_CONFIDENCE_HIGH;
@@ -70,6 +67,12 @@ public class MatchmakerServiceImpl implements MatchmakerService {
 
 
     private void autoMap(Entity entity, Project project, User user, String batchId) {
+        if (entity.getMappingStatus().equals(EntityStatus.MANUALLY_MAPPED) ||
+                entity.getMappingStatus().equals(EntityStatus.AUTO_MAPPED)) {
+            log.info("Entity [{}] has mapping status [{}]. Will not attempt re-mapping it.", entity.getName(), entity.getMappingStatus().name());
+            return;
+        }
+
         Pair<ProjectContext, Boolean> projectContextInfo = CurationUtil.findContext(entity.getContext(), project);
         if (!projectContextInfo.getRight()) {
             log.error("Cannot find context [{}] for entity [{}] in project: {}", entity.getContext(), entity.getName(), project.getId());
@@ -127,16 +130,17 @@ public class MatchmakerServiceImpl implements MatchmakerService {
                 termsCreated.add(ontologyTerm);
                 mappingSuggestionsService.createMappingSuggestion(entity, ontologyTerm, provenance);
 
+                if (entity.getMappingStatus().equals(EntityStatus.MANUALLY_MAPPED) || entity.getMappingStatus().equals(EntityStatus.AUTO_MAPPED)) {
+                    continue;
+                }
+
                 if (highConfidenceIRIs.contains(ontologyTerm.getIri())) {
-                    if (entity.getMappingStatus().equals(EntityStatus.UNMAPPED) || entity.getMappingStatus().equals(EntityStatus.SUGGESTIONS_PROVIDED)) {
-                        mappingService.createMapping(entity, ontologyTerm, provenance);
-                        entity = entityService.updateMappingStatus(entity, EntityStatus.AUTO_MAPPED);
-                        log.info("Found high confidence mapping for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
-                    }
+                    mappingService.createMapping(entity, Arrays.asList(new OntologyTerm[]{ontologyTerm}), provenance);
+                    entity = entityService.updateMappingStatus(entity, EntityStatus.AUTO_MAPPED);
+                    log.info("Found high confidence mapping for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
                 } else {
-                    if (entity.getName().equalsIgnoreCase(ontologyTerm.getLabel()) &&
-                            (entity.getMappingStatus().equals(EntityStatus.UNMAPPED) || entity.getMappingStatus().equals(EntityStatus.SUGGESTIONS_PROVIDED))) {
-                        mappingService.createMapping(entity, ontologyTerm, provenance);
+                    if (entity.getName().equalsIgnoreCase(ontologyTerm.getLabel())) {
+                        mappingService.createMapping(entity, Arrays.asList(new OntologyTerm[]{ontologyTerm}), provenance);
                         entity = entityService.updateMappingStatus(entity, EntityStatus.AUTO_MAPPED);
                         log.info("Found exact text matching for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
                     }

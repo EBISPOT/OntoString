@@ -12,4 +12,6 @@ public interface OntologyTermRepository extends MongoRepository<OntologyTerm, St
     Optional<OntologyTerm> findByIriHash(String iriHash);
 
     Optional<OntologyTerm> findByCurie(String curie);
+
+    List<OntologyTerm> findByCurieIn(List<String> curies);
 }

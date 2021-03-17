@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface MappingService {
 
-    Mapping createMapping(Entity entity, OntologyTerm ontologyTerm, Provenance provenance);
+    Mapping createMapping(Entity entity, List<OntologyTerm> ontologyTerms, Provenance provenance);
 
     Map<String, Mapping> retrieveMappingsForEntities(List<String> entityIds);
 

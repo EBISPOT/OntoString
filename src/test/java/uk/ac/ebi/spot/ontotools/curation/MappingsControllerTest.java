@@ -15,7 +15,6 @@ import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.audit.AuditEntryDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
@@ -73,7 +72,7 @@ public class MappingsControllerTest extends IntegrationTest {
     public void shouldCreateMapping() throws Exception {
         OntologyTerm ontologyTerm = ontologyTermRepository.findByCurie("MONDO:0007037").get();
         OntologyTermDto ontologyTermDto = OntologyTermDtoAssembler.assemble(ontologyTerm);
-        MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(), ontologyTermDto);
+        MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(), Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
         mappingRepository.deleteAll();
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
@@ -254,8 +253,9 @@ public class MappingsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotCreateMapping() throws Exception {
+        OntologyTermDto ontologyTermDto = new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037", "Achondroplasia", TermStatus.NEEDS_IMPORT.name(), null, null);
         MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(),
-                new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037", "Achondroplasia", TermStatus.NEEDS_IMPORT.name(), null, null));
+                Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
         mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -269,8 +269,9 @@ public class MappingsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotCreateMappingAsConsumer() throws Exception {
+        OntologyTermDto ontologyTermDto = new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037", "Achondroplasia", TermStatus.NEEDS_IMPORT.name(), null, null);
         MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(),
-                new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037", "Achondroplasia", TermStatus.NEEDS_IMPORT.name(), null, null));
+                Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
         userService.addUserToProject(super.user2, project.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
