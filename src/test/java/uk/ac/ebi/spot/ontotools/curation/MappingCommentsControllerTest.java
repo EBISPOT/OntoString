@@ -61,8 +61,7 @@ public class MappingCommentsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldCreateComment() throws Exception {
-        List<MappingDto> actual = super.retrieveMapping(project.getId());
-        MappingDto mappingDto = actual.get(0);
+        MappingDto mappingDto = super.retrieveMapping(project.getId());
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
                 CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_COMMENTS;
@@ -88,8 +87,7 @@ public class MappingCommentsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetComments() throws Exception {
-        List<MappingDto> actual = super.retrieveMapping(project.getId());
-        MappingDto mappingDto = actual.get(0);
+        MappingDto mappingDto = super.retrieveMapping(project.getId());
         mappingService.addCommentToMapping(mappingDto.getId(), "New comment", ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
@@ -113,8 +111,7 @@ public class MappingCommentsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotCreateComment() throws Exception {
-        List<MappingDto> actual = super.retrieveMapping(project.getId());
-        MappingDto mappingDto = actual.get(0);
+        MappingDto mappingDto = super.retrieveMapping(project.getId());
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
                 CurationConstants.API_MAPPINGS + "/" + mappingDto.getId() + CurationConstants.API_COMMENTS;
@@ -130,8 +127,7 @@ public class MappingCommentsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotGetComments() throws Exception {
-        List<MappingDto> actual = super.retrieveMapping(project.getId());
-        MappingDto mappingDto = actual.get(0);
+        MappingDto mappingDto = super.retrieveMapping(project.getId());
         mappingService.addCommentToMapping(mappingDto.getId(), "New comment", ProvenanceDtoAssembler.disassemble(mappingDto.getCreated()));
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +

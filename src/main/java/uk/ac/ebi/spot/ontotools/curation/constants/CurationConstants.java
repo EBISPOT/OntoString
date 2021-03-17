@@ -14,6 +14,8 @@ public class CurationConstants {
 
     public static final String API_MAPPINGS = "/mappings";
 
+    public static final String API_MAPPING = "/mapping";
+
     public static final String API_EXPORT = "/export";
 
     public static final String API_DOWNLOAD = "/download";

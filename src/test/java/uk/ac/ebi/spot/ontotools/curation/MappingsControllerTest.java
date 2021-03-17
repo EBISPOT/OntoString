@@ -55,27 +55,27 @@ public class MappingsControllerTest extends IntegrationTest {
     }
 
     /**
-     * GET /v1/projects/{projectId}/mappings?entityId=<entityId>
+     * GET /v1/projects/{projectId}/entities/{entityId}/mapping
      */
     @Test
     public void shouldGetMappings() throws Exception {
-        List<MappingDto> actual = super.retrieveMapping(project.getId());
-        assertEquals(1, actual.size());
-        assertEquals("Orphanet:15", actual.get(0).getOntologyTerms().get(0).getCurie());
-        assertEquals(MappingStatus.AWAITING_REVIEW.name(), actual.get(0).getStatus());
+        MappingDto actual = super.retrieveMapping(project.getId());
+        assertEquals("Orphanet:15", actual.getOntologyTerms().get(0).getCurie());
+        assertEquals(MappingStatus.AWAITING_REVIEW.name(), actual.getStatus());
     }
 
     /**
-     * POST /v1/projects/{projectId}/mappings
+     * POST /v1/projects/{projectId}/entities/{entityId}/mapping
      */
     @Test
     public void shouldCreateMapping() throws Exception {
         OntologyTerm ontologyTerm = ontologyTermRepository.findByCurie("MONDO:0007037").get();
         OntologyTermDto ontologyTermDto = OntologyTermDtoAssembler.assemble(ontologyTerm);
-        MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(), Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
+        MappingCreationDto mappingCreationDto = new MappingCreationDto(Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
         mappingRepository.deleteAll();
 
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_ENTITIES + "/" + entity.getId() + CurationConstants.API_MAPPING;
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(mappingCreationDto))
@@ -137,12 +137,12 @@ public class MappingsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldUpdateMapping() throws Exception {
-        List<MappingDto> mappingDtos = super.retrieveMapping(project.getId());
+        MappingDto mappingDto = super.retrieveMapping(project.getId());
         List<OntologyTermDto> ontologyTermDtos = new ArrayList<>();
         ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("MONDO:0007037").get()));
         ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("Orphanet:15").get()));
 
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + mappingDtos.get(0).getId();
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + mappingDto.getId();
         String response = mockMvc.perform(put(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(ontologyTermDtos))
@@ -205,9 +205,9 @@ public class MappingsControllerTest extends IntegrationTest {
     @Test
     public void shouldDeleteMapping() throws Exception {
         mappingSuggestionRepository.deleteAll();
-        List<MappingDto> actual = super.retrieveMapping(project.getId());
+        MappingDto actual = super.retrieveMapping(project.getId());
 
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + actual.get(0).getId();
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + actual.getId();
         mockMvc.perform(delete(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token1"))
@@ -249,14 +249,14 @@ public class MappingsControllerTest extends IntegrationTest {
     }
 
     /**
-     * POST /v1/projects/{projectId}/mappings
+     * POST /v1/projects/{projectId}/entities/{entityId}/mapping
      */
     @Test
     public void shouldNotCreateMapping() throws Exception {
         OntologyTermDto ontologyTermDto = new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037", "Achondroplasia", TermStatus.NEEDS_IMPORT.name(), null, null);
-        MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(),
-                Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
+        MappingCreationDto mappingCreationDto = new MappingCreationDto(Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_ENTITIES + "/" + entity.getId() + CurationConstants.API_MAPPING;
         mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(mappingCreationDto))
@@ -265,16 +265,16 @@ public class MappingsControllerTest extends IntegrationTest {
     }
 
     /**
-     * POST /v1/projects/{projectId}/mappings
+     * POST /v1/projects/{projectId}/entities/{entityId}/mapping
      */
     @Test
     public void shouldNotCreateMappingAsConsumer() throws Exception {
         OntologyTermDto ontologyTermDto = new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037", "Achondroplasia", TermStatus.NEEDS_IMPORT.name(), null, null);
-        MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(),
-                Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
+        MappingCreationDto mappingCreationDto = new MappingCreationDto(Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
         userService.addUserToProject(super.user2, project.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
 
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_ENTITIES + "/" + entity.getId() + CurationConstants.API_MAPPING;
         mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(mappingCreationDto))
@@ -287,9 +287,8 @@ public class MappingsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotDeleteMapping() throws Exception {
-        List<MappingDto> actual = super.retrieveMapping(project.getId());
-        MappingDto mappingDto = actual.get(0);
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + mappingDto.getId();
+        MappingDto actual = super.retrieveMapping(project.getId());
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + actual.getId();
         mockMvc.perform(delete(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token2"))
@@ -301,11 +300,10 @@ public class MappingsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotDeleteMappingAsConsumer() throws Exception {
-        List<MappingDto> actual = super.retrieveMapping(project.getId());
-        MappingDto mappingDto = actual.get(0);
+        MappingDto actual = super.retrieveMapping(project.getId());
         userService.addUserToProject(super.user2, project.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
 
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + mappingDto.getId();
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + actual.getId();
         mockMvc.perform(delete(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token2"))

@@ -239,9 +239,9 @@ public abstract class IntegrationTest {
                 projectId, false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
     }
 
-    protected List<MappingDto> retrieveMapping(String projectId) throws Exception {
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectId + CurationConstants.API_MAPPINGS
-                + "?entityId=" + entity.getId();
+    protected MappingDto retrieveMapping(String projectId) throws Exception {
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectId +
+                CurationConstants.API_ENTITIES + "/" + entity.getId() + CurationConstants.API_MAPPING;
         String response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token1"))
@@ -250,7 +250,7 @@ public abstract class IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<MappingDto> actual = mapper.readValue(response, new TypeReference<>() {
+        MappingDto actual = mapper.readValue(response, new TypeReference<>() {
         });
         return actual;
     }
