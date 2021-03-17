@@ -159,7 +159,6 @@ public abstract class IntegrationTest {
                                        String preferredMappingOntology, int noReviewsRequired) throws Exception {
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS;
 
-
         ProjectCreationDto projectCreationDto = new ProjectCreationDto(name, "Description", noReviewsRequired,
                 datasources != null ? datasources : new ArrayList<>(),
                 ontologies != null ? ontologies : new ArrayList<>(),

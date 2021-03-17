@@ -48,7 +48,7 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
     }
 
     @Override
-    @Async
+    @Async(value = "applicationTaskExecutor")
     public void deleteMappingSuggestionsExcluding(Entity entity, List<OntologyTerm> ontologyTerms, Provenance provenance) {
         log.info("Deleting [{}] old mapping suggestions for: {}", ontologyTerms.size(), entity.getName());
         List<String> ontologyTermIds = new ArrayList<>();

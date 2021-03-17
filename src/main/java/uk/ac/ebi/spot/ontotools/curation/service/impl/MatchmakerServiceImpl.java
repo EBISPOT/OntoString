@@ -1,13 +1,14 @@
 package uk.ac.ebi.spot.ontotools.curation.service.impl;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
+import uk.ac.ebi.spot.ontotools.curation.domain.MatchmakingLogEntry;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
@@ -49,6 +50,9 @@ public class MatchmakerServiceImpl implements MatchmakerService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private MatchmakingLogService matchmakingLogService;
+
     @Override
     @Async(value = "applicationTaskExecutor")
     public void runMatchmaking(String sourceId, Project project) {
@@ -57,35 +61,20 @@ public class MatchmakerServiceImpl implements MatchmakerService {
 
         long sTime = System.currentTimeMillis();
         Stream<Entity> entityStream = entityService.retrieveEntitiesForSource(sourceId);
-        entityStream.forEach(entity -> this.autoMap(entity, project, robotUser));
+        entityStream.forEach(entity -> this.autoMap(entity, project, robotUser, matchmakingLogService.createBatch(project.getId())));
         entityStream.close();
         long eTime = System.currentTimeMillis();
         log.info("[{}] Auto-mapping done in {}s", sourceId, (eTime - sTime) / 1000);
     }
 
-    private ProjectContext findContext(String contextName, String entityName, Project project) {
-        ProjectContext projectContext = null;
-        ProjectContext defaultContext = null;
-        for (ProjectContext pc : project.getContexts()) {
-            if (pc.getName().equalsIgnoreCase(contextName)) {
-                projectContext = pc;
-                break;
-            }
-            if (pc.getName().equalsIgnoreCase(CurationConstants.CONTEXT_DEFAULT)) {
-                defaultContext = pc;
-            }
+
+    private void autoMap(Entity entity, Project project, User user, String batchId) {
+        Pair<ProjectContext, Boolean> projectContextInfo = CurationUtil.findContext(entity.getContext(), project);
+        if (!projectContextInfo.getRight()) {
+            log.error("Cannot find context [{}] for entity [{}] in project: {}", entity.getContext(), entity.getName(), project.getId());
         }
+        ProjectContext projectContext = projectContextInfo.getLeft();
 
-        if (projectContext == null) {
-            log.error("Cannot find context [{}] for entity [{}] in project: {}", contextName, entityName, project.getId());
-            return defaultContext;
-        }
-
-        return projectContext;
-    }
-
-    private void autoMap(Entity entity, Project project, User user) {
-        ProjectContext projectContext = this.findContext(entity.getContext(), entity.getName(), project);
         List<String> projectDatasources = projectContext.getDatasources();
         List<String> projectOntologies = projectContext.getOntologies();
 
@@ -127,6 +116,8 @@ public class MatchmakerServiceImpl implements MatchmakerService {
             }
         }
 
+        matchmakingLogService.logEntry(new MatchmakingLogEntry(null, batchId, entity.getId(),
+                entity.getName(), highConfidenceIRIs, finalIRIs));
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         List<OntologyTerm> termsCreated = new ArrayList<>();
         for (String iri : finalIRIs) {

@@ -61,7 +61,7 @@ public class ExportExecutorServiceImpl implements ExportExecutorService {
     }
 
     @Override
-    @Async
+    @Async(value = "applicationTaskExecutor")
     public void addToQueue(ProjectExportRequest projectExportRequest) {
         log.info("Adding request to queue: {} | {}", projectExportRequest.getProjectId(), projectExportRequest.getRequestId());
         requestQueue.add(projectExportRequest.getId());

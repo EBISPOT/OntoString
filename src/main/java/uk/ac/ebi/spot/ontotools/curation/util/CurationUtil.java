@@ -1,6 +1,10 @@
 package uk.ac.ebi.spot.ontotools.curation.util;
 
+import org.apache.commons.lang3.tuple.Pair;
+import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
+import uk.ac.ebi.spot.ontotools.curation.domain.Project;
+import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,6 +70,26 @@ public class CurationUtil {
             map.put(split[0].trim().toLowerCase(), split[1].trim().toLowerCase());
         }
         return map;
+    }
+
+    public static Pair<ProjectContext, Boolean> findContext(String contextName, Project project) {
+        ProjectContext projectContext = null;
+        ProjectContext defaultContext = null;
+        for (ProjectContext pc : project.getContexts()) {
+            if (pc.getName().equalsIgnoreCase(contextName)) {
+                projectContext = pc;
+                break;
+            }
+            if (pc.getName().equalsIgnoreCase(CurationConstants.CONTEXT_DEFAULT)) {
+                defaultContext = pc;
+            }
+        }
+
+        if (projectContext == null) {
+            return Pair.of(defaultContext, false);
+        }
+
+        return Pair.of(projectContext, true);
     }
 
 }

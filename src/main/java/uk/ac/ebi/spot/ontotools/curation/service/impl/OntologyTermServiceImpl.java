@@ -46,50 +46,56 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     @Override
     public OntologyTerm createTerm(String iri, ProjectContext projectContext) {
         log.info("Creating term: {}", iri);
-        Optional<OntologyTerm> ontologyTermOp = ontologyTermRepository.findByIriHash(DigestUtils.sha256Hex(iri));
-        if (ontologyTermOp.isPresent()) {
-            log.warn("Ontology term already exists: {} | {}", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel());
-            return ontologyTermOp.get();
-        }
-
-        List<OLSTermDto> preferredOntoResponse = new ArrayList<>();
-        for (String preferredOntology : projectContext.getPreferredMappingOntologies()) {
-            preferredOntoResponse.addAll(olsService.retrieveTerms(preferredOntology, iri));
-        }
-        List<OLSTermDto> parentOntoResponse = new ArrayList<>();
-        String ontoId = CurationUtil.ontoFromIRI(iri);
-        String termStatus;
-        if (!projectContext.getPreferredMappingOntologies().contains(ontoId.toLowerCase())) {
-            parentOntoResponse = olsService.retrieveTerms(ontoId, iri);
-            termStatus = parseStatus(preferredOntoResponse, parentOntoResponse, null);
-        } else {
-            termStatus = parseStatus(preferredOntoResponse, null, null);
-        }
-
-        OntologyTerm ot;
-        if (termStatus.equalsIgnoreCase(TermStatus.DELETED.name())) {
-            /**
-             * TODO: Discuss
-             *
-             * Previous code:
-             * ot = new OntologyTerm(null, "Not found", iri, DigestUtils.sha256Hex(iri), "Not found", MappingStatus.DELETED.name(), null, null);
-             */
-            log.warn("Found DELETED term: {}", iri);
-            return null;
-        } else {
-            if (termStatus.equalsIgnoreCase(TermStatus.CURRENT.name())) {
-                OLSTermDto olsTermDto = preferredOntoResponse.get(0);
-                ot = new OntologyTerm(null, olsTermDto.getCurie(), iri,
-                        DigestUtils.sha256Hex(iri), olsTermDto.getLabel(), TermStatus.CURRENT.name(), null, null);
-            } else {
-                OLSTermDto olsTermDto = parentOntoResponse.get(0);
-                ot = new OntologyTerm(null, olsTermDto.getCurie(), olsTermDto.getIri(), DigestUtils.sha256Hex(olsTermDto.getIri()), olsTermDto.getLabel(), termStatus, null, null);
+        try {
+            Optional<OntologyTerm> ontologyTermOp = ontologyTermRepository.findByIriHash(DigestUtils.sha256Hex(iri));
+            if (ontologyTermOp.isPresent()) {
+                log.warn("Ontology term already exists: {} | {}", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel());
+                return ontologyTermOp.get();
             }
+
+            List<OLSTermDto> preferredOntoResponse = new ArrayList<>();
+            for (String preferredOntology : projectContext.getPreferredMappingOntologies()) {
+                preferredOntoResponse.addAll(olsService.retrieveTerms(preferredOntology, iri));
+            }
+            List<OLSTermDto> parentOntoResponse = new ArrayList<>();
+            String ontoId = CurationUtil.ontoFromIRI(iri);
+            String termStatus;
+            if (!projectContext.getPreferredMappingOntologies().contains(ontoId.toLowerCase())) {
+                parentOntoResponse = olsService.retrieveTerms(ontoId, iri);
+                termStatus = parseStatus(preferredOntoResponse, parentOntoResponse, null);
+            } else {
+                termStatus = parseStatus(preferredOntoResponse, null, null);
+            }
+
+            OntologyTerm ot;
+            if (termStatus.equalsIgnoreCase(TermStatus.DELETED.name())) {
+                /**
+                 * TODO: Discuss
+                 *
+                 * Previous code:
+                 * ot = new OntologyTerm(null, "Not found", iri, DigestUtils.sha256Hex(iri), "Not found", MappingStatus.DELETED.name(), null, null);
+                 */
+                log.warn("Found DELETED term: {}", iri);
+                return null;
+            } else {
+                if (termStatus.equalsIgnoreCase(TermStatus.CURRENT.name())) {
+                    OLSTermDto olsTermDto = preferredOntoResponse.get(0);
+                    ot = new OntologyTerm(null, olsTermDto.getCurie(), iri,
+                            DigestUtils.sha256Hex(iri), olsTermDto.getLabel(), TermStatus.CURRENT.name(), null, null);
+                } else {
+                    OLSTermDto olsTermDto = parentOntoResponse.get(0);
+                    ot = new OntologyTerm(null, olsTermDto.getCurie(), olsTermDto.getIri(), DigestUtils.sha256Hex(olsTermDto.getIri()), olsTermDto.getLabel(), termStatus, null, null);
+                }
+            }
+
+            ot = ontologyTermRepository.insert(ot);
+            log.info("Created ontology term [{} | {}]: {}", ot.getCurie(), ot.getLabel(), ot.getId());
+            return ot;
+        } catch (Exception e) {
+            log.error("ERROR: {}", e.getMessage(), e);
         }
 
-        ot = ontologyTermRepository.insert(ot);
-        log.info("Created ontology term [{} | {}]: {}", ot.getCurie(), ot.getLabel(), ot.getId());
-        return ot;
+        return null;
     }
 
     @Override

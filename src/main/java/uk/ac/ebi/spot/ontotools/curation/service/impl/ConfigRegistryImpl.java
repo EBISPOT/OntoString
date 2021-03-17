@@ -26,7 +26,7 @@ public class ConfigRegistryImpl implements ConfigRegistry {
     }
 
     @Override
-    @Async
+    @Async(value = "applicationTaskExecutor")
     public void updateAliases(ExternalServiceConfig externalServiceConfig) {
         ConfigListener configListener = configListenerMap.get(externalServiceConfig.getName());
         if (configListener != null) {
