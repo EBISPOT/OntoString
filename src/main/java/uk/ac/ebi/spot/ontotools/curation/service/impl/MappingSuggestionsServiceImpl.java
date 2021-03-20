@@ -82,6 +82,7 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
             list.add(mappingSuggestion);
             result.put(mappingSuggestion.getEntityId(), list);
         }
+        log.info("Returning a result of size: {}", result.size());
         return result;
     }
 

@@ -76,13 +76,16 @@ public class EntityController {
         List<String> entityIds = entities.get().map(Entity::getId).collect(Collectors.toList());
         Map<String, Mapping> mappings = mappingService.retrieveMappingsForEntities(entityIds);
         Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(entityIds);
+        log.info("Assembling results ...");
         List<EntityDto> entityDtos = new ArrayList<>();
+        //auditEntryService.retrieveAuditEntries(entity.getId())
         for (Entity entity : entities.getContent()) {
             entityDtos.add(EntityDtoAssembler.assemble(entity, sourceMap.get(entity.getSourceId()),
                     mappings.get(entity.getId()),
                     mappingSuggestions.get(entity.getId()),
-                    auditEntryService.retrieveAuditEntries(entity.getId())));
+                    new ArrayList<>()));
         }
+        log.info("Returning results ...");
         return new RestResponsePage<>(entityDtos, pageable, entities.getTotalElements());
     }
 

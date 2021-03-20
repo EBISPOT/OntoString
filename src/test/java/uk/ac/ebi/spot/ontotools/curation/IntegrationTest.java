@@ -241,7 +241,7 @@ public abstract class IntegrationTest {
 
     protected MappingDto retrieveMapping(String projectId) throws Exception {
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectId +
-                CurationConstants.API_ENTITIES + "/" + entity.getId() + CurationConstants.API_MAPPING;
+               CurationConstants.API_MAPPINGS + "?" + CurationConstants.PARAM_ENTITY_ID + "=" + entity.getId();
         String response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token1"))

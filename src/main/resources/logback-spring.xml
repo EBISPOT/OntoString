@@ -51,7 +51,12 @@
             </encoder>
         </appender>
 
+<!--
         <logger name="uk.ac.ebi.spot.ontotools" level="INFO">
+            <appender-ref ref="ROLLING"/>
+        </logger>
+-->
+        <logger name="org.springframework" level="DEBUG">
             <appender-ref ref="ROLLING"/>
         </logger>
         <root level="OFF">
@@ -104,11 +109,11 @@
         <logger name="uk.ac.ebi.spot.ontotools" level="INFO">
             <appender-ref ref="ROLLING"/>
         </logger>
-<!--
-        <logger name="org.springframework" level="DEBUG">
-            <appender-ref ref="ROLLING"/>
-        </logger>
--->
+        <!--
+                <logger name="org.springframework" level="DEBUG">
+                    <appender-ref ref="ROLLING"/>
+                </logger>
+        -->
         <root level="OFF">
         </root>
     </springProfile>
