@@ -44,7 +44,7 @@ spec:
         - name: LOG_FILE_NAME
           value: "ontotools-curation-service"
         - name: DB_USER
-          value: ""
+          value: "ontotoolscurator"
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:

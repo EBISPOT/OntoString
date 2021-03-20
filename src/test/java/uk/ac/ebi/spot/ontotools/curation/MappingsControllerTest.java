@@ -55,7 +55,7 @@ public class MappingsControllerTest extends IntegrationTest {
     }
 
     /**
-     * GET /v1/projects/{projectId}/entities/{entityId}/mapping
+     * GET /v1/projects/{projectId}/mappings?entityId=<entityId>
      */
     @Test
     public void shouldGetMappings() throws Exception {
@@ -65,17 +65,17 @@ public class MappingsControllerTest extends IntegrationTest {
     }
 
     /**
-     * POST /v1/projects/{projectId}/entities/{entityId}/mapping
+     * POST /v1/projects/{projectId}/mappings
      */
     @Test
     public void shouldCreateMapping() throws Exception {
         OntologyTerm ontologyTerm = ontologyTermRepository.findByCurie("MONDO:0007037").get();
         OntologyTermDto ontologyTermDto = OntologyTermDtoAssembler.assemble(ontologyTerm);
-        MappingCreationDto mappingCreationDto = new MappingCreationDto(Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
+        MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(), Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
         mappingRepository.deleteAll();
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
-                CurationConstants.API_ENTITIES + "/" + entity.getId() + CurationConstants.API_MAPPING;
+                CurationConstants.API_MAPPINGS;
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(mappingCreationDto))
@@ -249,14 +249,13 @@ public class MappingsControllerTest extends IntegrationTest {
     }
 
     /**
-     * POST /v1/projects/{projectId}/entities/{entityId}/mapping
+     * POST /v1/projects/{projectId}/mappings
      */
     @Test
     public void shouldNotCreateMapping() throws Exception {
         OntologyTermDto ontologyTermDto = new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037", "Achondroplasia", TermStatus.NEEDS_IMPORT.name(), null, null);
-        MappingCreationDto mappingCreationDto = new MappingCreationDto(Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
-                CurationConstants.API_ENTITIES + "/" + entity.getId() + CurationConstants.API_MAPPING;
+        MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(), Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
         mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(mappingCreationDto))
@@ -265,16 +264,15 @@ public class MappingsControllerTest extends IntegrationTest {
     }
 
     /**
-     * POST /v1/projects/{projectId}/entities/{entityId}/mapping
+     * POST /v1/projects/{projectId}/mappings
      */
     @Test
     public void shouldNotCreateMappingAsConsumer() throws Exception {
         OntologyTermDto ontologyTermDto = new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037", "Achondroplasia", TermStatus.NEEDS_IMPORT.name(), null, null);
-        MappingCreationDto mappingCreationDto = new MappingCreationDto(Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
+        MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(), Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
         userService.addUserToProject(super.user2, project.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
 
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
-                CurationConstants.API_ENTITIES + "/" + entity.getId() + CurationConstants.API_MAPPING;
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS;
         mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(mappingCreationDto))
