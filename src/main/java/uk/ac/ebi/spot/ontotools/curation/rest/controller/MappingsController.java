@@ -105,14 +105,8 @@ public class MappingsController {
         /**
          * Updating mapping status to MANUAL.
          */
-        entity = entityService.updateMappingStatus(entity, EntityStatus.MANUALLY_MAPPED);
+        entityService.updateMappingStatus(entity, EntityStatus.MANUALLY_MAPPED);
 
-        /**
-         * Deleting mapping suggestions associated with the current ontology term.
-         */
-        for (OntologyTerm ontologyTerm : ontologyTerms) {
-            mappingSuggestionsService.deleteMappingSuggestions(entity.getId(), ontologyTerm, provenance);
-        }
         return MappingDtoAssembler.assemble(created);
     }
 
@@ -151,20 +145,7 @@ public class MappingsController {
          * Updating mapping status to MANUAL.
          */
         Entity entity = entityService.retrieveEntity(updated.getEntityId());
-        entity = entityService.updateMappingStatus(entity, EntityStatus.MANUALLY_MAPPED);
-
-        /**
-         * Deleting mapping suggestions associated with the new ontology terms
-         */
-        for (String oId : ontologyTermMap.keySet()) {
-            mappingSuggestionsService.deleteMappingSuggestions(entity.getId(), ontologyTermMap.get(oId), provenance);
-        }
-        /**
-         * Create mapping suggestions associated with the old ontology terms
-         */
-        for (OntologyTerm ontologyTerm : old) {
-            mappingSuggestionsService.createMappingSuggestion(entity, ontologyTerm, provenance);
-        }
+        entityService.updateMappingStatus(entity, EntityStatus.MANUALLY_MAPPED);
 
         updated.setOntologyTerms(ontologyTerms);
         return MappingDtoAssembler.assemble(updated);
