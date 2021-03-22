@@ -13,8 +13,10 @@ import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.audit.AuditEntryDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.audit.MetadataEntryDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
@@ -112,24 +114,21 @@ public class MappingsControllerTest extends IntegrationTest {
         assertEquals("Achondroplasia", actualEntity.getMapping().getOntologyTerms().get(0).getLabel());
         assertEquals("MONDO:0007037", actualEntity.getMapping().getOntologyTerms().get(0).getCurie());
 
-        assertEquals(1, actualEntity.getMappingSuggestions().size());
-        assertEquals("Orphanet:15", actualEntity.getMappingSuggestions().get(0).getOntologyTerm().getCurie());
+        assertEquals(2, actualEntity.getMappingSuggestions().size());
+        List<String> curies = new ArrayList<>();
+        for (MappingSuggestionDto mappingSuggestionDto : actualEntity.getMappingSuggestions()) {
+            curies.add(mappingSuggestionDto.getOntologyTerm().getCurie());
+        }
+        assertTrue(curies.contains("Orphanet:15"));
+        assertTrue(curies.contains("MONDO:0007037"));
 
         assertEquals(sourceDto.getId(), actualEntity.getSource().getId());
 
-        assertEquals(2, actualEntity.getAuditTrail().size());
-        for (AuditEntryDto auditEntryDto : actualEntity.getAuditTrail()) {
-            assertTrue(auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.ADDED_MAPPING.name()) ||
-                    auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.REMOVED_SUGGESTION.name()));
-            if (auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.REMOVED_SUGGESTION.name())) {
-                assertEquals(1, auditEntryDto.getMetadata().size());
-                assertEquals("http://purl.obolibrary.org/obo/MONDO_0007037", auditEntryDto.getMetadata().get(0).getKey());
-            }
-            if (auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.ADDED_MAPPING.name())) {
-                assertEquals(1, auditEntryDto.getMetadata().size());
-                assertEquals("http://purl.obolibrary.org/obo/MONDO_0007037", auditEntryDto.getMetadata().get(0).getKey());
-            }
-        }
+        assertEquals(1, actualEntity.getAuditTrail().size());
+        AuditEntryDto auditEntryDto = actualEntity.getAuditTrail().get(0);
+        assertTrue(auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.ADDED_MAPPING.name()));
+        assertEquals(1, auditEntryDto.getMetadata().size());
+        assertEquals("http://purl.obolibrary.org/obo/MONDO_0007037", auditEntryDto.getMetadata().get(0).getKey());
     }
 
     /**
@@ -190,22 +189,26 @@ public class MappingsControllerTest extends IntegrationTest {
         assertNotNull(actualEntity.getMapping());
         assertEquals(2, actualEntity.getMapping().getOntologyTerms().size());
 
-        assertEquals(0, actualEntity.getMappingSuggestions().size());
-        assertEquals(3, actualEntity.getAuditTrail().size());
+        assertEquals(2, actualEntity.getMappingSuggestions().size());
+        curies = new ArrayList<>();
+        for (MappingSuggestionDto mappingSuggestionDto : actualEntity.getMappingSuggestions()) {
+            curies.add(mappingSuggestionDto.getOntologyTerm().getCurie());
+        }
+        assertTrue(curies.contains("Orphanet:15"));
+        assertTrue(curies.contains("MONDO:0007037"));
 
-        int noRemovedSuggestions = 0;
-        int noUpdatedMapping = 0;
-        for (AuditEntryDto auditEntryDto : actualEntity.getAuditTrail()) {
-            if (auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.UPDATED_MAPPING.name())) {
-                noUpdatedMapping++;
-            }
-            if (auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.REMOVED_SUGGESTION.name())) {
-                noRemovedSuggestions++;
-            }
+        assertEquals(1, actualEntity.getAuditTrail().size());
+        AuditEntryDto auditEntryDto = actualEntity.getAuditTrail().get(0);
+        assertTrue(auditEntryDto.getAction().equalsIgnoreCase(AuditEntryConstants.UPDATED_MAPPING.name()));
+        assertEquals(2, auditEntryDto.getMetadata().size());
+
+        curies = new ArrayList<>();
+        for (MetadataEntryDto metadataEntryDto : auditEntryDto.getMetadata()) {
+            curies.add(metadataEntryDto.getKey());
         }
 
-        assertEquals(2, noRemovedSuggestions);
-        assertEquals(1, noUpdatedMapping);
+        assertTrue(curies.contains("MONDO:0007037"));
+        assertTrue(curies.contains("Orphanet:15"));
     }
 
     /**
