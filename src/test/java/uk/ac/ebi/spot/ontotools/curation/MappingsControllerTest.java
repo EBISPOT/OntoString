@@ -142,10 +142,19 @@ public class MappingsControllerTest extends IntegrationTest {
         ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("MONDO:0007037").get()));
         ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("Orphanet:15").get()));
 
+        MappingDto updated = new MappingDto(mappingDto.getId(),
+                mappingDto.getEntityId(),
+                ontologyTermDtos,
+                mappingDto.isReviewed(),
+                mappingDto.getStatus(),
+                mappingDto.getReviews(),
+                mappingDto.getComments(),
+                mappingDto.getCreated());
+
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_MAPPINGS + "/" + mappingDto.getId();
         String response = mockMvc.perform(put(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(ontologyTermDtos))
+                .content(mapper.writeValueAsString(updated))
                 .header(IDPConstants.JWT_TOKEN, "token1"))
                 .andExpect(status().isOk())
                 .andReturn()
