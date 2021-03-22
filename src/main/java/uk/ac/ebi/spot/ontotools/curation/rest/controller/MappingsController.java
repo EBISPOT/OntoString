@@ -123,15 +123,15 @@ public class MappingsController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public MappingDto updateMapping(@PathVariable String projectId, @PathVariable String mappingId, @RequestBody @NotEmpty @Valid List<OntologyTermDto> ontologyTermsDtos, HttpServletRequest request) {
+    public MappingDto updateMapping(@PathVariable String projectId, @PathVariable String mappingId, @RequestBody @NotEmpty @Valid MappingDto mappingDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
-        log.info("[{}] Request to update mapping [{} | {}]: {}", user.getEmail(), projectId, mappingId, ontologyTermsDtos);
+        log.info("[{}] Request to update mapping [{} | {}]: {}", user.getEmail(), projectId, mappingId, mappingDto.getOntologyTerms());
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
 
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         Map<String, OntologyTerm> ontologyTermMap = new LinkedHashMap<>();
         List<OntologyTerm> ontologyTerms = new ArrayList<>();
-        for (OntologyTermDto ontologyTermDto : ontologyTermsDtos) {
+        for (OntologyTermDto ontologyTermDto : mappingDto.getOntologyTerms()) {
             OntologyTerm ontologyTerm = ontologyTermService.retrieveTermByCurie(ontologyTermDto.getCurie());
             ontologyTermMap.put(ontologyTerm.getId(), ontologyTerm);
             ontologyTerms.add(ontologyTerm);
