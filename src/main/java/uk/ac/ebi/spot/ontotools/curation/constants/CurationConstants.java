@@ -30,7 +30,11 @@ public class CurationConstants {
 
     public static final String API_COMMENTS = "/comments";
 
+    public static final String API_SEARCH_OLS = "/searchOLS";
+
     public static final String PARAM_ENTITY_ID = "entityId";
+
+    public static final String PARAM_QUERY = "query";
 
     public static final String ZOOMA_CONFIDENCE_HIGH = "HIGH";
 

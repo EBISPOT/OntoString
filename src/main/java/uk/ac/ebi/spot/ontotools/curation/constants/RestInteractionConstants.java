@@ -18,6 +18,8 @@ public class RestInteractionConstants {
 
     public static final String OLS_IDTYPE_IRI = "iri";
 
+    public static final String OLS_PARAM_Q = "q";
+
     public static String zoomaFilterValueFromList(List<String> datasources, List<String> ontologies) {
         if (datasources != null && !datasources.isEmpty()) {
             return ZOOMA_FILTER_VALUE_REQUIRED + ":[" + StringUtils.join(datasources, ",") + "]";

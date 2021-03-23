@@ -2,13 +2,13 @@ package uk.ac.ebi.spot.ontotools.curation;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSQueryDocDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class OLSServiceTest extends IntegrationTest {
 
@@ -28,4 +28,17 @@ public class OLSServiceTest extends IntegrationTest {
         assertFalse(terms.get(0).getObsolete());
     }
 
+    @Test
+    public void shouldQuery() {
+        String prefix = "diabetes";
+
+        List<OLSQueryDocDto> docs = olsService.query(prefix);
+        assertEquals(10, docs.size());
+
+        for (OLSQueryDocDto olsQueryDocDto : docs) {
+            if (olsQueryDocDto.getOntologyName().equalsIgnoreCase("efo")) {
+                assertEquals("EFO:0000400", olsQueryDocDto.getCurie());
+            }
+        }
+    }
 }

@@ -25,6 +25,9 @@ public class RestInteractionConfig {
     @Value("${ontotools.ols.endpoints.ontologies}")
     private String olsOntologiesEndpoint;
 
+    @Value("${ontotools.ols.endpoints.search}")
+    private String olsSearchEndpoint;
+
     @Value("${server.name}")
     private String serverName;
 
@@ -54,5 +57,9 @@ public class RestInteractionConfig {
 
     public String getOlsOntologiesEndpoint() {
         return olsBase + olsOntologiesEndpoint;
+    }
+
+    public String getOlsSearchEndpoint() {
+        return olsBase + olsSearchEndpoint;
     }
 }
