@@ -27,6 +27,7 @@ ontotools:
     base: https://www.ebi.ac.uk/ols/api
     endpoints:
       ontologies: /ontologies
+      search: /search
 
 ---
 

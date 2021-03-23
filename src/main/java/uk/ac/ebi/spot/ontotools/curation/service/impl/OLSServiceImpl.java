@@ -13,6 +13,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.ac.ebi.spot.ontotools.curation.config.RestInteractionConfig;
 import uk.ac.ebi.spot.ontotools.curation.constants.RestInteractionConstants;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSQueryDocDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSQueryResponseDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSResponseDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ConfigListener;
@@ -93,13 +95,39 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
         return new ArrayList<>();
     }
 
+    @Override
+    public List<OLSQueryDocDto> query(String prefix) {
+        log.info("Calling OLS search: {}", prefix);
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(restInteractionConfig.getOlsSearchEndpoint())
+                .queryParam(RestInteractionConstants.OLS_PARAM_Q, prefix);
+        String endpoint = uriBuilder.build().toUriString();
+
+        try {
+            HttpEntity httpEntity = restInteractionConfig.httpEntity().build();
+            ResponseEntity<OLSQueryResponseDto> response =
+                    restTemplate.exchange(endpoint,
+                            HttpMethod.GET, httpEntity,
+                            new ParameterizedTypeReference<>() {
+                            });
+
+            if (response.getStatusCode().equals(HttpStatus.OK)) {
+                log.info("OLS query [{}]: received {} docs.", prefix, response.getBody().getResponse().getDocs().size());
+                return response.getBody().getResponse().getDocs();
+            }
+        } catch (Exception e) {
+            log.error("Unable to call OLS: {}", e.getMessage(), e);
+        }
+
+        return new ArrayList<>();
+    }
+
     /**
      * TODO: Implement
      * Scheduled task to periodically go through all local terms with status CURRENT | AWAITING_IMPORT or NEEDS_IMPORT
      * and repeat the process associated with checking the status - as per the initial term creation
      * <p>
      * Why??
-     *
+     * <p>
      * Do we have to introduce project-based terms? If not - how do we use project preferences to do this import?
      */
     public void importOLS() {
