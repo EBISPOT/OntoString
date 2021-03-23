@@ -67,23 +67,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User addUserToProject(User user, String projectId, List<ProjectRole> roles) {
-        log.info("Adding project [{}] to user [{}] with roles: {}", projectId, user.getName(), roles);
-        if (user.getRoles() == null) {
-            user.setRoles(new ArrayList<>());
+    public User addUserToProject(User targetUser, String projectId, List<ProjectRole> roles) {
+        User existing = this.findByEmail(targetUser.getEmail());
+        log.info("Adding project [{}] to user [{}] with roles: {}", projectId, existing.getName(), roles);
+        if (existing.getRoles() == null) {
+            existing.setRoles(new ArrayList<>());
         }
         List<ProjectRole> existingRoles = new ArrayList<>();
         List<Role> toRemove = new ArrayList<>();
-        for (Role role : user.getRoles()) {
+        for (Role role : existing.getRoles()) {
             if (role.getProjectId().equalsIgnoreCase(projectId)) {
                 existingRoles.add(role.getRole());
                 toRemove.add(role);
             }
         }
         for (Role role : toRemove) {
-            user.getRoles().remove(role);
+            existing.getRoles().remove(role);
         }
-
         for (ProjectRole projectRole : roles) {
             if (!existingRoles.contains(projectRole)) {
                 existingRoles.add(projectRole);
@@ -91,28 +91,29 @@ public class UserServiceImpl implements UserService {
         }
 
         for (ProjectRole projectRole : existingRoles) {
-            user.getRoles().add(new Role(projectId, projectRole));
+            existing.getRoles().add(new Role(projectId, projectRole));
         }
-        return userRepository.save(user);
+        return userRepository.save(existing);
     }
 
     @Override
-    public User updateUserRoles(User user, String projectId, List<ProjectRole> projectRoles) {
-        log.info("Updating roles for user [{}] in project: {}", user.getEmail(), projectId);
+    public User updateUserRoles(User targetUser, String projectId, List<ProjectRole> projectRoles) {
+        User existing = this.findByEmail(targetUser.getEmail());
+        log.info("Updating roles for user [{}] in project: {}", existing.getEmail(), projectId);
         List<Role> toRemove = new ArrayList<>();
-        for (Role role : user.getRoles()) {
+        for (Role role : existing.getRoles()) {
             if (role.getProjectId().equalsIgnoreCase(projectId)) {
                 toRemove.add(role);
             }
         }
         for (Role role : toRemove) {
-            user.getRoles().remove(role);
+            existing.getRoles().remove(role);
         }
 
         for (ProjectRole projectRole : projectRoles) {
-            user.getRoles().add(new Role(projectId, projectRole));
+            existing.getRoles().add(new Role(projectId, projectRole));
         }
-        return userRepository.save(user);
+        return userRepository.save(existing);
     }
 
     @Override
@@ -129,24 +130,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void removeProjectFromUser(User user, String projectId) {
-        log.info("Removing project [{}] from user: {}", projectId, user.getName());
-        if (user.getRoles() == null) {
-            user.setRoles(new ArrayList<>());
+    public void removeProjectFromUser(User targetUser, String projectId) {
+        User existing = this.findByEmail(targetUser.getEmail());
+        log.info("Removing project [{}] from user: {}", projectId, existing.getName());
+        if (existing.getRoles() == null) {
+            existing.setRoles(new ArrayList<>());
         }
 
         Role found = null;
-        for (Role role : user.getRoles()) {
+        for (Role role : existing.getRoles()) {
             if (role.getProjectId().equals(projectId)) {
                 found = role;
                 break;
             }
         }
         if (found != null) {
-            user.getRoles().remove(found);
-            userRepository.save(user);
+            existing.getRoles().remove(found);
+            userRepository.save(existing);
         } else {
-            log.warn("Unable to find project [{}] associated with user: {}", projectId, user.getName());
+            log.warn("Unable to find project [{}] associated with user: {}", projectId, existing.getName());
         }
     }
 
