@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.AuditEntryConstants;
+import uk.ac.ebi.spot.ontotools.curation.domain.MetadataEntry;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
@@ -42,7 +43,8 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
         }
 
         MappingSuggestion created = mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), ontologyTerm.getId(), entity.getProjectId(), provenance, null));
-        auditEntryService.addEntry(AuditEntryConstants.ADDED_SUGGESTION.name(), entity.getId(), provenance, Map.of(ontologyTerm.getIri(), ontologyTerm.getLabel()));
+        auditEntryService.addEntry(AuditEntryConstants.ADDED_SUGGESTION.name(), entity.getId(), provenance,
+                Arrays.asList(new MetadataEntry[]{new MetadataEntry(ontologyTerm.getIri(), ontologyTerm.getLabel(), AuditEntryConstants.ADDED.name())}));
         log.info("[{} | {}] Mapping suggestion created: {}", entity.getName(), ontologyTerm.getCurie(), created.getId());
         return created;
     }
@@ -52,15 +54,14 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
     public void deleteMappingSuggestionsExcluding(Entity entity, List<OntologyTerm> ontologyTerms, Provenance provenance) {
         log.info("Deleting [{}] old mapping suggestions for: {}", ontologyTerms.size(), entity.getName());
         List<String> ontologyTermIds = new ArrayList<>();
-        Map<String, String> metadata = new LinkedHashMap<>();
+        List<MetadataEntry> metadata = new ArrayList<>();
         for (OntologyTerm ontologyTerm : ontologyTerms) {
             ontologyTermIds.add(ontologyTerm.getId());
-            metadata.put(ontologyTerm.getCurie(), ontologyTerm.getLabel());
+            metadata.add(new MetadataEntry(ontologyTerm.getCurie(), ontologyTerm.getLabel(), AuditEntryConstants.REMOVED.name()));
         }
         List<MappingSuggestion> toDelete = mappingSuggestionRepository.findByEntityIdAndOntologyTermIdNotIn(entity.getId(), ontologyTermIds);
         log.info("[{}] Found {} mapping suggestions to delete.", entity.getName(), toDelete.size());
         mappingSuggestionRepository.deleteAll(toDelete);
-
         auditEntryService.addEntry(AuditEntryConstants.REMOVED_SUGGESTION.name(), entity.getId(), provenance, metadata);
     }
 
@@ -114,6 +115,7 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
                 mappingSuggestionRepository.delete(mappingSuggestion);
             }
         }
-        auditEntryService.addEntry(AuditEntryConstants.REMOVED_SUGGESTION.name(), entityId, provenance, Map.of(ontologyTerm.getIri(), ontologyTerm.getLabel()));
+        auditEntryService.addEntry(AuditEntryConstants.REMOVED_SUGGESTION.name(), entityId, provenance,
+                Arrays.asList(new MetadataEntry[]{new MetadataEntry(ontologyTerm.getIri(), ontologyTerm.getLabel(), AuditEntryConstants.REMOVED.name())}));
     }
 }

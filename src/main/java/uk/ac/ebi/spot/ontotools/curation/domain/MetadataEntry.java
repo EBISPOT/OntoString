@@ -10,4 +10,6 @@ public class MetadataEntry {
     private String key;
 
     private String value;
+
+    private String action;
 }

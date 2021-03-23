@@ -5,6 +5,6 @@ import uk.ac.ebi.spot.ontotools.curation.rest.dto.audit.MetadataEntryDto;
 
 public class MetadataEntryDtoAssembler {
     public static MetadataEntryDto assemble(MetadataEntry metadataEntry) {
-        return new MetadataEntryDto(metadataEntry.getKey(), metadataEntry.getValue());
+        return new MetadataEntryDto(metadataEntry.getKey(), metadataEntry.getValue(), metadataEntry.getAction());
     }
 }

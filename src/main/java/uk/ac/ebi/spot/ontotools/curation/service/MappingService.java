@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.ontotools.curation.service;
 
+import uk.ac.ebi.spot.ontotools.curation.domain.MetadataEntry;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
@@ -22,7 +23,7 @@ public interface MappingService {
 
     Mapping addCommentToMapping(String mappingId, String body, Provenance provenance);
 
-    Mapping updateMapping(String mappingId, List<OntologyTerm> ontologyTerms, Provenance provenance);
+    Mapping updateMapping(String mappingId, List<OntologyTerm> newTerms, List<String> newTermIds, List<OntologyTerm> oldTerms, Provenance provenance);
 
-    void deleteMapping(String mappingId, Provenance provenance, Map<String, String> metadata);
+    void deleteMapping(String mappingId, Provenance provenance, List<MetadataEntry> metadata);
 }

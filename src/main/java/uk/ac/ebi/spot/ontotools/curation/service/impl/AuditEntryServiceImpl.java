@@ -10,9 +10,7 @@ import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.repository.AuditEntryRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.AuditEntryService;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class AuditEntryServiceImpl implements AuditEntryService {
@@ -22,12 +20,7 @@ public class AuditEntryServiceImpl implements AuditEntryService {
 
     @Override
     @Async(value = "applicationTaskExecutor")
-    public void addEntry(String action, String entityId, Provenance provenance, Map<String, String> metadata) {
-        List<MetadataEntry> metadataEntryList = new ArrayList<>();
-        for (String key : metadata.keySet()) {
-            metadataEntryList.add(new MetadataEntry(key, metadata.get(key)));
-        }
-
+    public void addEntry(String action, String entityId, Provenance provenance, List<MetadataEntry> metadataEntryList) {
         auditEntryRepository.insert(new AuditEntry(null, entityId, action, provenance, metadataEntryList, DateTime.now()));
     }
 

@@ -22,11 +22,17 @@ public final class MetadataEntryDto implements Serializable {
     @JsonProperty("value")
     private final String value;
 
+    @NotEmpty
+    @JsonProperty("action")
+    private final String action;
+
     @JsonCreator
     public MetadataEntryDto(@JsonProperty("key") String key,
-                            @JsonProperty("value") String value) {
+                            @JsonProperty("value") String value,
+                            @JsonProperty("action") String action) {
         this.key = key;
         this.value = value;
+        this.action = action;
     }
 
     public String getKey() {
@@ -35,5 +41,9 @@ public final class MetadataEntryDto implements Serializable {
 
     public String getValue() {
         return value;
+    }
+
+    public String getAction() {
+        return action;
     }
 }
