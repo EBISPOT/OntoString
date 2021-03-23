@@ -207,8 +207,8 @@ public class MappingsControllerTest extends IntegrationTest {
             curies.add(metadataEntryDto.getKey());
         }
 
-        assertTrue(curies.contains("MONDO:0007037"));
-        assertTrue(curies.contains("Orphanet:15"));
+        assertTrue(curies.contains("http://purl.obolibrary.org/obo/MONDO_0007037"));
+        assertTrue(curies.contains("http://www.orpha.net/ORDO/Orphanet_15"));
     }
 
     /**

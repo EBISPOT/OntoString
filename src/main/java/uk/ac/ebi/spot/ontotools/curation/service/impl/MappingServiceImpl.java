@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.AuditEntryConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
+import uk.ac.ebi.spot.ontotools.curation.domain.MetadataEntry;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.Review;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Comment;
@@ -44,15 +45,16 @@ public class MappingServiceImpl implements MappingService {
         created.setOntologyTerms(ontologyTerms);
 
         for (OntologyTerm ontologyTerm : ontologyTerms) {
-            auditEntryService.addEntry(AuditEntryConstants.ADDED_MAPPING.name(), entity.getId(), provenance, Map.of(ontologyTerm.getIri(), ontologyTerm.getLabel()));
+            auditEntryService.addEntry(AuditEntryConstants.ADDED_MAPPING.name(), entity.getId(), provenance,
+                    Arrays.asList(new MetadataEntry[]{new MetadataEntry(ontologyTerm.getIri(), ontologyTerm.getLabel(), AuditEntryConstants.ADDED.name())}));
         }
         log.info("Mapping for between entity [{}] and ontology term [{}] created: {}", entity.getName(), ontologyTerms, created.getId());
         return created;
     }
 
     @Override
-    public Mapping updateMapping(String mappingId, List<OntologyTerm> ontologyTerms, Provenance provenance) {
-        log.info("Updating mapping [{}]: {}", mappingId, ontologyTerms);
+    public Mapping updateMapping(String mappingId, List<OntologyTerm> newTerms, List<String> newTermIds, List<OntologyTerm> oldTerms, Provenance provenance) {
+        log.info("Updating mapping [{}]: {}", mappingId, newTerms);
         Optional<Mapping> mappingOp = mappingRepository.findById(mappingId);
         if (!mappingOp.isPresent()) {
             log.error("Mapping not found: {}", mappingId);
@@ -60,12 +62,26 @@ public class MappingServiceImpl implements MappingService {
         }
 
         Mapping mapping = mappingOp.get();
-        List<String> ontologyTermIds = new ArrayList<>();
-        mapping.setOntologyTermIds(ontologyTermIds);
-        Map<String, String> metadata = new LinkedHashMap<>();
-        for (OntologyTerm ontologyTerm : ontologyTerms) {
-            ontologyTermIds.add(ontologyTerm.getId());
-            metadata.put(ontologyTerm.getCurie(), ontologyTerm.getLabel());
+        Map<String, String> oldIRIs = new LinkedHashMap<>();
+        for (OntologyTerm ontologyTerm : oldTerms) {
+            oldIRIs.put(ontologyTerm.getIri(), ontologyTerm.getLabel());
+        }
+        Map<String, String> newIRIs = new LinkedHashMap<>();
+        for (OntologyTerm ontologyTerm : newTerms) {
+            oldIRIs.put(ontologyTerm.getIri(), ontologyTerm.getLabel());
+        }
+
+        mapping.setOntologyTermIds(newTermIds);
+        List<MetadataEntry> metadata = new ArrayList<>();
+        for (String oldIRI : oldIRIs.keySet()) {
+            if (!newIRIs.containsKey(oldIRI)) {
+                metadata.add(new MetadataEntry(oldIRI, oldIRIs.get(oldIRI), AuditEntryConstants.REMOVED.name()));
+            }
+        }
+        for (String newIRI : newIRIs.keySet()) {
+            if (!oldIRIs.containsKey(newIRI)) {
+                metadata.add(new MetadataEntry(newIRI, oldIRIs.get(newIRI), AuditEntryConstants.ADDED.name()));
+            }
         }
 
         auditEntryService.addEntry(AuditEntryConstants.UPDATED_MAPPING.name(), mappingOp.get().getEntityId(), provenance, metadata);
@@ -73,7 +89,7 @@ public class MappingServiceImpl implements MappingService {
     }
 
     @Override
-    public void deleteMapping(String mappingId, Provenance provenance, Map<String, String> metadata) {
+    public void deleteMapping(String mappingId, Provenance provenance, List<MetadataEntry> metadata) {
         Optional<Mapping> mappingOp = mappingRepository.findById(mappingId);
         if (!mappingOp.isPresent()) {
             log.error("Mapping not found: {}", mappingId);
@@ -153,7 +169,9 @@ public class MappingServiceImpl implements MappingService {
         mapping.addReview(new Review(comment, provenance), noReviewsRequired);
         mapping = mappingRepository.save(mapping);
         auditEntryService.addEntry(AuditEntryConstants.REVIEWED.name(), mappingOp.get().getEntityId(), provenance,
-                comment != null ? Map.of("COMMENT", comment) : new HashMap<>());
+                comment != null ?
+                        Arrays.asList(new MetadataEntry[]{new MetadataEntry("COMMENT", comment, AuditEntryConstants.ADDED.name())}) :
+                        new ArrayList<>());
         return mapping;
     }
 

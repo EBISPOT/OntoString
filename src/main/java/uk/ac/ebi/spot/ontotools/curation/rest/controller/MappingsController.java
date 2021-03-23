@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import uk.ac.ebi.spot.ontotools.curation.constants.AuditEntryConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
+import uk.ac.ebi.spot.ontotools.curation.domain.MetadataEntry;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
@@ -124,22 +126,24 @@ public class MappingsController {
 
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         Map<String, OntologyTerm> ontologyTermMap = new LinkedHashMap<>();
-        List<OntologyTerm> ontologyTerms = new ArrayList<>();
+        List<OntologyTerm> newTerms = new ArrayList<>();
+        List<String> newTermIds = new ArrayList<>();
         for (OntologyTermDto ontologyTermDto : mappingDto.getOntologyTerms()) {
             OntologyTerm ontologyTerm = ontologyTermService.retrieveTermByCurie(ontologyTermDto.getCurie());
             ontologyTermMap.put(ontologyTerm.getId(), ontologyTerm);
-            ontologyTerms.add(ontologyTerm);
+            newTerms.add(ontologyTerm);
+            newTermIds.add(ontologyTerm.getId());
         }
         Mapping existing = mappingService.retrieveMappingById(mappingId);
         List<String> existingOntoIds = existing.getOntologyTermIds();
-        Mapping updated = mappingService.updateMapping(mappingId, ontologyTerms, provenance);
-
-        List<OntologyTerm> old = new ArrayList<>();
+        List<OntologyTerm> oldTerms = new ArrayList<>();
         for (String oId : existingOntoIds) {
             if (!ontologyTermMap.containsKey(oId)) {
-                old.add(ontologyTermService.retrieveTermById(oId));
+                oldTerms.add(ontologyTermService.retrieveTermById(oId));
             }
         }
+
+        Mapping updated = mappingService.updateMapping(mappingId, newTerms, newTermIds, oldTerms, provenance);
 
         /**
          * Updating mapping status to MANUAL.
@@ -147,7 +151,7 @@ public class MappingsController {
         Entity entity = entityService.retrieveEntity(updated.getEntityId());
         entityService.updateMappingStatus(entity, EntityStatus.MANUALLY_MAPPED);
 
-        updated.setOntologyTerms(ontologyTerms);
+        updated.setOntologyTerms(newTerms);
         return MappingDtoAssembler.assemble(updated);
     }
 
@@ -168,11 +172,11 @@ public class MappingsController {
         List<String> ontoTermIds = mapping.getOntologyTermIds();
 
         Map<String, OntologyTerm> ontologyTermMap = new LinkedHashMap<>();
-        Map<String, String> metadata = new LinkedHashMap<>();
+        List<MetadataEntry> metadata = new ArrayList<>();
         for (String ontoTermId : ontoTermIds) {
             OntologyTerm ontologyTerm = ontologyTermService.retrieveTermById(ontoTermId);
             ontologyTermMap.put(ontoTermId, ontologyTerm);
-            metadata.put(ontologyTerm.getIri(), ontologyTerm.getLabel());
+            metadata.add(new MetadataEntry(ontologyTerm.getIri(), ontologyTerm.getLabel(), AuditEntryConstants.REMOVED.name()));
         }
 
         /**
