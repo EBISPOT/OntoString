@@ -79,7 +79,7 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
             ResponseEntity<OLSResponseDto> response =
                     restTemplate.exchange(endpoint,
                             HttpMethod.GET, httpEntity,
-                            new ParameterizedTypeReference<OLSResponseDto>() {
+                            new ParameterizedTypeReference<>() {
                             });
 
             if (response.getStatusCode().equals(HttpStatus.OK)) {
@@ -121,17 +121,35 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
         return new ArrayList<>();
     }
 
-    /**
-     * TODO: Implement
-     * Scheduled task to periodically go through all local terms with status CURRENT | AWAITING_IMPORT or NEEDS_IMPORT
-     * and repeat the process associated with checking the status - as per the initial term creation
-     * <p>
-     * Why??
-     * <p>
-     * Do we have to introduce project-based terms? If not - how do we use project preferences to do this import?
-     */
-    public void importOLS() {
+    @Override
+    public OLSTermDto retrieveOriginalTerm(String iri) {
+        log.info("Calling OLS terms: {}", iri);
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(restInteractionConfig.getOlsTermsEndpoint())
+                .queryParam(RestInteractionConstants.OLS_IDTYPE_IRI, iri);
+        String endpoint = uriBuilder.build().toUriString();
 
+        try {
+            HttpEntity httpEntity = restInteractionConfig.httpEntity().build();
+            ResponseEntity<OLSResponseDto> response =
+                    restTemplate.exchange(endpoint,
+                            HttpMethod.GET, httpEntity,
+                            new ParameterizedTypeReference<>() {
+                            });
+
+            if (response.getStatusCode().equals(HttpStatus.OK)) {
+                List<OLSTermDto> olsTermDtos = response.getBody().getEmbedded().getTerms();
+                log.info("OLS terms [{}]: received {} docs.", iri, olsTermDtos.size());
+                for (OLSTermDto olsTermDto : olsTermDtos) {
+                    if (olsTermDto.getDefiningOntology() != null && olsTermDto.getDefiningOntology()) {
+                        return olsTermDto;
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+            log.error("Unable to call OLS: {}", e.getMessage(), e);
+        }
+        return null;
     }
 
     @Override

@@ -10,4 +10,6 @@ public interface OLSService {
     List<OLSTermDto> retrieveTerms(String ontologyId, String identifierValue);
 
     List<OLSQueryDocDto> query(String prefix);
+
+    OLSTermDto retrieveOriginalTerm(String iri);
 }

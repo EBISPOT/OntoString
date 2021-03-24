@@ -41,4 +41,12 @@ public class OLSServiceTest extends IntegrationTest {
             }
         }
     }
+
+    @Test
+    public void shouldGetTerm() {
+        String iri = "http://www.ebi.ac.uk/efo/EFO_0001444";
+
+        OLSTermDto olsTermDto = olsService.retrieveOriginalTerm(iri);
+        assertNotNull(olsTermDto);
+    }
 }

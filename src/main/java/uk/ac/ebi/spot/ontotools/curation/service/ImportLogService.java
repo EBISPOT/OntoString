@@ -1,6 +1,6 @@
 package uk.ac.ebi.spot.ontotools.curation.service;
 
-import uk.ac.ebi.spot.ontotools.curation.domain.FailedImportLogEntry;
+import uk.ac.ebi.spot.ontotools.curation.domain.log.FailedImportLogEntry;
 
 public interface ImportLogService {
 

@@ -1,4 +1,4 @@
-package uk.ac.ebi.spot.ontotools.curation.domain;
+package uk.ac.ebi.spot.ontotools.curation.domain.log;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,8 +11,8 @@ import java.util.Set;
 
 @AllArgsConstructor
 @Getter
-@Document(collection = "failedImportLogEntries")
-public class FailedImportLogEntry {
+@Document(collection = "matchmakingLogEntries")
+public class MatchmakingLogEntry {
 
     @Id
     private String id;
@@ -20,7 +20,11 @@ public class FailedImportLogEntry {
     @Indexed
     private String batchId;
 
+    private String entityId;
+
     private String entityName;
 
-    private String context;
+    private List<String> highConfidenceURIs;
+
+    private Set<String> finalURIs;
 }

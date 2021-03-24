@@ -1,4 +1,4 @@
-package uk.ac.ebi.spot.ontotools.curation.domain;
+package uk.ac.ebi.spot.ontotools.curation.domain.log;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,13 +6,10 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
-import java.util.Set;
-
 @AllArgsConstructor
 @Getter
-@Document(collection = "matchmakingLogEntries")
-public class MatchmakingLogEntry {
+@Document(collection = "ontoTermsLogEntries")
+public class OntologyTermUpdateLogEntry {
 
     @Id
     private String id;
@@ -20,11 +17,13 @@ public class MatchmakingLogEntry {
     @Indexed
     private String batchId;
 
-    private String entityId;
+    private String ontoTermId;
 
-    private String entityName;
+    private String ontoTermCurie;
 
-    private List<String> highConfidenceURIs;
+    private String ontoTermLabel;
 
-    private Set<String> finalURIs;
+    private String previousStatus;
+
+    private String newStatus;
 }
