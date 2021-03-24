@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.ontotools.curation.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.AuditEntryConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
@@ -98,6 +99,16 @@ public class MappingServiceImpl implements MappingService {
 
         mappingRepository.delete(mappingOp.get());
         auditEntryService.addEntry(AuditEntryConstants.REMOVED_MAPPING.name(), mappingOp.get().getEntityId(), provenance, metadata);
+    }
+
+    @Override
+    @Async(value = "applicationTaskExecutor")
+    public void updateStatusForObsoleteMappings(String ontologyTermId) {
+        List<Mapping> mappings = mappingRepository.findByOntologyTermIdsContains(ontologyTermId);
+        for (Mapping mapping : mappings) {
+            mapping.setStatus(MappingStatus.HAS_OBSOLETE_TERM.name());
+            mappingRepository.save(mapping);
+        }
     }
 
     @Override

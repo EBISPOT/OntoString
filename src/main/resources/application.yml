@@ -28,6 +28,10 @@ ontotools:
     endpoints:
       ontologies: /ontologies
       search: /search
+      terms: /terms
+    update-schedule:
+      enabled: false
+      pattern: 0 0 1 * * MON
 
 ---
 
@@ -41,6 +45,11 @@ spring:
 
 ontotools-curation:
   db: ontotools-curation-dev
+
+ontotools:
+  ols:
+    update-schedule:
+      enabled: true
 
 ---
 

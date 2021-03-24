@@ -117,10 +117,10 @@ public class MatchMakingContolledTest extends IntegrationTest {
         when(zoomaService.annotate(eq(entity.getName()), any(), any())).thenReturn(zoomaResponseDtos);
 
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri1)), eq(iri1))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", false)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", false, true)})
         );
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri2)), eq(iri2))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri2, "MONDO:0007037", "achondroplasia", false)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri2, "MONDO:0007037", "achondroplasia", false, true)})
         );
 
         matchmakerService.runMatchmaking(sourceDto.getId(), project);
@@ -164,10 +164,10 @@ public class MatchMakingContolledTest extends IntegrationTest {
         when(zoomaService.annotate(eq(entity.getName()), any(), any())).thenReturn(zoomaResponseDtos);
 
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri1)), eq(iri1))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri3, "ICD:12356", "Pseudo-achondroplasia", false)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri3, "ICD:12356", "Pseudo-achondroplasia", false, true)})
         );
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri2)), eq(iri2))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri2, "MONDO:0007037", "ACH", false)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri2, "MONDO:0007037", "ACH", false, true)})
         );
 
         matchmakerService.runMatchmaking(sourceDto.getId(), project);
@@ -210,10 +210,10 @@ public class MatchMakingContolledTest extends IntegrationTest {
         when(zoomaService.annotate(eq(entity.getName()), any(), any())).thenReturn(zoomaResponseDtos);
 
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri1)), eq(iri1))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", false)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", false, true)})
         );
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri2)), eq(iri2))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri2, "MONDO:0007037", "ACH", false)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri2, "MONDO:0007037", "ACH", false, true)})
         );
 
         this.ontologies = Arrays.asList(new String[]{"efo", "mondo", "hp"});
@@ -261,10 +261,10 @@ public class MatchMakingContolledTest extends IntegrationTest {
         when(zoomaService.annotate(eq(entity.getName()), any(), any())).thenReturn(zoomaResponseDtos);
 
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri1)), eq(iri1))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", false)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", false, true)})
         );
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri2)), eq(iri2))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri2, "MONDO:0007037", "ACH", false)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri2, "MONDO:0007037", "ACH", false, true)})
         );
 
         matchmakerService.runMatchmaking(sourceDto.getId(), project);
@@ -307,10 +307,10 @@ public class MatchMakingContolledTest extends IntegrationTest {
         when(zoomaService.annotate(eq(entity.getName()), any(), any())).thenReturn(zoomaResponseDtos);
 
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri1)), eq(iri1))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Pseudo-achondroplasia", false)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Pseudo-achondroplasia", false, true)})
         );
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri2)), eq(iri2))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri2, "MONDO:0007037", "ACH", false)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri2, "MONDO:0007037", "ACH", false, true)})
         );
 
         matchmakerService.runMatchmaking(sourceDto.getId(), project);

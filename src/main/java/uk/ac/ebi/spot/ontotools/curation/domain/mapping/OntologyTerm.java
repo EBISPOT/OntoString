@@ -28,6 +28,7 @@ public class OntologyTerm {
 
     private String label;
 
+    @Indexed
     private String status;
 
     private String description;

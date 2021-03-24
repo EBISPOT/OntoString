@@ -27,15 +27,20 @@ public final class OLSTermDto implements Serializable {
     @JsonProperty("is_obsolete")
     private final Boolean obsolete;
 
+    @JsonProperty("is_defining_ontology")
+    private final Boolean definingOntology;
+
     @JsonCreator
     public OLSTermDto(@JsonProperty("iri") String iri,
                       @JsonProperty("obo_id") String curie,
                       @JsonProperty("label") String label,
-                      @JsonProperty("is_obsolete") Boolean obsolete) {
+                      @JsonProperty("is_obsolete") Boolean obsolete,
+                      @JsonProperty("is_defining_ontology") Boolean definingOntology) {
         this.iri = iri;
         this.curie = curie;
         this.label = label;
         this.obsolete = obsolete;
+        this.definingOntology = definingOntology;
     }
 
     public String getIri() {
@@ -52,5 +57,9 @@ public final class OLSTermDto implements Serializable {
 
     public Boolean getObsolete() {
         return obsolete;
+    }
+
+    public Boolean getDefiningOntology() {
+        return definingOntology;
     }
 }

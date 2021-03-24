@@ -1,4 +1,4 @@
-package uk.ac.ebi.spot.ontotools.curation.domain;
+package uk.ac.ebi.spot.ontotools.curation.domain.log;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
