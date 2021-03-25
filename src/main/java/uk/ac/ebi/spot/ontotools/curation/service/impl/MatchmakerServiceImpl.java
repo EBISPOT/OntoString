@@ -65,8 +65,8 @@ public class MatchmakerServiceImpl implements MatchmakerService {
         log.info("[{}] Auto-mapping done in {}s", sourceId, (eTime - sTime) / 1000);
     }
 
-
-    private void autoMap(Entity entity, Project project, User user, String batchId) {
+    @Override
+    public void autoMap(Entity entity, Project project, User user, String batchId) {
         if (entity.getMappingStatus().equals(EntityStatus.MANUALLY_MAPPED) ||
                 entity.getMappingStatus().equals(EntityStatus.AUTO_MAPPED)) {
             log.info("Entity [{}] has mapping status [{}]. Will not attempt re-mapping it.", entity.getName(), entity.getMappingStatus().name());

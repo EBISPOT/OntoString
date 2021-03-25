@@ -24,9 +24,9 @@ import java.util.stream.Stream;
 
 @Component
 @ConditionalOnProperty(name = "ontotools.ols.update-schedule.enabled", havingValue = "true")
-public class OLSUpdateTask {
+public class OntologyTermUpdateTask {
 
-    private static final Logger log = LoggerFactory.getLogger(OLSUpdateTask.class);
+    private static final Logger log = LoggerFactory.getLogger(OntologyTermUpdateTask.class);
 
     /**
      * Scheduled task to periodically go through all local terms with status CURRENT | AWAITING_IMPORT or NEEDS_IMPORT

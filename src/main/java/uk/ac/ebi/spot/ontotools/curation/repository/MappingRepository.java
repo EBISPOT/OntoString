@@ -12,4 +12,5 @@ public interface MappingRepository extends MongoRepository<Mapping, String> {
     Optional<Mapping> findByEntityId(String entityId);
 
     List<Mapping> findByOntologyTermIdsContains(String ontoTermId);
+
 }

@@ -29,10 +29,10 @@ import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {IntegrationTest.MockTaskExecutorConfig.class,
         IntegrationTest.MockOLSServiceConfig.class})
-public class OLSUpdateTaskTest extends IntegrationTest {
+public class OntologyTermUpdateTaskTest extends IntegrationTest {
 
     @Autowired
-    private OLSUpdateTask olsUpdateTask;
+    private OntologyTermUpdateTask ontologyTermUpdateTask;
 
     @Autowired
     private OLSService olsService;
@@ -75,7 +75,7 @@ public class OLSUpdateTaskTest extends IntegrationTest {
 
     @Test
     public void shouldRunUpdate() {
-        olsUpdateTask.updateOntologyTerms();
+        ontologyTermUpdateTask.updateOntologyTerms();
 
         OntologyTerm ontologyTerm = ontologyTermRepository.findById(this.orphaTerm.getId()).get();
         assertEquals(TermStatus.OBSOLETE.name(), ontologyTerm.getStatus());
