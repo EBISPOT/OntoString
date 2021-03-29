@@ -5,6 +5,8 @@ import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -92,4 +94,17 @@ public class CurationUtil {
         return Pair.of(projectContext, true);
     }
 
+    public static String termStatusForContext(OntologyTerm ontologyTerm, String projectId, String context) {
+        if (ontologyTerm.getContexts() == null) {
+            return null;
+        }
+
+        for (OntologyTermContext ontologyTermContext : ontologyTerm.getContexts()) {
+            if (ontologyTermContext.getProjectId().equals(projectId) &&
+                    ontologyTermContext.getContext().equals(context)) {
+                return ontologyTermContext.getStatus();
+            }
+        }
+        return null;
+    }
 }

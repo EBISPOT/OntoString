@@ -1,6 +1,7 @@
 package uk.ac.ebi.spot.ontotools.curation.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 
 import java.util.List;
@@ -16,5 +17,6 @@ public interface OntologyTermRepository extends MongoRepository<OntologyTerm, St
 
     List<OntologyTerm> findByCurieIn(List<String> curies);
 
-    Stream<OntologyTerm> readByStatusIn(List<String> statusList);
+    @Query(value = "{}")
+    Stream<OntologyTerm> findAllByCustomQueryAndStream();
 }

@@ -9,6 +9,7 @@ import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ProjectDtoAssembler {
@@ -33,6 +34,12 @@ public class ProjectDtoAssembler {
     }
 
     public static Pair<Project, ProjectContext> disassemble(ProjectCreationDto project, Provenance provenance) {
+        List<String> preferredMappingLower = new ArrayList<>();
+        if (project.getPreferredMappingOntologies() != null) {
+            for (String entry : project.getPreferredMappingOntologies()) {
+                preferredMappingLower.add(entry.toLowerCase());
+            }
+        }
         return Pair.of(new Project(null,
                         project.getName(),
                         project.getDescription(),
@@ -40,6 +47,6 @@ public class ProjectDtoAssembler {
                         new ArrayList<>(),
                         provenance, null),
                 new ProjectContext(null, CurationConstants.CONTEXT_DEFAULT, null, "Default context",
-                        project.getDatasources(), project.getOntologies(), project.getPreferredMappingOntologies()));
+                        project.getDatasources(), project.getOntologies(), project.getPreferredMappingOntologies(), preferredMappingLower));
     }
 }

@@ -24,10 +24,7 @@ import uk.ac.ebi.spot.ontotools.curation.constants.*;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.AuthToken;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.*;
 import uk.ac.ebi.spot.ontotools.curation.repository.*;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
@@ -228,10 +225,16 @@ public abstract class IntegrationTest {
                 CurationConstants.CONTEXT_DEFAULT, sourceId, projectId, null, provenance, EntityStatus.AUTO_MAPPED));
 
         OntologyTerm orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
-                DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia", TermStatus.CURRENT.name(), null, null));
+                DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia",
+                Arrays.asList(new OntologyTermContext[]{
+                        new OntologyTermContext(TermStatus.CURRENT.name(), entity.getProjectId(), entity.getContext())
+                }), null, null));
 
         OntologyTerm mondoTerm = ontologyTermRepository.insert(new OntologyTerm(null, "MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
-                DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia", TermStatus.NEEDS_IMPORT.name(), null, null));
+                DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia",
+                Arrays.asList(new OntologyTermContext[]{
+                        new OntologyTermContext(TermStatus.CURRENT.name(), entity.getProjectId(), entity.getContext())
+                }), null, null));
 
         mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), orphaTerm.getId(), projectId, provenance, null));
         mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), mondoTerm.getId(), projectId, provenance, null));
@@ -241,7 +244,7 @@ public abstract class IntegrationTest {
 
     protected MappingDto retrieveMapping(String projectId) throws Exception {
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectId +
-               CurationConstants.API_MAPPINGS + "?" + CurationConstants.PARAM_ENTITY_ID + "=" + entity.getId();
+                CurationConstants.API_MAPPINGS + "?" + CurationConstants.PARAM_ENTITY_ID + "=" + entity.getId();
         String response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token1"))

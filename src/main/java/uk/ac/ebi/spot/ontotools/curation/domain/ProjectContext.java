@@ -50,4 +50,6 @@ public class ProjectContext {
      */
     private List<String> preferredMappingOntologies;
 
+    private List<String> preferredMappingOntologiesLower;
+
 }

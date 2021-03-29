@@ -11,6 +11,7 @@ import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
@@ -51,25 +52,27 @@ public class OntologyTermControllerTest extends IntegrationTest {
     @Test
     public void shouldCreateOntologyTerm() throws Exception {
         OntologyTermDto toCreate = new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
-                "Achondroplasia", null, null, null);
+                "Achondroplasia", TermStatus.NEEDS_CREATION.name(), null, null);
+        OntologyTermCreationDto payload = new OntologyTermCreationDto(CurationConstants.CONTEXT_DEFAULT, toCreate);
+
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
                 CurationConstants.API_ONTOLOGY_TERMS;
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(toCreate))
+                .content(mapper.writeValueAsString(payload))
                 .header(IDPConstants.JWT_TOKEN, "token1"))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        OntologyTermDto actual = mapper.readValue(response, new TypeReference<OntologyTermDto>() {
+        OntologyTermDto actual = mapper.readValue(response, new TypeReference<>() {
         });
 
         assertEquals(toCreate.getLabel(), actual.getLabel());
         assertEquals(toCreate.getCurie(), actual.getCurie());
         assertEquals(toCreate.getIri(), actual.getIri());
-        assertEquals(TermStatus.NEEDS_IMPORT.toString(), actual.getStatus());
+        assertEquals(TermStatus.NEEDS_CREATION.toString(), actual.getStatus());
 
     }
 
@@ -80,11 +83,12 @@ public class OntologyTermControllerTest extends IntegrationTest {
     public void shouldNotCreateOntologyTerm() throws Exception {
         OntologyTermDto toCreate = new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
                 "Achondroplasia", null, null, null);
+        OntologyTermCreationDto payload = new OntologyTermCreationDto(CurationConstants.CONTEXT_DEFAULT, toCreate);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
                 CurationConstants.API_ONTOLOGY_TERMS;
         mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(toCreate))
+                .content(mapper.writeValueAsString(payload))
                 .header(IDPConstants.JWT_TOKEN, "token2"))
                 .andExpect(status().isNotFound());
     }
@@ -96,12 +100,13 @@ public class OntologyTermControllerTest extends IntegrationTest {
     public void shouldNotCreateOntologyTermAsConsumer() throws Exception {
         OntologyTermDto toCreate = new OntologyTermDto("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
                 "Achondroplasia", null, null, null);
+        OntologyTermCreationDto payload = new OntologyTermCreationDto(CurationConstants.CONTEXT_DEFAULT, toCreate);
         userService.addUserToProject(super.user2, project.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
                 CurationConstants.API_ONTOLOGY_TERMS;
         mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(toCreate))
+                .content(mapper.writeValueAsString(payload))
                 .header(IDPConstants.JWT_TOKEN, "token2"))
                 .andExpect(status().isNotFound());
     }
