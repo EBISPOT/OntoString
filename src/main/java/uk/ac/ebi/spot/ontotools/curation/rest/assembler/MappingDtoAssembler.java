@@ -1,17 +1,25 @@
 package uk.ac.ebi.spot.ontotools.curation.rest.assembler;
 
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class MappingDtoAssembler {
 
-    public static MappingDto assemble(Mapping mapping) {
+    public static MappingDto assemble(Mapping mapping, String projectId, String context) {
+        List<OntologyTermDto> ontologyTermDtos = new ArrayList<>();
+        for (OntologyTerm ontologyTerm : mapping.getOntologyTerms()) {
+            ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTerm, projectId, context));
+        }
+
         return new MappingDto(mapping.getId(),
                 mapping.getEntityId(),
-                mapping.getOntologyTerms().stream().map(OntologyTermDtoAssembler::assemble).collect(Collectors.toList()),
+                ontologyTermDtos,
                 mapping.isReviewed(),
                 mapping.getStatus(),
                 mapping.getReviews() != null ? mapping.getReviews().stream().map(ReviewDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>(),

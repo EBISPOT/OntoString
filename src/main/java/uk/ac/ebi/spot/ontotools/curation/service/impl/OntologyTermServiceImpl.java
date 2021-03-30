@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermRepository;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
@@ -47,10 +48,16 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     public OntologyTerm createTerm(String iri, ProjectContext projectContext) {
         log.info("Creating term: {}", iri);
         try {
+            OntologyTerm ot = null;
             Optional<OntologyTerm> ontologyTermOp = ontologyTermRepository.findByIriHash(DigestUtils.sha256Hex(iri));
             if (ontologyTermOp.isPresent()) {
-                log.warn("Ontology term already exists: {} | {}", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel());
-                return ontologyTermOp.get();
+                String status = CurationUtil.termStatusForContext(ontologyTermOp.get(), projectContext.getProjectId(), projectContext.getName());
+                if (status != null) {
+                    log.warn("Ontology term already exists: {} | {} | {}", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel(), status);
+                    return ontologyTermOp.get();
+                } else {
+                    ot = ontologyTermOp.get();
+                }
             }
 
             List<OLSTermDto> preferredOntoResponse = new ArrayList<>();
@@ -60,36 +67,39 @@ public class OntologyTermServiceImpl implements OntologyTermService {
             List<OLSTermDto> parentOntoResponse = new ArrayList<>();
             String ontoId = CurationUtil.ontoFromIRI(iri);
             String termStatus;
-            if (!projectContext.getPreferredMappingOntologies().contains(ontoId.toLowerCase())) {
+            if (!projectContext.getPreferredMappingOntologiesLower().contains(ontoId.toLowerCase())) {
                 parentOntoResponse = olsService.retrieveTerms(ontoId, iri);
                 termStatus = parseStatus(preferredOntoResponse, parentOntoResponse, null);
             } else {
                 termStatus = parseStatus(preferredOntoResponse, null, null);
             }
 
-            OntologyTerm ot;
             if (termStatus.equalsIgnoreCase(TermStatus.DELETED.name())) {
-                /**
-                 * TODO: Discuss
-                 *
-                 * Previous code:
-                 * ot = new OntologyTerm(null, "Not found", iri, DigestUtils.sha256Hex(iri), "Not found", MappingStatus.DELETED.name(), null, null);
-                 */
                 log.warn("Found DELETED term: {}", iri);
                 return null;
             } else {
-                if (termStatus.equalsIgnoreCase(TermStatus.CURRENT.name())) {
-                    OLSTermDto olsTermDto = preferredOntoResponse.get(0);
-                    ot = new OntologyTerm(null, olsTermDto.getCurie(), iri,
-                            DigestUtils.sha256Hex(iri), olsTermDto.getLabel(), TermStatus.CURRENT.name(), null, null);
+                if (ot != null) {
+                    if (ot.getContexts() == null) {
+                        ot.setContexts(new ArrayList<>());
+                    }
+                }
+
+                OntologyTermContext otc = new OntologyTermContext(projectContext.getProjectId(), projectContext.getName(), termStatus);
+                OLSTermDto olsTermDto = termStatus.equalsIgnoreCase(TermStatus.CURRENT.name()) ? preferredOntoResponse.get(0) : parentOntoResponse.get(0);
+                if (ot != null) {
+                    ot.getContexts().add(otc);
+                    ot = ontologyTermRepository.save(ot);
+                    log.info("Updated ontology term [{} | {}]: {} | {} | {}", ot.getCurie(), ot.getLabel(), projectContext.getProjectId(),
+                            projectContext.getName(), termStatus);
                 } else {
-                    OLSTermDto olsTermDto = parentOntoResponse.get(0);
-                    ot = new OntologyTerm(null, olsTermDto.getCurie(), olsTermDto.getIri(), DigestUtils.sha256Hex(olsTermDto.getIri()), olsTermDto.getLabel(), termStatus, null, null);
+                    ot = new OntologyTerm(null, olsTermDto.getCurie(), olsTermDto.getIri(),
+                            DigestUtils.sha256Hex(iri), olsTermDto.getLabel(),
+                            Arrays.asList(new OntologyTermContext[]{otc}), null, null);
+                    ot = ontologyTermRepository.insert(ot);
+                    log.info("Created ontology term [{} | {}]: {}", ot.getCurie(), ot.getLabel(), ot.getId());
                 }
             }
 
-            ot = ontologyTermRepository.insert(ot);
-            log.info("Created ontology term [{} | {}]: {}", ot.getCurie(), ot.getLabel(), ot.getId());
             return ot;
         } catch (Exception e) {
             log.error("ERROR: {}", e.getMessage(), e);

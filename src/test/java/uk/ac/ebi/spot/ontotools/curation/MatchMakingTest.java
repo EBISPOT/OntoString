@@ -20,6 +20,7 @@ import uk.ac.ebi.spot.ontotools.curation.repository.ExternalServiceConfigReposit
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.service.*;
+import uk.ac.ebi.spot.ontotools.curation.util.CurationUtil;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -96,10 +97,10 @@ public class MatchMakingTest extends IntegrationTest {
         for (OntologyTerm ontologyTerm : ontologyTerms) {
             ontoMap.put(ontologyTerm.getId(), ontologyTerm);
             if (ontologyTerm.getCurie().equalsIgnoreCase("Orphanet:15")) {
-                assertEquals(TermStatus.CURRENT.name(), ontologyTerm.getStatus());
+                assertEquals(TermStatus.CURRENT.name(), CurationUtil.termStatusForContext(ontologyTerm, project.getId(), updated.getContext()));
             }
             if (ontologyTerm.getCurie().equalsIgnoreCase("MONDO:0007037")) {
-                assertEquals(TermStatus.NEEDS_IMPORT.name(), ontologyTerm.getStatus());
+                assertEquals(TermStatus.NEEDS_IMPORT.name(), CurationUtil.termStatusForContext(ontologyTerm, project.getId(), updated.getContext()));
             }
         }
 

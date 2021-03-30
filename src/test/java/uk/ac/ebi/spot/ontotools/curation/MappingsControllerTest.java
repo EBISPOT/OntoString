@@ -72,7 +72,7 @@ public class MappingsControllerTest extends IntegrationTest {
     @Test
     public void shouldCreateMapping() throws Exception {
         OntologyTerm ontologyTerm = ontologyTermRepository.findByCurie("MONDO:0007037").get();
-        OntologyTermDto ontologyTermDto = OntologyTermDtoAssembler.assemble(ontologyTerm);
+        OntologyTermDto ontologyTermDto = OntologyTermDtoAssembler.assemble(ontologyTerm, project.getId(), entity.getContext());
         MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(), Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
         mappingRepository.deleteAll();
 
@@ -138,8 +138,8 @@ public class MappingsControllerTest extends IntegrationTest {
     public void shouldUpdateMapping() throws Exception {
         MappingDto mappingDto = super.retrieveMapping(project.getId());
         List<OntologyTermDto> ontologyTermDtos = new ArrayList<>();
-        ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("MONDO:0007037").get()));
-        ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("Orphanet:15").get()));
+        ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("MONDO:0007037").get(), project.getId(), entity.getContext()));
+        ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("Orphanet:15").get(), project.getId(), entity.getContext()));
 
         MappingDto updated = new MappingDto(mappingDto.getId(),
                 mappingDto.getEntityId(),

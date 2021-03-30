@@ -61,7 +61,7 @@ public class OntologyTermUpdateTask {
 
         OntologyTermUpdateLogBatch ontologyTermUpdateLogBatch = ontologyTermUpdateLogBatchRepository.insert(new OntologyTermUpdateLogBatch(null, DateTime.now(), 0));
 
-        Stream<OntologyTerm> ontologyTermStream = ontologyTermRepository.readByStatusIn(targetStatusList);
+        Stream<OntologyTerm> ontologyTermStream = ontologyTermRepository.findAllByCustomQueryAndStream();
         ontologyTermStream.forEach(ontologyTerm -> this.updateTerm(ontologyTerm, ontologyTermUpdateLogBatch.getId()));
         ontologyTermStream.close();
 
@@ -77,6 +77,7 @@ public class OntologyTermUpdateTask {
      */
 
     private void updateTerm(OntologyTerm ontologyTerm, String batchId) {
+        /*
         String currentStatus = ontologyTerm.getStatus();
         String newStatus = currentStatus;
         OLSTermDto olsTermDto = olsService.retrieveOriginalTerm(ontologyTerm.getIri());
@@ -96,5 +97,7 @@ public class OntologyTermUpdateTask {
 
             mappingService.updateStatusForObsoleteMappings(ontologyTerm.getId());
         }
+
+         */
     }
 }

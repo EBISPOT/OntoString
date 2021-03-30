@@ -17,8 +17,16 @@ import java.util.stream.Collectors;
 public class EntityDtoAssembler {
 
     public static EntityDto assemble(Entity entity, SourceDto source, Mapping mapping, List<MappingSuggestion> mappingSuggestions, List<AuditEntry> auditEntries) {
-        List<MappingSuggestionDto> mappingSuggestionDtos = mappingSuggestions != null ? mappingSuggestions.stream().map(MappingSuggestionDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>();
-        MappingDto mappingDto = mapping != null ? MappingDtoAssembler.assemble(mapping) : null;
+        List<MappingSuggestionDto> mappingSuggestionDtos = new ArrayList<>();
+        if (mappingSuggestions != null) {
+            for (MappingSuggestion mappingSuggestion : mappingSuggestions) {
+                mappingSuggestionDtos.add(MappingSuggestionDtoAssembler.assemble(mappingSuggestion, entity.getProjectId(), entity.getContext()));
+            }
+        }
+        MappingDto mappingDto = null;
+        if (mapping != null) {
+            mappingDto = MappingDtoAssembler.assemble(mapping, entity.getProjectId(), entity.getContext());
+        }
         List<AuditEntryDto> auditTrail = auditEntries != null ? auditEntries.stream().map(AuditEntryDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>();
 
         return new EntityDto(entity.getId(),
