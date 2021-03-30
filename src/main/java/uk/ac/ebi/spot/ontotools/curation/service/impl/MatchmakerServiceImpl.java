@@ -104,7 +104,7 @@ public class MatchmakerServiceImpl implements MatchmakerService {
             /**
              * Retain high confidence terms to attempt exact mapping.
              */
-            if (zoomaResponseDto.getConfidence().equalsIgnoreCase(ZOOMA_CONFIDENCE_HIGH)) {
+            if (zoomaResponseDto.getConfidence().equalsIgnoreCase(ZOOMA_CONFIDENCE_HIGH) && !highConfidenceIRIs.contains(suggestedTermIRI)) {
                 highConfidenceIRIs.add(suggestedTermIRI);
             }
 
@@ -113,10 +113,14 @@ public class MatchmakerServiceImpl implements MatchmakerService {
              */
             if (projectOntologies != null) {
                 if (projectOntologies.contains(CurationUtil.ontoFromIRI(suggestedTermIRI).toLowerCase())) {
-                    finalIRIs.add(suggestedTermIRI);
+                    if (!finalIRIs.contains(suggestedTermIRI)) {
+                        finalIRIs.add(suggestedTermIRI);
+                    }
                 }
             } else {
-                finalIRIs.add(suggestedTermIRI);
+                if (!finalIRIs.contains(suggestedTermIRI)) {
+                    finalIRIs.add(suggestedTermIRI);
+                }
             }
         }
 

@@ -92,7 +92,7 @@ public class OntologyTermServiceImpl implements OntologyTermService {
                     log.info("Updated ontology term [{} | {}]: {} | {} | {}", ot.getCurie(), ot.getLabel(), projectContext.getProjectId(),
                             projectContext.getName(), termStatus);
                 } else {
-                    ot = new OntologyTerm(null, olsTermDto.getCurie(), iri,
+                    ot = new OntologyTerm(null, olsTermDto.getCurie(), olsTermDto.getIri(),
                             DigestUtils.sha256Hex(iri), olsTermDto.getLabel(),
                             Arrays.asList(new OntologyTermContext[]{otc}), null, null);
                     ot = ontologyTermRepository.insert(ot);
