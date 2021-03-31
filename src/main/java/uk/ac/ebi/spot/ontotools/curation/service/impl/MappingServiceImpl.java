@@ -41,7 +41,7 @@ public class MappingServiceImpl implements MappingService {
     public Mapping createMapping(Entity entity, List<OntologyTerm> ontologyTerms, Provenance provenance) {
         log.info("Creating mapping for entity [{}]: {}", entity.getName(), ontologyTerms);
         List<String> ontologyTermIds = ontologyTerms.stream().map(OntologyTerm::getId).collect(Collectors.toList());
-        Mapping created = mappingRepository.insert(new Mapping(null, entity.getId(), ontologyTermIds, entity.getProjectId(),
+        Mapping created = mappingRepository.insert(new Mapping(null, entity.getId(), entity.getContext(), ontologyTermIds, entity.getProjectId(),
                 false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
         created.setOntologyTerms(ontologyTerms);
 
@@ -103,8 +103,8 @@ public class MappingServiceImpl implements MappingService {
 
     @Override
     @Async(value = "applicationTaskExecutor")
-    public void updateStatusForObsoleteMappings(String ontologyTermId) {
-        List<Mapping> mappings = mappingRepository.findByOntologyTermIdsContains(ontologyTermId);
+    public void updateStatusForObsoleteMappings(String ontologyTermId, String projectId, String context) {
+        List<Mapping> mappings = mappingRepository.findByProjectIdAndContextAndOntologyTermIdsContains(projectId, context, ontologyTermId);
         for (Mapping mapping : mappings) {
             mapping.setStatus(MappingStatus.HAS_OBSOLETE_TERM.name());
             mappingRepository.save(mapping);

@@ -22,7 +22,8 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@CompoundIndexes({@CompoundIndex(name = "eoId", def = "{'entityId': 1, 'ontologyTermIds': 1}")})
+@CompoundIndexes({@CompoundIndex(name = "eoId", def = "{'entityId': 1, 'ontologyTermIds': 1}"),
+        @CompoundIndex(name = "pco", def = "{'projectId': 1, 'context': 1, 'ontologyTermIds': 1}")})
 public class Mapping {
 
     @Id
@@ -30,6 +31,8 @@ public class Mapping {
 
     @Indexed
     private String entityId;
+
+    private String context;
 
     @Indexed
     private List<String> ontologyTermIds;

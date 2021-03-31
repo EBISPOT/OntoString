@@ -109,6 +109,23 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     }
 
     @Override
+    public String retrieveStatusUpdate(String iri, ProjectContext projectContext, String previousStatus) {
+        List<OLSTermDto> preferredOntoResponse = new ArrayList<>();
+        for (String preferredOntology : projectContext.getPreferredMappingOntologies()) {
+            preferredOntoResponse.addAll(olsService.retrieveTerms(preferredOntology, iri));
+        }
+        String ontoId = CurationUtil.ontoFromIRI(iri);
+        String termStatus;
+        if (!projectContext.getPreferredMappingOntologiesLower().contains(ontoId.toLowerCase())) {
+            List<OLSTermDto> parentOntoResponse = olsService.retrieveTerms(ontoId, iri);
+            termStatus = parseStatus(preferredOntoResponse, parentOntoResponse, previousStatus);
+        } else {
+            termStatus = parseStatus(preferredOntoResponse, null, previousStatus);
+        }
+        return termStatus;
+    }
+
+    @Override
     public Map<String, OntologyTerm> retrieveTerms(List<String> ontologyTermIds) {
         log.info("Retrieving {} ontology terms.", ontologyTermIds.size());
         Map<String, OntologyTerm> result = new HashMap<>();

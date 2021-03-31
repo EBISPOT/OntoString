@@ -23,6 +23,10 @@ public class OntologyTermUpdateLogEntry {
 
     private String ontoTermLabel;
 
+    private String projectId;
+
+    private String context;
+
     private String previousStatus;
 
     private String newStatus;
