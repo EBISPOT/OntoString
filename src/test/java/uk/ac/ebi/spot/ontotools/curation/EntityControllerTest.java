@@ -1,6 +1,8 @@
 package uk.ac.ebi.spot.ontotools.curation;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -10,6 +12,8 @@ import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
+import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
@@ -93,6 +97,48 @@ public class EntityControllerTest extends IntegrationTest {
 
         assertEquals(2, foundCuries);
         assertEquals(sourceDto.getId(), actual.getSource().getId());
+    }
+
+    /**
+     * GET /v1/projects/{projectId}/entities?search=<search>
+     */
+    @Test
+    public void shouldGetEntitiesByPrefixSearch() throws Exception {
+        super.entityRepository.insert(new Entity(null, "Achonparestesia", RandomStringUtils.randomAlphabetic(10),
+                CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), null,
+                new Provenance(user1.getName(), user1.getEmail(), DateTime.now()), EntityStatus.AUTO_MAPPED));
+
+        String prefix = "chon";
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_ENTITIES +
+                "?" + CurationConstants.PARAM_SEARCH + "=" + prefix;
+        String response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        RestResponsePage<EntityDto> entitiesPage = mapper.readValue(response, new TypeReference<>() {
+        });
+        assertEquals(2, entitiesPage.getTotalElements());
+
+        prefix = "achond";
+        endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_ENTITIES +
+                "?" + CurationConstants.PARAM_SEARCH + "=" + prefix;
+        response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        entitiesPage = mapper.readValue(response, new TypeReference<>() {
+        });
+        assertEquals(1, entitiesPage.getTotalElements());
+        EntityDto actual = entitiesPage.getContent().get(0);
+        assertEquals("Achondroplasia", actual.getName());
     }
 
     /**

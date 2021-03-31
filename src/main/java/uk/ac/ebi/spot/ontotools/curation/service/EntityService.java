@@ -19,7 +19,7 @@ public interface EntityService {
 
     Entity updateMappingStatus(Entity entity, EntityStatus mappingStatus);
 
-    Page<Entity> retrieveEntitiesForProject(String projectId, Pageable page);
+    Page<Entity> retrieveEntitiesForProject(String projectId, String prefix, Pageable page);
 
     Entity retrieveEntity(String entityId);
 

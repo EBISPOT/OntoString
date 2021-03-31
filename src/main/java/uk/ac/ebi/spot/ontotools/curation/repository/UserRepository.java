@@ -1,5 +1,7 @@
 package uk.ac.ebi.spot.ontotools.curation.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 
@@ -13,4 +15,7 @@ public interface UserRepository extends MongoRepository<User, String> {
     List<User> findBySuperUser(boolean superUser);
 
     List<User> findByRoles_ProjectId(String projectId);
+
+    Page<User> findByNameLikeIgnoreCase(String prefix, Pageable pageable);
+
 }

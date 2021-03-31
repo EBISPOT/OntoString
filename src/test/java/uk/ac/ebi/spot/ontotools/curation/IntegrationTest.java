@@ -111,7 +111,7 @@ public abstract class IntegrationTest {
     protected MappingRepository mappingRepository;
 
     @Autowired
-    private EntityRepository entityRepository;
+    protected EntityRepository entityRepository;
 
     @Autowired
     protected UserService userService;
