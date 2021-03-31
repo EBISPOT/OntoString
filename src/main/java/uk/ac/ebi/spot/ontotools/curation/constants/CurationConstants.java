@@ -34,6 +34,8 @@ public class CurationConstants {
 
     public static final String PARAM_ENTITY_ID = "entityId";
 
+    public static final String PARAM_SEARCH = "search";
+
     public static final String PARAM_QUERY = "query";
 
     public static final String ZOOMA_CONFIDENCE_HIGH = "HIGH";
