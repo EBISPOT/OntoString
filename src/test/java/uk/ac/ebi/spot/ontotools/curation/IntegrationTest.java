@@ -238,7 +238,7 @@ public abstract class IntegrationTest {
 
         mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), orphaTerm.getId(), projectId, provenance, null));
         mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), mondoTerm.getId(), projectId, provenance, null));
-        orphaTermMapping = mappingRepository.insert(new Mapping(null, entity.getId(), Arrays.asList(new String[]{orphaTerm.getId()}),
+        orphaTermMapping = mappingRepository.insert(new Mapping(null, entity.getId(), entity.getContext(), Arrays.asList(new String[]{orphaTerm.getId()}),
                 projectId, false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
     }
 

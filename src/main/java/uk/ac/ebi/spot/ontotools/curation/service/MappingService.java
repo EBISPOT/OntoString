@@ -27,5 +27,5 @@ public interface MappingService {
 
     void deleteMapping(String mappingId, Provenance provenance, List<MetadataEntry> metadata);
 
-    void updateStatusForObsoleteMappings(String ontologyTermId);
+    void updateStatusForObsoleteMappings(String ontologyTermId, String projectId, String context);
 }

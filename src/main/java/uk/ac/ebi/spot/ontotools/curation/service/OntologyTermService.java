@@ -20,4 +20,6 @@ public interface OntologyTermService {
     OntologyTerm retrieveTermById(String ontologyTermId);
 
     List<OntologyTerm> retrieveTermByCuries(List<String> curies);
+
+    String retrieveStatusUpdate(String iri, ProjectContext projectContext, String previousStatus);
 }
