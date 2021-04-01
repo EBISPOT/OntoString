@@ -24,7 +24,7 @@ public class ProjectContextsControllerTest extends IntegrationTest {
 
     public void setup() throws Exception {
         super.setup();
-        projectDto = super.createProject("New Project", "token1",
+        projectDto = super.createProject("New Project", user1,
                 Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"}),
                 Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"}),
                 "efo", 0);

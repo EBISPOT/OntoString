@@ -12,6 +12,7 @@ import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
+import uk.ac.ebi.spot.ontotools.curation.exception.AuthorizationException;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.ProjectDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
@@ -50,9 +51,12 @@ public class ProjectsController {
     @ResponseStatus(HttpStatus.CREATED)
     public ProjectDto createProject(@RequestBody @Valid ProjectCreationDto projectCreationDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        if (!user.isSuperUser()) {
+            log.error("Attempt to create a project by a non-super user: {}", user.getEmail());
+            throw new AuthorizationException("Attempt to create a project by a non-super user: " + user.getEmail());
+        }
         log.info("[{}] Request to create project: {}", user.getEmail(), projectCreationDto.getName());
         Project created = projectService.createProject(ProjectDtoAssembler.disassemble(projectCreationDto, new Provenance(user.getName(), user.getEmail(), DateTime.now())), user);
-        userService.addUserToProject(user, created.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
         return ProjectDtoAssembler.assemble(created);
     }
 
@@ -92,6 +96,10 @@ public class ProjectsController {
     @ResponseStatus(HttpStatus.OK)
     public ProjectDto updateProject(@RequestBody @Valid ProjectDto projectDto, @PathVariable String projectId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        if (!user.isSuperUser()) {
+            log.error("Attempt to create a project by a non-super user: {}", user.getEmail());
+            throw new AuthorizationException("Attempt to create a project by a non-super user: " + user.getEmail());
+        }
         log.info("[{}] Request to update project [{}]: {}", user.getEmail(), projectId, projectDto.getName());
         Project updated = projectService.updateProject(ProjectDtoAssembler.disassemble(projectDto), projectId, user);
         return ProjectDtoAssembler.assemble(updated);
@@ -105,6 +113,10 @@ public class ProjectsController {
     @ResponseStatus(HttpStatus.OK)
     public void deleteProject(@PathVariable String projectId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        if (!user.isSuperUser()) {
+            log.error("Attempt to create a project by a non-super user: {}", user.getEmail());
+            throw new AuthorizationException("Attempt to create a project by a non-super user: " + user.getEmail());
+        }
         log.info("[{}] Request to delete project: {}", user.getEmail(), projectId);
         projectService.deleteProject(projectId, user);
         userService.removeProjectFromUser(user, projectId);
