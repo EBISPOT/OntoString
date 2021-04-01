@@ -81,7 +81,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
      */
     @Test
     public void testCase1() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", "token1", datasources, ontologies, "efo", 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, datasources, ontologies, "efo", 0);
 
         user1 = userService.findByEmail(user1.getEmail());
         Project project1 = projectService.retrieveProject(projectDto.getId(), user1);
@@ -90,7 +90,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
         Entity entity1 = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
                 CurationConstants.CONTEXT_DEFAULT, sourceDto1.getId(), project1.getId(), 10, provenance, EntityStatus.UNMAPPED));
 
-        projectDto = super.createProject("New Project 2", "token1", datasources, ontologies, "efo", 0);
+        projectDto = super.createProject("New Project 2", user1, datasources, ontologies, "efo", 0);
         user1 = userService.findByEmail(user1.getEmail());
         Project project2 = projectService.retrieveProject(projectDto.getId(), user1);
         SourceDto sourceDto2 = super.createSource(project2.getId());
@@ -149,7 +149,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
      */
     @Test
     public void testCase2() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", "token1", datasources, ontologies, "efo", 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, datasources, ontologies, "efo", 0);
         user1 = userService.findByEmail(user1.getEmail());
 
         Project project = projectService.retrieveProject(projectDto.getId(), user1);

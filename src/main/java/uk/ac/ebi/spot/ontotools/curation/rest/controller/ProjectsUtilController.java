@@ -21,7 +21,7 @@ import java.util.List;
 @RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS)
 public class ProjectsUtilController {
 
-    private static final Logger log = LoggerFactory.getLogger(ProjectsController.class);
+    private static final Logger log = LoggerFactory.getLogger(ProjectsUtilController.class);
 
     @Autowired
     private JWTService jwtService;

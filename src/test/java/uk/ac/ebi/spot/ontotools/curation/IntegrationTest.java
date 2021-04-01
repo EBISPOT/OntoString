@@ -151,7 +151,7 @@ public abstract class IntegrationTest {
         mongoTemplate.getDb().drop();
     }
 
-    protected ProjectDto createProject(String name, String token,
+    protected ProjectDto createProject(String name, User adminUser,
                                        List<String> datasources, List<String> ontologies,
                                        String preferredMappingOntology, int noReviewsRequired) throws Exception {
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS;
@@ -164,7 +164,7 @@ public abstract class IntegrationTest {
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(projectCreationDto))
-                .header(IDPConstants.JWT_TOKEN, token))
+                .header(IDPConstants.JWT_TOKEN, "supertoken"))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
@@ -192,6 +192,8 @@ public abstract class IntegrationTest {
         if (preferredMappingOntology != null) {
             assertEquals(preferredMappingOntology, actual.getContexts().get(0).getPreferredMappingOntologies().get(0));
         }
+
+        userService.addUserToProject(adminUser, actual.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
         return actual;
     }
 

@@ -27,9 +27,9 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS)
-public class UserManagementController {
+public class ProjectUsersController {
 
-    private static final Logger log = LoggerFactory.getLogger(ProjectsController.class);
+    private static final Logger log = LoggerFactory.getLogger(ProjectUsersController.class);
 
     @Autowired
     private JWTService jwtService;

@@ -5,6 +5,8 @@ import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
+import uk.ac.ebi.spot.ontotools.curation.domain.auth.Role;
+import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 
@@ -106,5 +108,15 @@ public class CurationUtil {
             }
         }
         return null;
+    }
+
+    public static boolean isAdmin(User user) {
+        for (Role role : user.getRoles()) {
+            if (role.getRole().equals(ProjectRole.ADMIN)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

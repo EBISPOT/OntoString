@@ -27,7 +27,7 @@ import java.util.Arrays;
 @RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS)
 public class OntologyTermController {
 
-    private static final Logger log = LoggerFactory.getLogger(ProjectsController.class);
+    private static final Logger log = LoggerFactory.getLogger(OntologyTermController.class);
 
     @Autowired
     private JWTService jwtService;

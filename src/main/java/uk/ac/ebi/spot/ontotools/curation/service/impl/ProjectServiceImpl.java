@@ -189,6 +189,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private boolean hasAccess(User user, String projectId, List<ProjectRole> roles) {
+        if (user.isSuperUser()) {
+            return true;
+        }
         if (user.getRoles() != null) {
             for (Role role : user.getRoles()) {
                 if (role.getProjectId().equals(projectId) && roles.contains(role.getRole())) {

@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS)
 public class MappingsController {
 
-    private static final Logger log = LoggerFactory.getLogger(ProjectsController.class);
+    private static final Logger log = LoggerFactory.getLogger(MappingsController.class);
 
     @Autowired
     private JWTService jwtService;

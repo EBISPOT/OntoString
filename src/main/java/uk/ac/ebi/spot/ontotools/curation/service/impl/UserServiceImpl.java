@@ -3,6 +3,8 @@ package uk.ac.ebi.spot.ontotools.curation.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.Role;
@@ -127,6 +129,21 @@ public class UserServiceImpl implements UserService {
         }
 
         return userOptional.get();
+    }
+
+    @Override
+    public Page<User> retrieveUsers(String prefix, Pageable page) {
+        log.info("Retrieving users: {}", prefix);
+        Page<User> userPage = prefix == null ? userRepository.findAll(page) : userRepository.findByNameLikeIgnoreCase(prefix, page);
+        return userPage;
+    }
+
+    @Override
+    public User createUser(String name, String email) {
+        log.info("Creating user: {} | {}", name, email);
+        User created = userRepository.insert(new User(null, name, email, new ArrayList<>(), false));
+        log.info("User [{}] created: {}", email, created.getId());
+        return created;
     }
 
     @Override

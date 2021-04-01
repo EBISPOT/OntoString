@@ -22,7 +22,7 @@ public class ProjectsUtilControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldQueryOLS() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", "token1", null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_SEARCH_OLS +
                 "?" + CurationConstants.PARAM_QUERY + "=diabetes";
         String response = mockMvc.perform(get(endpoint)
