@@ -22,6 +22,7 @@ public class UsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetUsers() throws Exception {
+        super.createProject("New Project", user1, null, null, null, 0);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_USERS;
         String response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)

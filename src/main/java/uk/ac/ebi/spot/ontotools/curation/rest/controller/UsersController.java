@@ -48,6 +48,10 @@ public class UsersController {
                                               HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve users: {}", user.getEmail(), prefix);
+        if (!user.isSuperUser() && !CurationUtil.isAdmin(user)) {
+            log.error("Attempt to retrieve users by an unauthorized user: {}", user.getEmail());
+            throw new AuthorizationException("Attempt to retrieve users by an unauthorized user: " + user.getEmail());
+        }
         Page<User> users = userService.retrieveUsers(prefix, pageable);
         return new RestResponsePage<>(users.stream().map(UserDtoAssembler::assemble).collect(Collectors.toList()), pageable, users.getTotalElements());
     }
