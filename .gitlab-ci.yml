@@ -3,9 +3,12 @@ services:
   - docker:dind
 
 stages:
-  - build
-  - docker
-  - docker-release
+  - build-frontend
+  - build-artefact
+  - build-container
+  - build-frontend-release
+  - build-artefact-release
+  - build-container-release
   - deploy-sandbox
   - deploy-fallback
   - deploy-live
@@ -16,27 +19,84 @@ variables:
   REGISTRY_IMAGE: ebispot/ontotools-curation-service
   SERVICE_NAME: ontotools-curation-service
 
-maven-build:
-  image: maven:3-jdk-12
-  stage: build
+build-front:
+  image: node:10.15.3
+  stage: build-frontend
   script:
-    - mvn clean install -B -Dspring.profiles.active=test
+    - npm -v
+    - node -v
+    - cd frontend
+    - rm -rf node_modules
+    - npm install
+    - CI=false npm run build:sandbox
   artifacts:
     paths:
-      - target/*.jar
+      - frontend/build/*
+  only:
+    - develop
+
+maven-build:
+  image: maven:3-jdk-12
+  stage: build-artefact
+  script:
+    - mkdir src/main/webapp
+    - mv frontend/build/* src/main/webapp/
+    - ls -lah src/main/webapp
+    - mvn clean package spring-boot:repackage -DskipTests=true
+  dependencies:
+    - build-front
+  artifacts:
+    paths:
+      - target/*.war
+  only:
+    - develop
 
 build-container:
-  stage: docker
+  stage: build-container
   script:
     - echo "$DOCKER_HUB_PASSWORD" > dhpw.txt
     - docker login -u "${DOCKER_HUB_USER}" --password-stdin < dhpw.txt
     - docker build --cache-from $REGISTRY_IMAGE:latest -t $REGISTRY_IMAGE:$CI_COMMIT_SHA .
     - docker push $REGISTRY_IMAGE:$CI_COMMIT_SHA
+  only:
+    - develop
+
+build-front-release:
+  image: node:10.15.3
+  stage: build-frontend-release
+  script:
+    - npm -v
+    - node -v
+    - cd frontend
+    - rm -rf node_modules
+    - npm install
+    - CI=false npm run build:prod
+  artifacts:
+    paths:
+      - frontend/build/*
+  only:
+    - tags
+
+maven-build-release:
+  image: maven:3-jdk-12
+  stage: build-artefact-release
+  script:
+    - mkdir src/main/webapp
+    - mv frontend/build/* src/main/webapp/
+    - ls -lah src/main/webapp
+    - mvn clean package spring-boot:repackage -DskipTests=true
+  dependencies:
+    - build-front-release
+  artifacts:
+    paths:
+      - target/*.war
+  only:
+    - tags
 
 build-release:
   variables:
     GIT_STRATEGY: none
-  stage: docker-release
+  stage: build-container-release
   script:
   - echo "$DOCKER_HUB_PASSWORD" > dhpw.txt
   - docker login -u "${DOCKER_HUB_USER}" --password-stdin < dhpw.txt
@@ -63,7 +123,6 @@ deploy-sandbox:
   when: manual
   only:
   - develop
-
 
 deploy-fallback:
   image: dtzar/helm-kubectl:2.13.1
