@@ -64,9 +64,10 @@ public class EntityController {
     @ResponseStatus(HttpStatus.OK)
     public RestResponsePage<EntityDto> getEntities(@PathVariable String projectId,
                                                    @RequestParam(value = CurationConstants.PARAM_SEARCH, required = false) String prefix,
+                                                   @RequestParam(value = CurationConstants.PARAM_CONTEXT, required = false) String context,
                                                    @PageableDefault(size = 20, page = 0) Pageable pageable, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
-        log.info("[{}] Request to retrieve entities: {}", user.getEmail(), projectId);
+        log.info("[{}] Request to retrieve entities: {} | {} | {}", user.getEmail(), projectId, prefix, context);
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
         List<Source> sources = sourceService.getSources(projectId);
         Map<String, SourceDto> sourceMap = new HashMap<>();
@@ -74,7 +75,7 @@ public class EntityController {
             sourceMap.put(source.getId(), SourceDtoAssembler.assemble(source));
         }
 
-        Page<Entity> entities = entityService.retrieveEntitiesForProject(projectId, prefix, pageable);
+        Page<Entity> entities = entityService.retrieveEntitiesForProject(projectId, prefix, context, pageable);
         List<String> entityIds = entities.get().map(Entity::getId).collect(Collectors.toList());
         Map<String, Mapping> mappings = mappingService.retrieveMappingsForEntities(entityIds);
         Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(entityIds);

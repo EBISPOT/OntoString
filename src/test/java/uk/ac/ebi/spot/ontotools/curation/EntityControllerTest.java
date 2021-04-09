@@ -14,10 +14,7 @@ import uk.ac.ebi.spot.ontotools.curation.constants.MappingStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.*;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
@@ -29,6 +26,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ContextConfiguration(classes = {IntegrationTest.MockTaskExecutorConfig.class})
@@ -139,6 +137,63 @@ public class EntityControllerTest extends IntegrationTest {
         assertEquals(1, entitiesPage.getTotalElements());
         EntityDto actual = entitiesPage.getContent().get(0);
         assertEquals("Achondroplasia", actual.getName());
+    }
+
+    /**
+     * GET /v1/projects/{projectId}/entities?context=<CONTEXT>
+     */
+    @Test
+    public void shouldGetEntitiesByContext() throws Exception {
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_CONTEXTS;
+        ProjectContextDto newProjectContextDto = new ProjectContextDto("species_mouse", "",
+                Arrays.asList(new String[]{"sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"}),
+                Arrays.asList(new String[]{"efo", "mondo", "mp"}),
+                Arrays.asList(new String[]{"efo"}));
+
+        String response = mockMvc.perform(post(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1")
+                .content(super.mapper.writeValueAsString(newProjectContextDto)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ProjectDto projectResponse = mapper.readValue(response, new TypeReference<>() {
+        });
+        assertEquals(2, projectResponse.getContexts().size());
+
+        super.entityRepository.insert(new Entity(null, "Achonparestesia", RandomStringUtils.randomAlphabetic(10),
+                CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), null,
+                new Provenance(user1.getName(), user1.getEmail(), DateTime.now()), EntityStatus.AUTO_MAPPED));
+
+        endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_ENTITIES +
+                "?" + CurationConstants.PARAM_CONTEXT + "=species_mouse";
+        response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        RestResponsePage<EntityDto> entitiesPage = mapper.readValue(response, new TypeReference<>() {
+        });
+        assertEquals(0, entitiesPage.getTotalElements());
+
+        endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_ENTITIES +
+                "?" + CurationConstants.PARAM_CONTEXT + "=DEFAULT";
+        response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        entitiesPage = mapper.readValue(response, new TypeReference<>() {
+        });
+        assertEquals(2, entitiesPage.getTotalElements());
     }
 
     /**

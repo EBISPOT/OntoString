@@ -4,9 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
-import uk.ac.ebi.spot.ontotools.curation.domain.Source;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 public interface EntityService {
@@ -19,7 +17,7 @@ public interface EntityService {
 
     Entity updateMappingStatus(Entity entity, EntityStatus mappingStatus);
 
-    Page<Entity> retrieveEntitiesForProject(String projectId, String prefix, Pageable page);
+    Page<Entity> retrieveEntitiesForProject(String projectId, String prefix, String context, Pageable page);
 
     Entity retrieveEntity(String entityId);
 
