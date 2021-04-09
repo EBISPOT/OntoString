@@ -7,6 +7,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.support.MultipartFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
@@ -47,6 +48,16 @@ public class WebMvcConfig {
                     .allowedMethods("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH", "FETCH")
                     .allowCredentials(true)
                     .allowedHeaders("*", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials");
+        }
+
+        @Override
+        public void addViewControllers(ViewControllerRegistry registry) {
+            registry.addViewController("/{spring:^[a-zA-Z\\d-_]+}")
+                    .setViewName("forward:/");
+            registry.addViewController("/**/{spring:^[a-zA-Z\\d-_]+}")
+                    .setViewName("forward:/");
+            registry.addViewController("/{spring:^[a-zA-Z\\d-_]+}/**{spring:?!(\\.js|\\.css)$}")
+                    .setViewName("forward:/");
         }
     }
 }

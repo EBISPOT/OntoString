@@ -10,8 +10,8 @@ RUN if [ ! -d /var/log/ontotools/ ];then mkdir /var/log/ontotools/;fi
 RUN chown -R ontotools-curation-service:ontotools-curation-service /var/log/ontotools
 
 # Move project artifact
-ADD target/ontotools-curation-service-*.jar /home/ontotools-curation-service/
+ADD target/ontotools-curation-service-*.war /home/ontotools-curation-service/
 USER ontotools-curation-service
 
 # Launch application server
-ENTRYPOINT exec $JAVA_HOME/bin/java $XMX $XMS -jar -Dspring.profiles.active=$ENVIRONMENT /home/ontotools-curation-service/ontotools-curation-service-*.jar
+ENTRYPOINT exec $JAVA_HOME/bin/java $XMX $XMS -jar -Dspring.profiles.active=$ENVIRONMENT /home/ontotools-curation-service/ontotools-curation-service-*.war

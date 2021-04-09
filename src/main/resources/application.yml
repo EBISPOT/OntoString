@@ -2,6 +2,12 @@ server:
   name: ontotools-curation
   port: 8080
 
+spring:
+  web:
+    resources:
+      add-mappings: true
+      static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/
+
 logging:
   level:
     org:

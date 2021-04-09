@@ -38,9 +38,13 @@ public class Application implements WebMvcConfigurer {
     }
 
     public static void main(String[] args) throws UnknownHostException {
-        String hostAddress = InetAddress.getLocalHost().getHostAddress();
-        String logFileName = System.getenv(GeneralCommon.LOG_FILE_NAME);
-        System.setProperty("log.file.name", logFileName + "-" + hostAddress);
-        SpringApplication.run(Application.class, args);
+        try {
+            String hostAddress = InetAddress.getLocalHost().getHostAddress();
+            String logFileName = System.getenv(GeneralCommon.LOG_FILE_NAME);
+            System.setProperty("log.file.name", logFileName + "-" + hostAddress);
+            SpringApplication.run(Application.class, args);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
