@@ -57,10 +57,13 @@ public class EntityServiceImpl implements EntityService {
     }
 
     @Override
-    public Page<Entity> retrieveEntitiesForProject(String projectId, String prefix, Pageable page) {
+    public Page<Entity> retrieveEntitiesForProject(String projectId, String prefix, String context, Pageable page) {
         log.debug("Retrieving entities [{}]: {} | {}", projectId, prefix, page.getPageNumber(), page.getPageSize());
-        Page<Entity> entityPage = prefix == null ? entityRepository.findByProjectId(projectId, page) :
-                entityRepository.findByNameLikeIgnoreCase(prefix, page);
+        Page<Entity> entityPage = prefix == null ?
+                (context == null ? entityRepository.findByProjectId(projectId, page) :
+                        entityRepository.findByProjectIdAndContext(projectId, context, page)) :
+                (context == null ? entityRepository.findByProjectIdAndNameLikeIgnoreCase(projectId, prefix, page) :
+                        entityRepository.findByProjectIdAndContextAndNameLikeIgnoreCase(projectId, context, prefix, page));
         log.debug("Found {} entities.", entityPage.getContent().size());
         return entityPage;
     }
