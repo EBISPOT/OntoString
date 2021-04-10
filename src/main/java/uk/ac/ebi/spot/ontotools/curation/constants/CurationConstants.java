@@ -34,7 +34,7 @@ public class CurationConstants {
 
     public static final String PARAM_ENTITY_ID = "entityId";
 
-    public static final String PARAM_SEARCH = "search";
+    public static final String PARAM_FILTER = "filter";
 
     public static final String PARAM_CONTEXT = "context";
 
