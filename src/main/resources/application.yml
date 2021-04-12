@@ -101,3 +101,36 @@ spring:
 
 ontotools-curation:
   db: ontotoolscurator
+
+ontotools:
+  zooma:
+    update-schedule:
+      enabled: true
+      pattern: 0 5 1 * * MON
+  ols:
+    update-schedule:
+      enabled: true
+      pattern: 0 5 1 * * MON
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "fallback"
+  data:
+    mongodb:
+      uri: mongos-hx-ontotoolscuratorprors071-01.ebi.ac.uk:27017,mongos-hl-ontotoolscuratorprors071-02.ebi.ac.uk:27017/admin
+
+ontotools-curation:
+  db: ontotoolscurator
+
+ontotools:
+  zooma:
+    update-schedule:
+      enabled: true
+      pattern: 0 0 1 * * MON
+  ols:
+    update-schedule:
+      enabled: true
+      pattern: 0 0 1 * * MON

@@ -63,6 +63,36 @@
         </root>
     </springProfile>
 
+    <springProfile name="fallback">
+        <property resource="logging-fallback.properties"/>
+
+        <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily -->
+                <fileNamePattern>${log.file.location}${log.file.name}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <!-- or whenever the file size reaches 100MB -->
+                    <maxFileSize>${log.max.file.size}</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+            <encoder>
+                <pattern>${log.pattern}</pattern>
+            </encoder>
+        </appender>
+
+        <logger name="uk.ac.ebi.spot.ontotools" level="INFO">
+            <appender-ref ref="ROLLING"/>
+        </logger>
+        <!--
+                <logger name="org.springframework" level="DEBUG">
+                    <appender-ref ref="ROLLING"/>
+                </logger>
+        -->
+        <root level="OFF">
+        </root>
+    </springProfile>
+
     <springProfile name="test">
         <property resource="logging-test.properties"/>
 
