@@ -1,16 +1,10 @@
 
-export default interface OlsResponse {
-    numFound:number
-    start:number
-    docs: OlsSearchResult[]
-}
-
 export interface OlsSearchResult {
 
         iri:string
-        curie:string
+        obo_id:string
         label:string
-        description:string
-        ontologyName:string
+        description:string[]
+        ontology_name:string
 
 }

@@ -62,6 +62,13 @@ class EntityList extends React.Component<Props, State> {
         this.fetchEntities()
     }
 
+    componentDidUpdate(prevProps:Props){
+        if (this.props.contextId !== prevProps.contextId ||
+                this.props.projectId !== prevProps.projectId) {
+                    this.fetchEntities()
+        }
+    }
+
     columns: any[] = [
         {
             name: 'Name',
@@ -91,7 +98,7 @@ class EntityList extends React.Component<Props, State> {
             selector: 'source',
             sortable: true,
             ignoreRowClick: true,
-            cell: (entity:Entity) => <Link to={`/sources/${entity.source.id}`}>{entity.source.name}</Link>
+            cell: (entity:Entity) => { entity.source && <Link to={`/sources/${entity.source.id}`}>{entity.source.name}</Link> }
         },
         // {
         //     name: 'Mapping Suggestions',
@@ -159,7 +166,7 @@ class EntityList extends React.Component<Props, State> {
                 page: page.toString(),
                 size: size.toString(),
                 ...(sortColumn ? { sort: sortColumn + ',' + sortDirection } : {}),
-                filter: filter
+                search: filter
             })
         }`, {
             headers: { ...getAuthHeaders() }

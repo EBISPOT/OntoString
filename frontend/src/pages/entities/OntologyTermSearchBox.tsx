@@ -5,76 +5,136 @@ import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { get } from '../../api';
-import OlsResponse, { OlsSearchResult } from '../../dto/OlsSearchResult';
+import { OlsSearchResult } from '../../dto/OlsSearchResult';
+import { Grid } from '@material-ui/core';
 
-export default function OntologyTermSearchBox(projectId:string) {
-  const [open, setOpen] = React.useState<boolean>(false);
-  const [options, setOptions] = React.useState<OlsSearchResult[]>([]);
-  const loading = open && options.length === 0;
+interface Props {
+    projectId:string
+    onSelectTerm:(term:OlsSearchResult)=>void
+}
 
-  React.useEffect(() => {
-    let active = true;
+interface State {
+    open:boolean
+    options:OlsSearchResult[]
+    query:string
+    loading:boolean
+}
 
-    if (!loading) {
-      return undefined;
+export default class OntologyTermSearchBox extends React.Component<Props, State> {
+
+    constructor(props:Props) {
+
+        super(props)
+
+        this.state = {
+            open: false,
+            options: [],
+            query: '',
+            loading: false
+        }
+
     }
 
-    (async () => {
+    componentDidMount() {
+        this.load();
+    }
 
-      const res:OlsResponse = await get(`/v1/projects/${projectId}/searchOLS?${
-        new URLSearchParams({
-            query: ''
+    async load() {
+
+        let { projectId } = this.props
+        let { query } = this.state
+
+        this.setState(prevState => ({ ...prevState, loading: true }))
+
+        const res: OlsSearchResult[] = await get(`/v1/projects/${projectId}/searchOLS?${new URLSearchParams({
+            query
         })}`)
 
-      console.dir(res)
+        this.setState(prevState => ({ ...prevState, loading: false, options: res }))
 
-      if (active) {
-        setOptions(res.docs)
-      }
-    })();
-
-    return () => {
-      active = false;
-    };
-  }, [loading]);
-
-  React.useEffect(() => {
-    if (!open) {
-      setOptions([]);
     }
-  }, [open]);
 
-  return (
-    <Autocomplete
-      id="asynchronous-demo"
-      style={{ width: 300 }}
-      open={open}
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={() => {
-        setOpen(false);
-      }}
-      getOptionSelected={(option:OlsSearchResult, value:OlsSearchResult) => option.iri === value.iri}
-      getOptionLabel={(option:OlsSearchResult) => option.iri}
-      options={options}
-      loading={loading}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label="Asynchronous"
-          variant="outlined"
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <React.Fragment>
-                {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                {params.InputProps.endAdornment}
-              </React.Fragment>
-            ),
-          }}
-        />
-      )}
-    />
-  );
+    render() {
+
+        let { open, options, query, loading } = this.state
+
+        console.log('rendering with options')
+        console.dir(options)
+
+        return (
+            <Autocomplete
+            id="asynchronous-demo"
+            style={{ width: 500 }}
+            open={open}
+            onOpen={this.onOpen}
+            onClose={this.onClose}
+            onChange={this.onAutocompleteChange as any}
+            // getOptionSelected={(option:OlsSearchResult, value:OlsSearchResult) => option.iri === value.iri}
+            getOptionLabel={(option:OlsSearchResult) => option.iri}
+            renderOption={(option:OlsSearchResult) =>
+<Grid
+  container
+  direction="row"
+  justify="space-between"
+  alignItems="center"
+>
+                
+                <span>{option.label || option.obo_id}</span><span style={{
+                backgroundColor: '#999',
+                padding: '0 10px',
+                lineHeight: '1.5',
+                fontSize: '.875rem',
+                color: '#fff',
+                verticalAlign: 'middle',
+                whiteSpace: 'nowrap',
+                textAlign: 'center',
+                borderRadius: '0.6rem',
+                textTransform: 'uppercase',
+            }}>{option.ontology_name}</span>
+            
+            </Grid>
+        
+        }
+            filterOptions={x => x}
+            options={options}
+            loading={loading}
+            renderInput={(params) => (
+                <TextField
+                {...params}
+                label="Search..."
+                variant="outlined"
+                value={query}
+                onChange={this.onChange}
+                InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                    <React.Fragment>
+                        {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                    </React.Fragment>
+                    ),
+                }}
+                />
+            )}
+            />
+        )
+
+    }
+
+    onOpen = () => {
+        this.setState(prevState => ({ ...prevState, open: true }))
+    }
+
+    onClose = () => {
+        this.setState(prevState => ({ ...prevState, open: false }))
+    }
+
+    onChange = async (e: any) => {
+        await this.setState(prevState => ({ ...prevState, query: e.target.value }))
+        this.load()
+    }
+
+    onAutocompleteChange = async (e: any, option:OlsSearchResult) => {
+        this.props.onSelectTerm(option)
+    }
 }
