@@ -8,8 +8,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
+import uk.ac.ebi.spot.ontotools.curation.constants.UpdateTaskType;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
+import uk.ac.ebi.spot.ontotools.curation.domain.UpdateTask;
 import uk.ac.ebi.spot.ontotools.curation.domain.log.OntologyTermUpdateLogBatch;
 import uk.ac.ebi.spot.ontotools.curation.domain.log.OntologyTermUpdateLogEntry;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
@@ -58,9 +60,17 @@ public class OntologyTermUpdateTask {
     @Autowired
     private OntologyTermService ontologyTermService;
 
+    @Autowired
+    private UpdateTaskManager updateTaskManager;
+
     @Scheduled(cron = "${ontotools.ols.update-schedule.pattern}")
     public void updateOntologyTerms() {
         log.info("Running ontology terms update ...");
+        UpdateTask updateTask = updateTaskManager.checkAndCreateIfNecessary(UpdateTaskType.TERM_UPDATE.name());
+        if (updateTask == null) {
+            return;
+        }
+
         double sTime = System.currentTimeMillis();
         OntologyTermUpdateLogBatch ontologyTermUpdateLogBatch = ontologyTermUpdateLogBatchRepository.insert(new OntologyTermUpdateLogBatch(null, DateTime.now(), 0));
 
@@ -76,6 +86,7 @@ public class OntologyTermUpdateTask {
         ontologyTermUpdateLogBatch.setTotalTime((int) tTime);
         ontologyTermUpdateLogBatchRepository.save(ontologyTermUpdateLogBatch);
         log.info("Ontology terms update finalized in {}s.", tTime);
+        updateTaskManager.removeUpdateTask(updateTask);
     }
 
     private Map<String, Map<String, ProjectContext>> prepareProjectConfig(List<Project> projects) {
