@@ -5,9 +5,9 @@ services:
 stages:
   - build-frontend
   - build-artefact
-  - build-container
   - build-frontend-release
   - build-artefact-release
+  - build-container
   - build-container-release
   - deploy-sandbox
   - deploy-fallback
@@ -60,6 +60,7 @@ build-container:
     - docker push $REGISTRY_IMAGE:$CI_COMMIT_SHA
   only:
     - develop
+    - tags
 
 build-front-release:
   image: node:10.15.3
