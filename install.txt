@@ -1,0 +1,20 @@
+Data to be created during the initial setup.
+
+External service configs
+------------------------
+db.externalServiceConfigs.insert({"name": "OXO", "aliases" : ["ordo::orphanet"]})
+db.externalServiceConfigs.insert({"name": "OLS", "aliases" : ["orphanet::ordo"]})
+
+Users
+-----
+db.users.insert({"name": "Robot User", "email": "ontotools-curator@ebi.ac.uk", "roles": [], "superUser": true})
+db.users.insert({"name": "James", "email": "james@ebi.ac.uk", "roles": [], "superUser": false})
+db.users.insert({"name": "Tudor", "email": "tudor@ebi.ac.uk", "roles": [], "superUser": false})
+db.users.insert({"name": "Henriette", "email": "henriette@ebi.ac.uk", "roles": [], "superUser": false})
+
+Tokens
+-----
+db.tokens.insert({"token": "tudor", "email":"tudor@ebi.ac.uk"})
+db.tokens.insert({"token": "james", "email":"james@ebi.ac.uk"})
+db.tokens.insert({"token": "henriette", "email":"henriette@ebi.ac.uk"})
+db.tokens.insert({"token": "robot", "email":"ontotools-curator@ebi.ac.uk"})

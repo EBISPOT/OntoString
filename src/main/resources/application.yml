@@ -1,0 +1,103 @@
+server:
+  name: ontotools-curation
+  port: 8080
+
+spring:
+  web:
+    resources:
+      add-mappings: true
+      static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/
+
+logging:
+  level:
+    org:
+      springframework: DEBUG
+
+ontotools-curation:
+  auth:
+    enabled: true
+    cert: aap.der
+    unauthenticated-endpoints-prefix: /public
+  admin:
+    robot-user: ontotools-curator@ebi.ac.uk
+
+ontotools:
+  zooma:
+    base: http://www.ebi.ac.uk/spot/zooma/v2/api
+    endpoints:
+      annotate: /services/annotate
+    update-schedule:
+      enabled: false
+      pattern: 0 0 1 * * MON
+  oxo:
+    base: https://www.ebi.ac.uk/spot/oxo/api/search?size=5000
+    mapping-distance: 2
+  ols:
+    base: https://www.ebi.ac.uk/ols/api
+    endpoints:
+      ontologies: /ontologies
+      search: /search
+      terms: /terms
+    update-schedule:
+      enabled: false
+      pattern: 0 0 1 * * MON
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "dev"
+  data:
+    mongodb:
+      uri: localhost:27017
+
+ontotools-curation:
+  db: ontotools-curation-dev
+
+ontotools:
+  ols:
+    update-schedule:
+      enabled: true
+  zooma:
+    update-schedule:
+      enabled: true
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "test"
+  data:
+    mongodb:
+      uri: snoopy.ebi.ac.uk:27017
+
+ontotools-curation:
+  db: ontotools-curation-test
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "sandbox"
+  data:
+    mongodb:
+      uri: mongo-0.mongo.default.svc.cluster.local,mongo-1.mongo.default.svc.cluster.local,mongo-2.mongo.default.svc.cluster.local:27017
+
+ontotools-curation:
+  db: ontotools-curation-sandbox
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "prod"
+  data:
+    mongodb:
+      uri: mongos-hx-ontotoolscuratorprors071-01.ebi.ac.uk:27017,mongos-hl-ontotoolscuratorprors071-02.ebi.ac.uk:27017/admin
+
+ontotools-curation:
+  db: ontotoolscurator
