@@ -121,7 +121,6 @@ deploy-sandbox:
   - helm install --name ontotools-curation-service --set k8Namespace=ontotools,image.repository=$REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.secretsName=ontotools-secrets,image.env.secretsKey=db-pwd ./k8chart/ --wait
   environment:
     name: sandbox
-  when: manual
   only:
   - develop
 
