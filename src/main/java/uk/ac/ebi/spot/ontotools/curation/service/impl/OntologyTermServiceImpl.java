@@ -35,8 +35,19 @@ public class OntologyTermServiceImpl implements OntologyTermService {
         log.info("Creating term manually: {}", term.getCurie());
         Optional<OntologyTerm> ontologyTermOp = ontologyTermRepository.findByIriHash(DigestUtils.sha256Hex(term.getIri()));
         if (ontologyTermOp.isPresent()) {
-            log.warn("Ontology term already exists: {} | {}", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel());
-            return ontologyTermOp.get();
+            OntologyTerm existing = ontologyTermOp.get();
+            OntologyTermContext ontologyTermContext = term.getContexts().get(0);
+            for (OntologyTermContext existingOTC : existing.getContexts()) {
+                if (existingOTC.getContext().equals(ontologyTermContext.getContext())) {
+                    log.warn("Ontology term already exists: {} | {} | {}", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel(), ontologyTermContext.getContext());
+                    return existing;
+                }
+            }
+
+            log.info("Ontology term already exists, but in a different context: {} | {} | {}", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel(), ontologyTermContext.getContext());
+            existing.getContexts().add(ontologyTermContext);
+            existing = ontologyTermRepository.save(existing);
+            return existing;
         }
 
         OntologyTerm ontologyTerm = ontologyTermRepository.insert(term);
