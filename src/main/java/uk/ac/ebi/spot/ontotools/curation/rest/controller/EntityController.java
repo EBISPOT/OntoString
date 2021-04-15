@@ -63,7 +63,7 @@ public class EntityController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public RestResponsePage<EntityDto> getEntities(@PathVariable String projectId,
-                                                   @RequestParam(value = CurationConstants.PARAM_FILTER, required = false) String prefix,
+                                                   @RequestParam(value = CurationConstants.PARAM_SEARCH, required = false) String prefix,
                                                    @RequestParam(value = CurationConstants.PARAM_CONTEXT, required = false) String context,
                                                    @PageableDefault(size = 20, page = 0) Pageable pageable, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));

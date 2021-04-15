@@ -108,7 +108,7 @@ public class EntityControllerTest extends IntegrationTest {
 
         String prefix = "chon";
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_ENTITIES +
-                "?" + CurationConstants.PARAM_FILTER + "=" + prefix;
+                "?" + CurationConstants.PARAM_SEARCH + "=" + prefix;
         String response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token1"))
@@ -123,7 +123,7 @@ public class EntityControllerTest extends IntegrationTest {
 
         prefix = "achond";
         endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_ENTITIES +
-                "?" + CurationConstants.PARAM_FILTER + "=" + prefix;
+                "?" + CurationConstants.PARAM_SEARCH + "=" + prefix;
         response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token1"))

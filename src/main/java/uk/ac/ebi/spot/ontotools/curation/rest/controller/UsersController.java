@@ -43,7 +43,7 @@ public class UsersController {
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public RestResponsePage<UserDto> getUsers(@RequestParam(value = CurationConstants.PARAM_FILTER, required = false) String prefix,
+    public RestResponsePage<UserDto> getUsers(@RequestParam(value = CurationConstants.PARAM_SEARCH, required = false) String prefix,
                                               @PageableDefault(size = 20, page = 0) Pageable pageable,
                                               HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
