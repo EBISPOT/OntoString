@@ -17,6 +17,8 @@ public interface OntologyTermRepository extends MongoRepository<OntologyTerm, St
 
     List<OntologyTerm> findByCurieIn(List<String> curies);
 
+    List<OntologyTerm> findByContexts_ProjectIdAndContexts_ContextAndContexts_Status(String projectId, String context, String status);
+
     @Query(value = "{}")
     Stream<OntologyTerm> findAllByCustomQueryAndStream();
 }

@@ -229,13 +229,13 @@ public abstract class IntegrationTest {
         OntologyTerm orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
                 DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia",
                 Arrays.asList(new OntologyTermContext[]{
-                        new OntologyTermContext(TermStatus.CURRENT.name(), entity.getProjectId(), entity.getContext())
+                        new OntologyTermContext(entity.getProjectId(), entity.getContext(), TermStatus.CURRENT.name())
                 }), null, null));
 
         OntologyTerm mondoTerm = ontologyTermRepository.insert(new OntologyTerm(null, "MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
                 DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia",
                 Arrays.asList(new OntologyTermContext[]{
-                        new OntologyTermContext(TermStatus.CURRENT.name(), entity.getProjectId(), entity.getContext())
+                        new OntologyTermContext(entity.getProjectId(), entity.getContext(), TermStatus.CURRENT.name())
                 }), null, null));
 
         mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), orphaTerm.getId(), projectId, provenance, null));

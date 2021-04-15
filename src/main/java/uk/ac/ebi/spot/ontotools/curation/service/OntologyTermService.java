@@ -22,4 +22,6 @@ public interface OntologyTermService {
     List<OntologyTerm> retrieveTermByCuries(List<String> curies);
 
     String retrieveStatusUpdate(String iri, ProjectContext projectContext, String previousStatus);
+
+    List<OntologyTerm> retrieveTermsByStatus(String projectId, String context, List<String> statusList);
 }

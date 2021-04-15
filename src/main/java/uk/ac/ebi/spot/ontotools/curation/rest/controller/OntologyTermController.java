@@ -21,7 +21,9 @@ import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS)
@@ -54,4 +56,25 @@ public class OntologyTermController {
         return OntologyTermDtoAssembler.assemble(created, projectId, ontologyTermCreationDto.getContext());
     }
 
+    /**
+     * GET /v1/projects/{projectId}/ontology-terms?status=<STATUS>&context=<CONTEXT>
+     */
+    @GetMapping(value = "/{projectId}" + CurationConstants.API_ONTOLOGY_TERMS,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public List<OntologyTermDto> getOntologyTerms(@PathVariable String projectId,
+                                                  @RequestParam(value = CurationConstants.PARAM_STATUS) String status,
+                                                  @RequestParam(value = CurationConstants.PARAM_CONTEXT) String context,
+                                                  HttpServletRequest request) {
+        User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        log.info("[{}] Request to get ontology terms: {} | {} | {}", user.getEmail(), projectId, status, context);
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        List<String> statusList = Arrays.asList(status.split(","));
+        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveTermsByStatus(projectId, context, statusList);
+        List<OntologyTermDto> ontologyTermDtos = new ArrayList<>();
+        for (OntologyTerm ontologyTerm : ontologyTerms) {
+            ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTerm, projectId, context));
+        }
+        return ontologyTermDtos;
+    }
 }
