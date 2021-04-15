@@ -137,6 +137,17 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     }
 
     @Override
+    public List<OntologyTerm> retrieveTermsByStatus(String projectId, String context, List<String> statusList) {
+        log.info("Retrieving terms by status: {} | {} | {}", projectId, context, statusList);
+        List<OntologyTerm> finalList = new ArrayList<>();
+        for (String status : statusList) {
+            finalList.addAll(ontologyTermRepository.findByContexts_ProjectIdAndContexts_ContextAndContexts_Status(projectId, context, status));
+        }
+        log.info("Found {} terms.", finalList.size());
+        return finalList;
+    }
+
+    @Override
     public Map<String, OntologyTerm> retrieveTerms(List<String> ontologyTermIds) {
         log.info("Retrieving {} ontology terms.", ontologyTermIds.size());
         Map<String, OntologyTerm> result = new HashMap<>();

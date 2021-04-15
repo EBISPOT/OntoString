@@ -30,6 +30,7 @@ public class OntologyTerm {
 
     private String label;
 
+    @Indexed
     private List<OntologyTermContext> contexts;
 
     private String description;

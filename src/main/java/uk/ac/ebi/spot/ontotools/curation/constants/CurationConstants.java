@@ -36,6 +36,8 @@ public class CurationConstants {
 
     public static final String PARAM_FILTER = "filter";
 
+    public static final String PARAM_STATUS = "status";
+
     public static final String PARAM_CONTEXT = "context";
 
     public static final String PARAM_QUERY = "query";

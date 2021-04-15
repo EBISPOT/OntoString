@@ -1,6 +1,7 @@
 package uk.ac.ebi.spot.ontotools.curation;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -10,6 +11,8 @@ import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
@@ -21,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -109,5 +113,40 @@ public class OntologyTermControllerTest extends IntegrationTest {
                 .content(mapper.writeValueAsString(payload))
                 .header(IDPConstants.JWT_TOKEN, "token2"))
                 .andExpect(status().isNotFound());
+    }
+
+    /**
+     * GET /v1/projects/{projectId}/ontology-terms?status=<STATUS>&context=<CONTEXT>
+     */
+    @Test
+    public void shouldGetOntologyTerms() throws Exception {
+        OntologyTerm orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
+                DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia",
+                Arrays.asList(new OntologyTermContext[]{
+                        new OntologyTermContext(project.getId(), CurationConstants.CONTEXT_DEFAULT, TermStatus.NEEDS_IMPORT.name())
+                }), null, null));
+
+        ontologyTermRepository.insert(new OntologyTerm(null, "MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
+                DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia",
+                Arrays.asList(new OntologyTermContext[]{
+                        new OntologyTermContext(project.getId(), CurationConstants.CONTEXT_DEFAULT, TermStatus.CURRENT.name())
+                }), null, null));
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_ONTOLOGY_TERMS + "?context=" + CurationConstants.CONTEXT_DEFAULT + "&status=" + TermStatus.NEEDS_IMPORT.name();
+
+        String response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        List<OntologyTermDto> actual = mapper.readValue(response, new TypeReference<>() {
+        });
+
+        assertEquals(1, actual.size());
+        assertEquals(orphaTerm.getCurie(), actual.get(0).getCurie());
     }
 }
