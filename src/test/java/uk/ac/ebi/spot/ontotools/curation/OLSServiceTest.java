@@ -6,6 +6,7 @@ import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSQueryDocDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -35,11 +36,13 @@ public class OLSServiceTest extends IntegrationTest {
         List<OLSQueryDocDto> docs = olsService.query(prefix);
         assertEquals(10, docs.size());
 
+        List<String> efoUris = new ArrayList<>();
         for (OLSQueryDocDto olsQueryDocDto : docs) {
             if (olsQueryDocDto.getOntologyName().equalsIgnoreCase("efo")) {
-                assertEquals("EFO:0000400", olsQueryDocDto.getCurie());
+                efoUris.add(olsQueryDocDto.getCurie());
             }
         }
+        assertTrue(efoUris.contains("EFO:0000400"));
     }
 
     @Test

@@ -1,6 +1,5 @@
 package uk.ac.ebi.spot.ontotools.curation;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.zooma.ZoomaResponseDto;
@@ -17,18 +16,17 @@ public class ZoomaServiceTest extends IntegrationTest {
     private ZoomaService zoomaService;
 
     @Test
-    @Ignore
     public void shouldAnnotateDatasources() {
         String entity = "achondroplasia";
 
         List<String> datasources = Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"});
 
         List<ZoomaResponseDto> annotationResults = zoomaService.annotate(entity, datasources, null);
-        assertEquals(1, annotationResults.size());
+        assertEquals(2, annotationResults.size());
         ZoomaResponseDto responseDto = annotationResults.get(0);
         assertEquals("GOOD", responseDto.getConfidence());
-        assertEquals(1, responseDto.getSemanticTags().size());
-        assertEquals("http://www.orpha.net/ORDO/Orphanet_15", responseDto.getSemanticTags().get(0));
+        assertEquals(4, responseDto.getSemanticTags().size());
+        assertEquals("http://purl.obolibrary.org/obo/MONDO_0007037", responseDto.getSemanticTags().get(0));
     }
 
     @Test

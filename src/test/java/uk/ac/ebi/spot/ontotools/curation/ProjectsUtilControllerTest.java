@@ -9,9 +9,11 @@ import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSQueryDocDto;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,11 +38,13 @@ public class ProjectsUtilControllerTest extends IntegrationTest {
         List<OLSQueryDocDto> docs = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(10, docs.size());
+        List<String> efoUris = new ArrayList<>();
         for (OLSQueryDocDto olsQueryDocDto : docs) {
             if (olsQueryDocDto.getOntologyName().equalsIgnoreCase("efo")) {
-                assertEquals("EFO:0000400", olsQueryDocDto.getCurie());
+                efoUris.add(olsQueryDocDto.getCurie());
             }
         }
+        assertTrue(efoUris.contains("EFO:0000400"));
     }
 
 }
