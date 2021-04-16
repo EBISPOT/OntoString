@@ -1,8 +1,8 @@
 import React, { Fragment, useState } from 'react';
-import { BrowserRouter, Route, RouteComponentProps, Switch, withRouter } from "react-router-dom";
+import { BrowserRouter, Link, Route, RouteComponentProps, Switch, withRouter } from "react-router-dom";
 import logo from './logo.svg';
 import './App.css';
-import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core';
+import { AppBar, createStyles, Tab, Tabs, Theme, WithStyles, withStyles } from '@material-ui/core';
 
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -29,6 +29,24 @@ function App(props:AppProps) {
   return (
       <Fragment>
           <BrowserRouter basename={process.env.PUBLIC_URL}>
+
+<header style={{padding:'16px',backgroundColor:'black',backgroundImage:'url(\'' + process.env.PUBLIC_URL + '/embl-ebi-background-4.jpg\')',backgroundPosition:'100% 100%'}}>
+                <img style={{height:'100px'}} src={process.env.PUBLIC_URL + "/curator.svg"} />
+
+
+                <nav>
+                        <ul className="dropdown menu float-left" data-description="navigational" role="menubar" data-dropdown-menu="6mg2ht-dropdown-menu">
+                            <li  role="menuitem"><Link to="/ols/index">Projects</Link></li>
+                            <li  role="menuitem"><Link to="/ols/ontologies">Entities</Link></li>
+                            <li  role="menuitem"><Link to="/ols/docs">Terms</Link></li>
+                            <li  role="menuitem"><Link to="/ols/about">About</Link></li>
+                        </ul>
+                    </nav>
+
+
+
+                </header>
+
               <main className={classes.main}>
                 <Switch>
                     <Route exact path={`/`} component={Home} />

@@ -17,11 +17,11 @@ export default function Home(props:Props) {
 
     return <div>
         {/* <div>Logged in as {getToken().authEmail} with token {getToken().auth}</div> */}
-            <Breadcrumbs>
+            {/* <Breadcrumbs>
                 <Link color="inherit" href="/">
                     Projects
                 </Link>
-            </Breadcrumbs>
+            </Breadcrumbs> */}
         <h2>Projects</h2>
         <ProjectList />
     </div>

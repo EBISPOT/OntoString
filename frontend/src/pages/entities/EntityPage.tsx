@@ -205,6 +205,8 @@ export default class EntityPage extends React.Component<Props, State> {
     }
 
     openSearchOntologies = async () => {
+
+        console.log('sso')
         await this.setState(prevState => ({ ...prevState, showSearchOntologiesDialog: true }))
     }
 
