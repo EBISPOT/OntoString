@@ -3,6 +3,9 @@ package uk.ac.ebi.spot.ontotools.curation.rest.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +14,7 @@ import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.OntologyTermDtoAssembler;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.JWTService;
@@ -62,19 +66,19 @@ public class OntologyTermController {
     @GetMapping(value = "/{projectId}" + CurationConstants.API_ONTOLOGY_TERMS,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public List<OntologyTermDto> getOntologyTerms(@PathVariable String projectId,
-                                                  @RequestParam(value = CurationConstants.PARAM_STATUS) String status,
-                                                  @RequestParam(value = CurationConstants.PARAM_CONTEXT) String context,
-                                                  HttpServletRequest request) {
+    public RestResponsePage<OntologyTermDto> getOntologyTerms(@PathVariable String projectId,
+                                                              @RequestParam(value = CurationConstants.PARAM_STATUS) String status,
+                                                              @RequestParam(value = CurationConstants.PARAM_CONTEXT) String context,
+                                                              @PageableDefault(size = 20, page = 0) Pageable pageable,
+                                                              HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to get ontology terms: {} | {} | {}", user.getEmail(), projectId, status, context);
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
-        List<String> statusList = Arrays.asList(status.split(","));
-        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveTermsByStatus(projectId, context, statusList);
+        Page<OntologyTerm> ontologyTerms = ontologyTermService.retrieveTermsByStatus(projectId, context, status, pageable);
         List<OntologyTermDto> ontologyTermDtos = new ArrayList<>();
         for (OntologyTerm ontologyTerm : ontologyTerms) {
             ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTerm, projectId, context));
         }
-        return ontologyTermDtos;
+        return new RestResponsePage<>(ontologyTermDtos, pageable, ontologyTerms.getTotalElements());
     }
 }

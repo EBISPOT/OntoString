@@ -1,5 +1,7 @@
 package uk.ac.ebi.spot.ontotools.curation.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 
@@ -23,5 +25,5 @@ public interface OntologyTermService {
 
     String retrieveStatusUpdate(String iri, ProjectContext projectContext, String previousStatus);
 
-    List<OntologyTerm> retrieveTermsByStatus(String projectId, String context, List<String> statusList);
+    Page<OntologyTerm> retrieveTermsByStatus(String projectId, String context, String status, Pageable pageable);
 }
