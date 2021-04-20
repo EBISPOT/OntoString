@@ -74,7 +74,7 @@ public class MappingCommentsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        CommentDto commentDto = mapper.readValue(response, new TypeReference<CommentDto>() {
+        CommentDto commentDto = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals("New comment", commentDto.getBody());
         Mapping mapping = mappingService.retrieveMappingById(mappingDto.getId());
@@ -100,7 +100,7 @@ public class MappingCommentsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<CommentDto> commentDtos = mapper.readValue(response, new TypeReference<List<CommentDto>>() {
+        List<CommentDto> commentDtos = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(1, commentDtos.size());
         assertEquals("New comment", commentDtos.get(0).getBody());

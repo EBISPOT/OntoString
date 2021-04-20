@@ -21,6 +21,8 @@ public interface OntologyTermRepository extends MongoRepository<OntologyTerm, St
 
     Page<OntologyTerm> findByContexts_ProjectIdAndContexts_ContextAndContexts_Status(String projectId, String context, String status, Pageable pageable);
 
+    Stream<OntologyTerm> readByContexts_ProjectIdAndContexts_ContextAndContexts_Status(String projectId, String context, String status);
+
     @Query(value = "{}")
     Stream<OntologyTerm> findAllByCustomQueryAndStream();
 }

@@ -141,7 +141,6 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     @Override
     public Page<OntologyTerm> retrieveTermsByStatus(String projectId, String context, String status, Pageable pageable) {
         log.info("Retrieving terms by status: {} | {} | {}", projectId, context, status);
-        List<OntologyTerm> finalList = new ArrayList<>();
         Page<OntologyTerm> ontologyTerms = ontologyTermRepository.findByContexts_ProjectIdAndContexts_ContextAndContexts_Status(projectId, context, status, pageable);
         return ontologyTerms;
     }
