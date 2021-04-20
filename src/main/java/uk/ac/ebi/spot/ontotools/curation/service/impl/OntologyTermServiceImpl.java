@@ -5,6 +5,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
@@ -137,14 +139,11 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     }
 
     @Override
-    public List<OntologyTerm> retrieveTermsByStatus(String projectId, String context, List<String> statusList) {
-        log.info("Retrieving terms by status: {} | {} | {}", projectId, context, statusList);
+    public Page<OntologyTerm> retrieveTermsByStatus(String projectId, String context, String status, Pageable pageable) {
+        log.info("Retrieving terms by status: {} | {} | {}", projectId, context, status);
         List<OntologyTerm> finalList = new ArrayList<>();
-        for (String status : statusList) {
-            finalList.addAll(ontologyTermRepository.findByContexts_ProjectIdAndContexts_ContextAndContexts_Status(projectId, context, status));
-        }
-        log.info("Found {} terms.", finalList.size());
-        return finalList;
+        Page<OntologyTerm> ontologyTerms = ontologyTermRepository.findByContexts_ProjectIdAndContexts_ContextAndContexts_Status(projectId, context, status, pageable);
+        return ontologyTerms;
     }
 
     @Override

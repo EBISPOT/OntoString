@@ -14,6 +14,7 @@ import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
@@ -143,10 +144,10 @@ public class OntologyTermControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<OntologyTermDto> actual = mapper.readValue(response, new TypeReference<>() {
+        RestResponsePage<OntologyTermDto> actual = mapper.readValue(response, new TypeReference<>() {
         });
 
-        assertEquals(1, actual.size());
-        assertEquals(orphaTerm.getCurie(), actual.get(0).getCurie());
+        assertEquals(1, actual.getTotalElements());
+        assertEquals(orphaTerm.getCurie(), actual.getContent().get(0).getCurie());
     }
 }

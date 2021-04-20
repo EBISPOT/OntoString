@@ -1,5 +1,7 @@
 package uk.ac.ebi.spot.ontotools.curation.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
@@ -17,7 +19,7 @@ public interface OntologyTermRepository extends MongoRepository<OntologyTerm, St
 
     List<OntologyTerm> findByCurieIn(List<String> curies);
 
-    List<OntologyTerm> findByContexts_ProjectIdAndContexts_ContextAndContexts_Status(String projectId, String context, String status);
+    Page<OntologyTerm> findByContexts_ProjectIdAndContexts_ContextAndContexts_Status(String projectId, String context, String status, Pageable pageable);
 
     @Query(value = "{}")
     Stream<OntologyTerm> findAllByCustomQueryAndStream();
