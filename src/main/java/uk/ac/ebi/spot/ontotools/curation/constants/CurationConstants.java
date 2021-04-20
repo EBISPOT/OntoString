@@ -22,6 +22,8 @@ public class CurationConstants {
 
     public static final String API_ONTOLOGY_TERMS = "/ontology-terms";
 
+    public static final String API_ACTION = "/action";
+
     public static final String API_AUDIT_TRAIL = "/audit-trail";
 
     public static final String API_USERS = "/users";

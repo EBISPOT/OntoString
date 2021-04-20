@@ -15,10 +15,12 @@ import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.OntologyTermDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.ActionOntologyTermsDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.JWTService;
 import uk.ac.ebi.spot.ontotools.curation.service.OntologyTermService;
+import uk.ac.ebi.spot.ontotools.curation.service.OntologyTermUtilService;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
@@ -43,6 +45,9 @@ public class OntologyTermController {
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private OntologyTermUtilService ontologyTermUtilService;
 
     /**
      * POST /v1/projects/{projectId}/ontology-terms
@@ -80,5 +85,21 @@ public class OntologyTermController {
             ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTerm, projectId, context));
         }
         return new RestResponsePage<>(ontologyTermDtos, pageable, ontologyTerms.getTotalElements());
+    }
+
+    /**
+     * POST /v1/projects/{projectId}/ontology-terms/action
+     */
+    @PostMapping(value = "/{projectId}" + CurationConstants.API_ONTOLOGY_TERMS + CurationConstants.API_ACTION,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public void actionOntologyTerms(@PathVariable String projectId, @RequestBody @Valid ActionOntologyTermsDto actionOntologyTermsDto, HttpServletRequest request) {
+        User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        log.info("[{}] Request to action ontology terms: {} | {} | {}", user.getEmail(), projectId,
+                actionOntologyTermsDto.getStatus(), actionOntologyTermsDto.getContext());
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        ontologyTermUtilService.actionTerms(projectId, actionOntologyTermsDto.getContext(),
+                actionOntologyTermsDto.getStatus(), actionOntologyTermsDto.getComment(), user);
     }
 }

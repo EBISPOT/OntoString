@@ -7,6 +7,7 @@ public enum TermStatus {
     DELETED,
     NEEDS_IMPORT,
     AWAITING_IMPORT,
-    NEEDS_CREATION
+    NEEDS_CREATION,
+    AWAITING_CREATION
 
 }
