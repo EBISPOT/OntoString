@@ -5,7 +5,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import uk.ac.ebi.spot.ontotools.curation.constants.*;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
@@ -17,14 +19,17 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.ActionOntologyTermsDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.ExportOntologyTermsDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -133,5 +138,35 @@ public class OntologyTermUtilTest extends IntegrationTest {
         mondoMapping = mappingRepository.findById(mondoMapping.getId()).get();
         assertEquals(1, mondoMapping.getComments().size());
         assertEquals("New Comment", mondoMapping.getComments().get(0).getBody());
+    }
+
+
+    /**
+     * POST /v1/projects/{projectId}/ontology-terms/export
+     */
+    @Test
+    public void shouldExportOntologyTerms() throws Exception {
+        ExportOntologyTermsDto payload = new ExportOntologyTermsDto(TermStatus.NEEDS_IMPORT.name(),
+                CurationConstants.CONTEXT_DEFAULT);
+
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_ONTOLOGY_TERMS + CurationConstants.API_EXPORT;
+
+        MockHttpServletResponse dataResponse = mockMvc.perform(post(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(payload))
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse();
+
+        byte[] data = dataResponse.getContentAsByteArray();
+        assertTrue(data.length != 0);
+        assertEquals("attachment; filename=terms_" + project.getId() + "_" + CurationConstants.CONTEXT_DEFAULT + ".csv", dataResponse.getHeader(HttpHeaders.CONTENT_DISPOSITION));
+
+        String sContent = new String(data, StandardCharsets.UTF_8);
+        String[] lines = sContent.split("\n");
+        assertEquals(1, lines.length);
+        assertTrue(sContent.contains(orphaTerm.getIri()));
     }
 }
