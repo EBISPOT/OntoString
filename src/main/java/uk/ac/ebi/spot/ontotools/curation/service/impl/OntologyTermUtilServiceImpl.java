@@ -15,6 +15,7 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 import uk.ac.ebi.spot.ontotools.curation.repository.MappingRepository;
 import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.OntologyTermUtilService;
+import uk.ac.ebi.spot.ontotools.curation.util.ContentCompiler;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -36,6 +37,19 @@ public class OntologyTermUtilServiceImpl implements OntologyTermUtilService {
         Stream<OntologyTerm> ontologyTermStream = ontologyTermRepository.readByContexts_ProjectIdAndContexts_ContextAndContexts_Status(projectId, context, status);
         ontologyTermStream.forEach(ontologyTerm -> this.updateStatus(ontologyTerm, status, projectId, context, comment, user));
         ontologyTermStream.close();
+    }
+
+    @Override
+    public String exportOntologyTerms(String projectId, String context, String status) {
+        ContentCompiler contentCompiler = new ContentCompiler();
+        Stream<OntologyTerm> ontologyTermStream = ontologyTermRepository.readByContexts_ProjectIdAndContexts_ContextAndContexts_Status(projectId, context, status);
+        ontologyTermStream.forEach(ontologyTerm -> this.addToContent(ontologyTerm, contentCompiler));
+        ontologyTermStream.close();
+        return contentCompiler.getContent();
+    }
+
+    private void addToContent(OntologyTerm ontologyTerm, ContentCompiler contentCompiler) {
+        contentCompiler.addOntologyTerm(ontologyTerm);
     }
 
     private void updateStatus(OntologyTerm ontologyTerm, String oldStatus, String projectId, String context, String comment, User user) {

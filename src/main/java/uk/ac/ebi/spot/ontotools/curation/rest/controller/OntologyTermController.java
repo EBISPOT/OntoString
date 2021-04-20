@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,7 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.OntologyTermDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.ActionOntologyTermsDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.ExportOntologyTermsDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.JWTService;
@@ -27,6 +30,7 @@ import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -91,8 +95,7 @@ public class OntologyTermController {
      * POST /v1/projects/{projectId}/ontology-terms/action
      */
     @PostMapping(value = "/{projectId}" + CurationConstants.API_ONTOLOGY_TERMS + CurationConstants.API_ACTION,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public void actionOntologyTerms(@PathVariable String projectId, @RequestBody @Valid ActionOntologyTermsDto actionOntologyTermsDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
@@ -101,5 +104,29 @@ public class OntologyTermController {
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
         ontologyTermUtilService.actionTerms(projectId, actionOntologyTermsDto.getContext(),
                 actionOntologyTermsDto.getStatus(), actionOntologyTermsDto.getComment(), user);
+    }
+
+    /**
+     * POST /v1/projects/{projectId}/ontology-terms/export
+     */
+    @PostMapping(value = "/{projectId}" + CurationConstants.API_ONTOLOGY_TERMS + CurationConstants.API_EXPORT,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public HttpEntity<byte[]> exportOntologyTerms(@PathVariable String projectId, @RequestBody @Valid ExportOntologyTermsDto exportOntologyTermsDto, HttpServletRequest request) {
+        User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        log.info("[{}] Request to export ontology terms: {} | {} | {}", user.getEmail(), projectId,
+                exportOntologyTermsDto.getStatus(), exportOntologyTermsDto.getContext());
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+
+        String csvContent = ontologyTermUtilService.exportOntologyTerms(projectId, exportOntologyTermsDto.getContext(),
+                exportOntologyTermsDto.getStatus());
+        byte[] payload = csvContent.getBytes(StandardCharsets.UTF_8);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=terms_" + projectId + "_" +
+                exportOntologyTermsDto.getContext() + ".csv");
+        responseHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        responseHeaders.add(HttpHeaders.CONTENT_LENGTH, Integer.toString(payload.length));
+        return new HttpEntity<>(payload, responseHeaders);
     }
 }
