@@ -166,7 +166,7 @@ public class OntologyTermUtilTest extends IntegrationTest {
 
         String sContent = new String(data, StandardCharsets.UTF_8);
         String[] lines = sContent.split("\n");
-        assertEquals(1, lines.length);
+        assertEquals(2, lines.length);
         assertTrue(sContent.contains(orphaTerm.getIri()));
     }
 }
