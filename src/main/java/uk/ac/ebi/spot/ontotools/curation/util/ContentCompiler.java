@@ -1,7 +1,6 @@
 package uk.ac.ebi.spot.ontotools.curation.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jetty.util.StringUtil;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 
 import java.util.ArrayList;
@@ -13,14 +12,27 @@ public class ContentCompiler {
 
     public ContentCompiler() {
         this.lines = new ArrayList<>();
+        this.lines.add(new StringBuffer()
+                .append("IRI")
+                .append(",")
+                .append("Label")
+                .append(",")
+                .append("Cross-refs")
+                .append(",")
+                .append("Mappings")
+                .toString());
     }
 
-    public void addOntologyTerm(OntologyTerm ontologyTerm) {
+    public void addOntologyTerm(OntologyTerm ontologyTerm, String entityNames) {
         StringBuffer sb = new StringBuffer();
-        sb.append(ontologyTerm.getIri()).append(",").append("\"" + ontologyTerm.getLabel() + "\"");
+        sb.append(ontologyTerm.getIri())
+                .append(",")
+                .append("\"" + ontologyTerm.getLabel() + "\"")
+                .append(",");
         if (ontologyTerm.getCrossRefs() != null && !ontologyTerm.getCrossRefs().equalsIgnoreCase("")) {
-            sb.append(",").append(ontologyTerm.getCrossRefs());
+            sb.append(ontologyTerm.getCrossRefs());
         }
+        sb.append(",").append(entityNames);
         lines.add(sb.toString());
     }
 

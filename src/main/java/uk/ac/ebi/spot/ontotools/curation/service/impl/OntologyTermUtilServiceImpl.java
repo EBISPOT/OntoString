@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.ontotools.curation.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,16 +9,17 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Comment;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.*;
+import uk.ac.ebi.spot.ontotools.curation.repository.EntityRepository;
 import uk.ac.ebi.spot.ontotools.curation.repository.MappingRepository;
 import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.OntologyTermUtilService;
 import uk.ac.ebi.spot.ontotools.curation.util.ContentCompiler;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @Service
@@ -31,6 +33,9 @@ public class OntologyTermUtilServiceImpl implements OntologyTermUtilService {
     @Autowired
     private MappingRepository mappingRepository;
 
+    @Autowired
+    private EntityRepository entityRepository;
+
     @Override
     public void actionTerms(String projectId, String context, String status, String comment, User user) {
         log.info("Updating status for terms: {} | {} | {}", projectId, context, status);
@@ -42,14 +47,33 @@ public class OntologyTermUtilServiceImpl implements OntologyTermUtilService {
     @Override
     public String exportOntologyTerms(String projectId, String context, String status) {
         ContentCompiler contentCompiler = new ContentCompiler();
-        Stream<OntologyTerm> ontologyTermStream = ontologyTermRepository.readByContexts_ProjectIdAndContexts_ContextAndContexts_Status(projectId, context, status);
-        ontologyTermStream.forEach(ontologyTerm -> this.addToContent(ontologyTerm, contentCompiler));
-        ontologyTermStream.close();
-        return contentCompiler.getContent();
-    }
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findByContexts_ProjectIdAndContexts_ContextAndContexts_Status(projectId, context, status);
 
-    private void addToContent(OntologyTerm ontologyTerm, ContentCompiler contentCompiler) {
-        contentCompiler.addOntologyTerm(ontologyTerm);
+        List<Entity> entities = entityRepository.findByProjectIdAndContext(projectId, context);
+        Map<String, Entity> entityMap = new LinkedHashMap<>();
+        for (Entity entity : entities) {
+            entityMap.put(entity.getId(), entity);
+        }
+
+        List<Mapping> mappings = mappingRepository.findByProjectIdAndContext(projectId, context);
+        Map<String, List<String>> mappingMap = new LinkedHashMap<>();
+        for (Mapping mapping : mappings) {
+            for (String ontoTermId : mapping.getOntologyTermIds()) {
+                List<String> list = mappingMap.containsKey(ontoTermId) ? mappingMap.get(ontoTermId) : new ArrayList<>();
+                Entity entity = entityMap.get(mapping.getEntityId());
+                if (!list.contains(entity.getName())) {
+                    list.add(entity.getName());
+                }
+                mappingMap.put(ontoTermId, list);
+            }
+        }
+
+        for (OntologyTerm ontologyTerm : ontologyTerms) {
+            List<String> entityNames = mappingMap.get(ontologyTerm.getId());
+            contentCompiler.addOntologyTerm(ontologyTerm, StringUtils.join(entityNames, " | "));
+        }
+
+        return contentCompiler.getContent();
     }
 
     private void updateStatus(OntologyTerm ontologyTerm, String oldStatus, String projectId, String context, String comment, User user) {

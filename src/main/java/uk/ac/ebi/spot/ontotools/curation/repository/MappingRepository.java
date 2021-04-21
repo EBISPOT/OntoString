@@ -14,4 +14,6 @@ public interface MappingRepository extends MongoRepository<Mapping, String> {
     List<Mapping> findByOntologyTermIdsContains(String ontoTermId);
 
     List<Mapping> findByProjectIdAndContextAndOntologyTermIdsContains(String projectId, String context, String ontoTermId);
+
+    List<Mapping> findByProjectIdAndContext(String projectId, String context);
 }
