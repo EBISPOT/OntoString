@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.EqualsAndHashCode;
 import org.joda.time.DateTime;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.UserDto;
 import uk.ac.ebi.spot.ontotools.curation.util.JsonJodaDateTimeDeserializer;
 import uk.ac.ebi.spot.ontotools.curation.util.JsonJodaDateTimeSerializer;
 

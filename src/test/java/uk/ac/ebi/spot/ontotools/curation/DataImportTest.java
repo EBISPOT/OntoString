@@ -12,8 +12,8 @@ import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.repository.EntityRepository;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.service.MatchmakerService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 

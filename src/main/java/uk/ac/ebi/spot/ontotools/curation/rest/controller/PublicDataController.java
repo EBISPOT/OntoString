@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectExportRequest;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectExportStatusDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectExportStatusDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectExportService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 

@@ -7,9 +7,9 @@ import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.UserDtoAssembler;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectUserDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.UserDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.ProjectUserDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.UserDto;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
 import java.util.Arrays;

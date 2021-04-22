@@ -13,7 +13,7 @@ import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;

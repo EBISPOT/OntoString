@@ -6,8 +6,8 @@ import org.springframework.http.MediaType;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectCreationDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectCreationDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class ProjectsControllerTest extends IntegrationTest {
     public void shouldNotCreateProject() throws Exception {
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS;
         ProjectCreationDto projectCreationDto = new ProjectCreationDto("New Project", "Description", 0,
-                new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+                new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null);
         mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(projectCreationDto))

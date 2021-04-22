@@ -5,7 +5,7 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.audit.AuditEntryDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;

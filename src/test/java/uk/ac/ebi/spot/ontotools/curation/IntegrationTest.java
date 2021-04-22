@@ -26,10 +26,10 @@ import uk.ac.ebi.spot.ontotools.curation.domain.auth.AuthToken;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.*;
 import uk.ac.ebi.spot.ontotools.curation.repository.*;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectCreationDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceCreationDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectCreationDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceCreationDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 import uk.ac.ebi.spot.ontotools.curation.service.MatchmakerService;
 import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
@@ -159,7 +159,8 @@ public abstract class IntegrationTest {
         ProjectCreationDto projectCreationDto = new ProjectCreationDto(name, "Description", noReviewsRequired,
                 datasources != null ? datasources : new ArrayList<>(),
                 ontologies != null ? ontologies : new ArrayList<>(),
-                preferredMappingOntology != null ? Arrays.asList(new String[]{preferredMappingOntology}) : new ArrayList<>());
+                preferredMappingOntology != null ? Arrays.asList(new String[]{preferredMappingOntology}) : new ArrayList<>(),
+                null);
 
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)

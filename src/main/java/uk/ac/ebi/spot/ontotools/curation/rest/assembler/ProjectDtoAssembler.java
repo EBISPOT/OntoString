@@ -5,8 +5,9 @@ import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectCreationDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectContextGraphRestrictionDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectCreationDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,7 @@ public class ProjectDtoAssembler {
                         new ArrayList<>(),
                         provenance, null),
                 new ProjectContext(null, CurationConstants.CONTEXT_DEFAULT, null, "Default context",
-                        project.getDatasources(), project.getOntologies(), project.getPreferredMappingOntologies(), preferredMappingLower));
+                        project.getDatasources(), project.getOntologies(), project.getPreferredMappingOntologies(), preferredMappingLower,
+                        project.getGraphRestriction() != null ? ProjectContextGraphRestrictionDtoAssembler.disassemble(project.getGraphRestriction()) : null));
     }
 }

@@ -1,7 +1,7 @@
 package uk.ac.ebi.spot.ontotools.curation.rest.assembler;
 
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectContextDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectContextDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,8 @@ public class ProjectContextDtoAssembler {
                 projectContext.getDescription(),
                 projectContext.getDatasources(),
                 projectContext.getOntologies(),
-                projectContext.getPreferredMappingOntologies());
+                projectContext.getPreferredMappingOntologies(),
+                projectContext.getProjectContextGraphRestriction() != null ? ProjectContextGraphRestrictionDtoAssembler.assemble(projectContext.getProjectContextGraphRestriction()) : null);
     }
 
     public static ProjectContext disassemble(ProjectContextDto projectContext) {
@@ -31,6 +32,7 @@ public class ProjectContextDtoAssembler {
                 projectContext.getDatasources(),
                 projectContext.getOntologies(),
                 projectContext.getPreferredMappingOntologies(),
-                preferredMappingLower);
+                preferredMappingLower,
+                projectContext.getGraphRestriction() != null ? ProjectContextGraphRestrictionDtoAssembler.disassemble(projectContext.getGraphRestriction()) : null);
     }
 }

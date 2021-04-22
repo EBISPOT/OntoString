@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.audit.AuditEntryDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;

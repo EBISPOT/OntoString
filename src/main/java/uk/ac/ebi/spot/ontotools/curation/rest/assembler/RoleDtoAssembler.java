@@ -2,7 +2,7 @@ package uk.ac.ebi.spot.ontotools.curation.rest.assembler;
 
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.Role;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.RoleDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.RoleDto;
 
 public class RoleDtoAssembler {
 

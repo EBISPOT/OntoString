@@ -1,7 +1,8 @@
-package uk.ac.ebi.spot.ontotools.curation.rest.dto;
+package uk.ac.ebi.spot.ontotools.curation.rest.dto.users;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.ProjectUserDto;
 
 public class ProjectUserDtoTest {
 

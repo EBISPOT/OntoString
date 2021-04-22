@@ -6,8 +6,8 @@ import org.springframework.http.MediaType;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.UserCreationDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.UserDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.UserCreationDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.UserDto;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
 import static org.junit.Assert.assertEquals;

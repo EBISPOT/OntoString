@@ -1,4 +1,4 @@
-package uk.ac.ebi.spot.ontotools.curation.rest.dto;
+package uk.ac.ebi.spot.ontotools.curation.rest.dto.project;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -33,17 +33,22 @@ public final class ProjectContextDto implements Serializable {
     @JsonProperty("preferredMappingOntologies")
     private final List<String> preferredMappingOntologies;
 
+    @JsonProperty("graphRestriction")
+    private final ProjectContextGraphRestrictionDto graphRestriction;
+
     @JsonCreator
     public ProjectContextDto(@JsonProperty("name") String name,
                              @JsonProperty("description") String description,
                              @JsonProperty("datasources") List<String> datasources,
                              @JsonProperty("ontologies") List<String> ontologies,
-                             @JsonProperty("preferredMappingOntologies") List<String> preferredMappingOntologies) {
+                             @JsonProperty("preferredMappingOntologies") List<String> preferredMappingOntologies,
+                             @JsonProperty("graphRestriction") ProjectContextGraphRestrictionDto graphRestriction) {
         this.name = name;
         this.description = description;
         this.datasources = datasources;
         this.ontologies = ontologies;
         this.preferredMappingOntologies = preferredMappingOntologies;
+        this.graphRestriction = graphRestriction;
     }
 
     public String getName() {
@@ -64,5 +69,9 @@ public final class ProjectContextDto implements Serializable {
 
     public List<String> getPreferredMappingOntologies() {
         return preferredMappingOntologies;
+    }
+
+    public ProjectContextGraphRestrictionDto getGraphRestriction() {
+        return graphRestriction;
     }
 }

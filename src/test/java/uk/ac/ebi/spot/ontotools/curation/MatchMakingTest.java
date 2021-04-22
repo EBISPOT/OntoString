@@ -17,8 +17,8 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.repository.ExternalServiceConfigRepository;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.service.*;
 import uk.ac.ebi.spot.ontotools.curation.util.CurationUtil;
 
