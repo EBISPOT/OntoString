@@ -13,6 +13,7 @@ import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.ExtendedOntologyTermDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermCreationDto;
@@ -116,38 +117,4 @@ public class OntologyTermControllerTest extends IntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
-    /**
-     * GET /v1/projects/{projectId}/ontology-terms?status=<STATUS>&context=<CONTEXT>
-     */
-    @Test
-    public void shouldGetOntologyTerms() throws Exception {
-        OntologyTerm orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
-                DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia",
-                Arrays.asList(new OntologyTermContext[]{
-                        new OntologyTermContext(project.getId(), CurationConstants.CONTEXT_DEFAULT, TermStatus.NEEDS_IMPORT.name())
-                }), null, null));
-
-        ontologyTermRepository.insert(new OntologyTerm(null, "MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
-                DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia",
-                Arrays.asList(new OntologyTermContext[]{
-                        new OntologyTermContext(project.getId(), CurationConstants.CONTEXT_DEFAULT, TermStatus.CURRENT.name())
-                }), null, null));
-
-        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
-                CurationConstants.API_ONTOLOGY_TERMS + "?context=" + CurationConstants.CONTEXT_DEFAULT + "&status=" + TermStatus.NEEDS_IMPORT.name();
-
-        String response = mockMvc.perform(get(endpoint)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header(IDPConstants.JWT_TOKEN, "token1"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        RestResponsePage<OntologyTermDto> actual = mapper.readValue(response, new TypeReference<>() {
-        });
-
-        assertEquals(1, actual.getTotalElements());
-        assertEquals(orphaTerm.getCurie(), actual.getContent().get(0).getCurie());
-    }
 }

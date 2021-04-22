@@ -16,10 +16,7 @@ import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.OntologyTermUtilService;
 import uk.ac.ebi.spot.ontotools.curation.util.ContentCompiler;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -74,6 +71,30 @@ public class OntologyTermUtilServiceImpl implements OntologyTermUtilService {
         }
 
         return contentCompiler.getContent();
+    }
+
+    @Override
+    public Map<String, Map<String, String>> retrieveEntityData(List<OntologyTerm> ontologyTerms, String projectId, String context) {
+        List<Entity> entities = entityRepository.findByProjectIdAndContext(projectId, context);
+        Map<String, String> entityMap = new LinkedHashMap<>();
+        for (Entity entity : entities) {
+            entityMap.put(entity.getId(), entity.getName());
+        }
+
+        List<Mapping> mappings = mappingRepository.findByProjectIdAndContext(projectId, context);
+        Map<String, Map<String, String>> result = new LinkedHashMap<>();
+
+        for (OntologyTerm ontologyTerm : ontologyTerms) {
+            Map<String, String> entityNames = new HashMap<>();
+
+            for (Mapping mapping : mappings) {
+                if (mapping.getOntologyTermIds().contains(ontologyTerm.getId())) {
+                    entityNames.put(mapping.getEntityId(), entityMap.get(mapping.getEntityId()));
+                }
+            }
+            result.put(ontologyTerm.getId(), entityNames);
+        }
+        return result;
     }
 
     private void updateStatus(OntologyTerm ontologyTerm, String oldStatus, String projectId, String context, String comment, User user) {
