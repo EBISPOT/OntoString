@@ -7,6 +7,7 @@ import Project from "../../dto/Project";
 import CreateProjectDialog from "./CreateProjectDialog";
 import { Link, Redirect } from 'react-router-dom'
 import formatDate from "../../formatDate";
+import Spinner from "../../components/Spinner";
 
 const styles = (theme:Theme) => createStyles({
     tableRow: {
@@ -51,7 +52,7 @@ class ProjectList extends React.Component<Props, State> {
         let { classes } = this.props
 
         if(projects === null) {
-            return <CircularProgress />
+            return <Spinner />
         }
 
         if(goToProject !== null) {

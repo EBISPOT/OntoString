@@ -1,14 +1,17 @@
 import React, { Fragment, useState } from 'react';
-import { BrowserRouter, Link, Route, RouteComponentProps, Switch, withRouter } from "react-router-dom";
+import { BrowserRouter, Link, Redirect, Route, RouteComponentProps, Switch, withRouter } from "react-router-dom";
 import logo from './logo.svg';
 import './App.css';
 import { AppBar, createStyles, Tab, Tabs, Theme, WithStyles, withStyles } from '@material-ui/core';
 
 import Home from './pages/Home'
 import Login from './pages/Login'
-import ProjectPage from './pages/projects/ProjectPage'
 import { AuthProvider } from './auth-context';
 import EntityPage from './pages/entities/EntityPage';
+import ProjectsPage from './pages/projects/ProjectsPage';
+import EntitiesPage from './pages/entities/EntitiesPage';
+import TermsPage from './pages/terms/TermsPage';
+import About from './pages/About';
 
 let styles = (theme:Theme) => createStyles({
     main: {
@@ -27,41 +30,31 @@ function App(props:AppProps) {
   let { classes } = props
 
   return (
-      <Fragment>
           <BrowserRouter basename={process.env.PUBLIC_URL}>
 
-<header style={{padding:'16px',backgroundColor:'black',backgroundImage:'url(\'' + process.env.PUBLIC_URL + '/embl-ebi-background-4.jpg\')',backgroundPosition:'100% 100%'}}>
-                <img style={{height:'100px'}} src={process.env.PUBLIC_URL + "/curator.svg"} />
-
-
-                <nav>
-                        <ul className="dropdown menu float-left" data-description="navigational" role="menubar" data-dropdown-menu="6mg2ht-dropdown-menu">
-                            <li  role="menuitem"><Link to="/ols/index">Projects</Link></li>
-                            <li  role="menuitem"><Link to="/ols/ontologies">Entities</Link></li>
-                            <li  role="menuitem"><Link to="/ols/docs">Terms</Link></li>
-                            <li  role="menuitem"><Link to="/ols/about">About</Link></li>
-                        </ul>
-                    </nav>
-
-
-
-                </header>
-
-              <main className={classes.main}>
                 <Switch>
                     <Route exact path={`/`} component={Home} />
 
                     <Route exact path={`/login`} component={Login}></Route>
 
+                    <Route exact path={`/projects`} component={ProjectsPage} />
+
                     <Route exact path={`/projects/:id`}
-                        component={(props:any) => <ProjectPage id={props.match.params.id}/>}></Route>
+                        component={(props:any) => <Redirect to={`/projects/${props.match.params.id}/entities`}/>}></Route>
+
+                    <Route exact path={`/projects/:id/entities`}
+                        component={(props:any) => <EntitiesPage projectId={props.match.params.id}/>}></Route>
+
+                    <Route exact path={`/projects/:id/terms`}
+                        component={(props:any) => <TermsPage projectId={props.match.params.id}/>}></Route>
 
                     <Route exact path={`/projects/:projectId/entities/:entityId`}
                         component={(props:any) => <EntityPage projectId={props.match.params.projectId} entityId={props.match.params.entityId} />}></Route>
+
+                    <Route exact path={`/about`}
+                        component={(props:any) => <About projectId={ new URLSearchParams(props.location.search).get('projectId') || undefined} />}></Route>
                 </Switch>
-              </main>
           </BrowserRouter>
-      </Fragment>
 
   );
 

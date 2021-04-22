@@ -15,15 +15,17 @@ export default function Home(props:Props) {
         return <Redirect to='/login'/>
     }
 
-    return <div>
-        {/* <div>Logged in as {getToken().authEmail} with token {getToken().auth}</div> */}
-            {/* <Breadcrumbs>
-                <Link color="inherit" href="/">
-                    Projects
-                </Link>
-            </Breadcrumbs> */}
-        <h2>Projects</h2>
-        <ProjectList />
-    </div>
+    return <Redirect to='/projects'/>
+
+    // return <div>
+    //     {/* <div>Logged in as {getToken().authEmail} with token {getToken().auth}</div> */}
+    //         <Breadcrumbs>
+    //             <Link color="inherit" href="/">
+    //                 Projects
+    //             </Link>
+    //         </Breadcrumbs>
+    //     <h2>Projects</h2>
+    //     <ProjectList />
+    // </div>
 }
 

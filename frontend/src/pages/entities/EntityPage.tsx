@@ -22,6 +22,8 @@ import ReviewList from "./ReviewList";
 import CommentList from "./CommentList";
 import AddReviewDialog from "./AddReviewDialog";
 import AddCommentDialog from "./AddCommentDialog";
+import Header from "../../components/Header";
+import Spinner from "../../components/Spinner";
 
 interface Props {
     projectId:string
@@ -65,10 +67,16 @@ export default class EntityPage extends React.Component<Props, State> {
         }
 
         if(!project || !entity) {
-            return <CircularProgress />
+            return <Fragment>
+                <Header section='entities' projectId={this.props.projectId} />
+                <main> <Spinner /> </main>
+            </Fragment >
         }
 
-        return <div>
+        return <Fragment>
+            <Header section="entities" projectId={this.props.projectId} />
+            <main>
+
             <Breadcrumbs>
                 <Link color="inherit" component={RouterLink} to="/">
                     Projects
@@ -120,8 +128,8 @@ export default class EntityPage extends React.Component<Props, State> {
                     <Button variant="outlined" color="primary" size="large" onClick={this.onClickAddComment}>+ Add Comment</Button>
                 </Fragment>
                 }
-
-        </div>
+                </main>
+        </Fragment>
     }
 
     async fetch() {

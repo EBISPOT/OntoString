@@ -2,8 +2,8 @@
 import { Box, Button, CircularProgress, createStyles, darken, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, lighten, makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
 import React, { Fragment } from "react";
 import { useState, useEffect } from "react";
-import { getAuthHeaders, getToken, isLoggedIn } from "../../auth";
-import Context from "../../dto/Context";
+import { getAuthHeaders, getToken, isLoggedIn } from "../auth";
+import Context from "../dto/Context";
 import ContextForm from "./ContextForm";
 
 interface Props {
