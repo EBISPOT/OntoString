@@ -1,4 +1,4 @@
-package uk.ac.ebi.spot.ontotools.curation.rest.dto;
+package uk.ac.ebi.spot.ontotools.curation.rest.dto.project;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;

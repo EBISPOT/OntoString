@@ -16,8 +16,8 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 import uk.ac.ebi.spot.ontotools.curation.repository.ExternalServiceConfigRepository;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.zooma.ZoomaResponseDto;
 import uk.ac.ebi.spot.ontotools.curation.service.*;
@@ -157,7 +157,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
         SourceDto sourceDto2 = super.createSource(project.getId());
         Provenance provenance = new Provenance(user1.getName(), user1.getEmail(), DateTime.now());
         projectService.createProjectContext(new ProjectContext(null, "SECOND", project.getId(), "Description",
-                datasources, ontologies, Arrays.asList(new String[]{"Orphanet"}), Arrays.asList(new String[]{"orphanet"})), project.getId(), user1);
+                datasources, ontologies, Arrays.asList(new String[]{"Orphanet"}), Arrays.asList(new String[]{"orphanet"}), null), project.getId(), user1);
         project = projectService.retrieveProject(projectDto.getId(), user1);
 
         Entity entity1 = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),

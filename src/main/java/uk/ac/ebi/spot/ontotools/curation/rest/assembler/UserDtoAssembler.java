@@ -1,7 +1,7 @@
 package uk.ac.ebi.spot.ontotools.curation.rest.assembler;
 
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.UserDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.UserDto;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
