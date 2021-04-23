@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface OLSService {
 
+    List<OLSTermDto> retrieveAncestors(String ontologyId, String iri, boolean direct);
+
     List<OLSTermDto> retrieveTerms(String ontologyId, String identifierValue);
 
     List<OLSQueryDocDto> query(String prefix);

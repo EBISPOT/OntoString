@@ -43,7 +43,7 @@ public class DataImportTest extends IntegrationTest {
     @Override
     public void setup() throws Exception {
         super.setup();
-        projectDto = super.createProject("New Project", user1, null, null, null, 0);
+        projectDto = super.createProject("New Project", user1, null, null, null, 0, null);
         sourceDto = super.createSource(projectDto.getId());
         doNothing().when(matchmakerService).runMatchmaking(eq(sourceDto.getId()), any());
     }

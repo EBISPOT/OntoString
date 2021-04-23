@@ -28,7 +28,7 @@ public class ProjectContextsControllerTest extends IntegrationTest {
         projectDto = super.createProject("New Project", user1,
                 Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"}),
                 Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"}),
-                "efo", 0);
+                "efo", 0, null);
     }
 
 

@@ -16,7 +16,13 @@ public class RestInteractionConstants {
 
     public static final String OLS_TERMS = "/terms";
 
+    public static final String OLS_ANCESTORS = "/ancestors";
+
+    public static final String OLS_PARENTS = "/parents";
+
     public static final String OLS_IDTYPE_IRI = "iri";
+
+    public static final String OLS_PAGE = "page";
 
     public static final String OLS_PARAM_Q = "q";
 

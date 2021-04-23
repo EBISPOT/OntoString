@@ -18,12 +18,21 @@ public final class OLSResponseDto implements Serializable {
     @JsonProperty("_embedded")
     private final OLSEmbeddedDto embedded;
 
+    @JsonProperty("page")
+    private final OLSPageDto page;
+
     @JsonCreator
-    public OLSResponseDto(@JsonProperty("_embedded") OLSEmbeddedDto embedded) {
+    public OLSResponseDto(@JsonProperty("_embedded") OLSEmbeddedDto embedded,
+                          @JsonProperty("page") OLSPageDto page) {
         this.embedded = embedded;
+        this.page = page;
     }
 
     public OLSEmbeddedDto getEmbedded() {
         return embedded;
+    }
+
+    public OLSPageDto getPage() {
+        return page;
     }
 }
