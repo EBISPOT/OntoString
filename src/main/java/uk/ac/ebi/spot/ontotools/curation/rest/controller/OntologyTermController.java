@@ -1,6 +1,5 @@
 package uk.ac.ebi.spot.ontotools.curation.rest.controller;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +92,22 @@ public class OntologyTermController {
                     projectId, context));
         }
         return new RestResponsePage<>(extendedOntologyTermDtos, pageable, ontologyTermsPage.getTotalElements());
+    }
+
+    /**
+     * GET /v1/projects/{projectId}/ontology-terms-stats?context=<CONTEXT>
+     */
+    @GetMapping(value = "/{projectId}" + CurationConstants.API_ONTOLOGY_TERMS_STATS,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public OntologyTermStatsDto getOntologyTermStats(@PathVariable String projectId,
+                                                     @RequestParam(value = CurationConstants.PARAM_CONTEXT) String context,
+                                                     HttpServletRequest request) {
+        User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        log.info("[{}] Request to get ontology term stats: {} | {}", user.getEmail(), projectId, context);
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        Map<String, Integer> stats = ontologyTermService.retrieveTermStats(projectId, context);
+        return new OntologyTermStatsDto(stats);
     }
 
     /**

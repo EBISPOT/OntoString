@@ -36,7 +36,7 @@ public class OntologyTermUtilServiceImpl implements OntologyTermUtilService {
     @Override
     public void actionTerms(String projectId, String context, String status, String comment, User user) {
         log.info("Updating status for terms: {} | {} | {}", projectId, context, status);
-        Stream<OntologyTerm> ontologyTermStream = ontologyTermRepository.readByContexts_ProjectIdAndContexts_ContextAndContexts_Status(projectId, context, status);
+        Stream<OntologyTerm> ontologyTermStream = ontologyTermRepository.readByHasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(true, projectId, context, status);
         ontologyTermStream.forEach(ontologyTerm -> this.updateStatus(ontologyTerm, status, projectId, context, comment, user));
         ontologyTermStream.close();
     }
@@ -44,7 +44,7 @@ public class OntologyTermUtilServiceImpl implements OntologyTermUtilService {
     @Override
     public String exportOntologyTerms(String projectId, String context, String status) {
         ContentCompiler contentCompiler = new ContentCompiler();
-        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findByContexts_ProjectIdAndContexts_ContextAndContexts_Status(projectId, context, status);
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findByHasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(true, projectId, context, status);
 
         List<Entity> entities = entityRepository.findByProjectIdAndContext(projectId, context);
         Map<String, Entity> entityMap = new LinkedHashMap<>();

@@ -19,11 +19,13 @@ public interface OntologyTermRepository extends MongoRepository<OntologyTerm, St
 
     List<OntologyTerm> findByCurieIn(List<String> curies);
 
-    Page<OntologyTerm> findByContexts_ProjectIdAndContexts_ContextAndContexts_Status(String projectId, String context, String status, Pageable pageable);
+    Page<OntologyTerm> findByHasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(boolean hasMapping, String projectId, String context, String status, Pageable pageable);
 
-    Stream<OntologyTerm> readByContexts_ProjectIdAndContexts_ContextAndContexts_Status(String projectId, String context, String status);
+    Stream<OntologyTerm> readByHasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(boolean hasMapping, String projectId, String context, String status);
 
-    List<OntologyTerm> findByContexts_ProjectIdAndContexts_ContextAndContexts_Status(String projectId, String context, String status);
+    List<OntologyTerm> findByHasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(boolean hasMapping, String projectId, String context, String status);
+
+    long countByHasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(boolean hasMapping, String projectId, String context, String status);
 
     @Query(value = "{}")
     Stream<OntologyTerm> findAllByCustomQueryAndStream();

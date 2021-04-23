@@ -10,7 +10,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
-import uk.ac.ebi.spot.ontotools.curation.constants.*;
+import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
+import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
+import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
+import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
@@ -18,22 +21,24 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.ExtendedOntologyTermDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.ActionOntologyTermsDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.ExportOntologyTermsDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.ExtendedOntologyTermDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermStatsDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.service.MappingService;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,6 +51,9 @@ public class OntologyTermUtilTest extends IntegrationTest {
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private MappingService mappingService;
 
     private Project project;
 
@@ -76,23 +84,20 @@ public class OntologyTermUtilTest extends IntegrationTest {
         entity1 = entityRepository.insert(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
                 CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), null, provenance, EntityStatus.AUTO_MAPPED));
 
-        orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
+        orphaTerm = ontologyTermRepository.insert(new OntologyTerm("Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
                 DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia",
                 Arrays.asList(new OntologyTermContext[]{
                         new OntologyTermContext(entity1.getProjectId(), entity1.getContext(), TermStatus.NEEDS_IMPORT.name())
                 }), null, null));
 
-        mondoTerm = ontologyTermRepository.insert(new OntologyTerm(null, "MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
+        mondoTerm = ontologyTermRepository.insert(new OntologyTerm("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
                 DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia",
                 Arrays.asList(new OntologyTermContext[]{
                         new OntologyTermContext(entity1.getProjectId(), entity1.getContext(), TermStatus.NEEDS_CREATION.name())
                 }), null, null));
 
-        orphaMapping = mappingRepository.insert(new Mapping(null, entity1.getId(), entity1.getContext(), Arrays.asList(new String[]{orphaTerm.getId()}),
-                project.getId(), false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
-
-        mondoMapping = mappingRepository.insert(new Mapping(null, entity1.getId(), entity1.getContext(), Arrays.asList(new String[]{mondoTerm.getId()}),
-                project.getId(), false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
+        orphaMapping = mappingService.createMapping(entity1, Arrays.asList(new OntologyTerm[]{orphaTerm}), provenance);
+        mondoMapping = mappingService.createMapping(entity1, Arrays.asList(new OntologyTerm[]{mondoTerm}), provenance);
     }
 
     /**
@@ -176,7 +181,6 @@ public class OntologyTermUtilTest extends IntegrationTest {
         assertTrue(sContent.contains(orphaTerm.getIri()));
     }
 
-
     /**
      * GET /v1/projects/{projectId}/ontology-terms?status=<STATUS>&context=<CONTEXT>
      */
@@ -201,6 +205,30 @@ public class OntologyTermUtilTest extends IntegrationTest {
         assertEquals(1, actual.getContent().get(0).getEntities().size());
         assertEquals(entity1.getId(), actual.getContent().get(0).getEntities().get(0).getId());
         assertEquals(entity1.getName(), actual.getContent().get(0).getEntities().get(0).getName());
+    }
 
+
+    /**
+     * GET /v1/projects/{projectId}/ontology-terms-stats?context=<CONTEXT>
+     */
+    @Test
+    public void shouldGetOntologyTermsStats() throws Exception {
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() +
+                CurationConstants.API_ONTOLOGY_TERMS_STATS + "?context=" + CurationConstants.CONTEXT_DEFAULT;
+
+        String response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        OntologyTermStatsDto actual = mapper.readValue(response, new TypeReference<>() {
+        });
+
+        assertFalse(actual.getStats().isEmpty());
+        assertEquals(1, actual.getStats().get(TermStatus.NEEDS_CREATION.name()).intValue());
+        assertEquals(1, actual.getStats().get(TermStatus.NEEDS_IMPORT.name()).intValue());
     }
 }
