@@ -26,4 +26,8 @@ public interface OntologyTermService {
     String retrieveStatusUpdate(String iri, ProjectContext projectContext, String previousStatus);
 
     Page<OntologyTerm> retrieveTermsByStatus(String projectId, String context, String status, Pageable pageable);
+
+    void saveOntologyTerm(OntologyTerm ontologyTerm);
+
+    Map<String, Integer> retrieveTermStats(String projectId, String context);
 }

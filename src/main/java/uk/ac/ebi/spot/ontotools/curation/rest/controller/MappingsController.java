@@ -127,12 +127,10 @@ public class MappingsController {
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         Map<String, OntologyTerm> ontologyTermMap = new LinkedHashMap<>();
         List<OntologyTerm> newTerms = new ArrayList<>();
-        List<String> newTermIds = new ArrayList<>();
         for (OntologyTermDto ontologyTermDto : mappingDto.getOntologyTerms()) {
             OntologyTerm ontologyTerm = ontologyTermService.retrieveTermByCurie(ontologyTermDto.getCurie());
             ontologyTermMap.put(ontologyTerm.getId(), ontologyTerm);
             newTerms.add(ontologyTerm);
-            newTermIds.add(ontologyTerm.getId());
         }
         Mapping existing = mappingService.retrieveMappingById(mappingId);
         List<String> existingOntoIds = existing.getOntologyTermIds();
@@ -143,7 +141,7 @@ public class MappingsController {
             }
         }
 
-        Mapping updated = mappingService.updateMapping(mappingId, newTerms, newTermIds, oldTerms, provenance);
+        Mapping updated = mappingService.updateMapping(mappingId, newTerms, oldTerms, provenance);
 
         /**
          * Updating mapping status to MANUAL.

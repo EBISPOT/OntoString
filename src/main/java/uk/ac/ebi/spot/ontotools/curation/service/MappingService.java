@@ -23,7 +23,7 @@ public interface MappingService {
 
     Mapping addCommentToMapping(String mappingId, String body, Provenance provenance);
 
-    Mapping updateMapping(String mappingId, List<OntologyTerm> newTerms, List<String> newTermIds, List<OntologyTerm> oldTerms, Provenance provenance);
+    Mapping updateMapping(String mappingId, List<OntologyTerm> newTerms, List<OntologyTerm> oldTerms, Provenance provenance);
 
     void deleteMapping(String mappingId, Provenance provenance, List<MetadataEntry> metadata);
 

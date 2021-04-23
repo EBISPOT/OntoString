@@ -26,8 +26,7 @@ public class OntologyTermDtoAssembler {
         List<OntologyTermContext> ontologyTermContexts = Arrays.asList(new OntologyTermContext[]{
                 new OntologyTermContext(projectId, context, status)
         });
-        return new OntologyTerm(null,
-                ontologyTerm.getCurie(),
+        return new OntologyTerm(ontologyTerm.getCurie(),
                 ontologyTerm.getIri(),
                 DigestUtils.sha256Hex(ontologyTerm.getIri()),
                 ontologyTerm.getLabel(),
