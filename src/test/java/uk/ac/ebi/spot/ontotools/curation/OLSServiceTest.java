@@ -52,4 +52,13 @@ public class OLSServiceTest extends IntegrationTest {
         OLSTermDto olsTermDto = olsService.retrieveOriginalTerm(iri);
         assertNotNull(olsTermDto);
     }
+
+    @Test
+    public void shouldRetrieveAncestors() {
+        String ontoId = "efo";
+        String termId = "http://www.orpha.net/ORDO/Orphanet_15";
+
+        List<OLSTermDto> terms = olsService.retrieveAncestors(ontoId, termId, false);
+        assertEquals(23, terms.size());
+    }
 }

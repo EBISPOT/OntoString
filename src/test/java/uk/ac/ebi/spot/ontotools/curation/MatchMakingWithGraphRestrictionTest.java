@@ -14,9 +14,9 @@ import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.config.ExternalServiceConfig;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.repository.ExternalServiceConfigRepository;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectContextGraphRestrictionDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.service.*;
@@ -30,7 +30,7 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 @ContextConfiguration(classes = {IntegrationTest.MockTaskExecutorConfig.class})
-public class MatchMakingTest extends IntegrationTest {
+public class MatchMakingWithGraphRestrictionTest extends IntegrationTest {
 
     @Autowired
     private ExternalServiceConfigRepository externalServiceConfigRepository;
@@ -48,19 +48,14 @@ public class MatchMakingTest extends IntegrationTest {
     private MatchmakerService matchmakerService;
 
     @Autowired
-    private MappingSuggestionsService mappingSuggestionsService;
-
-    @Autowired
     private MappingService mappingService;
 
     @Autowired
     private OntologyTermService ontologyTermService;
 
-    private Project project;
+    private List<String> datasources;
 
-    private SourceDto sourceDto;
-
-    private Entity entity;
+    private List<String> ontologies;
 
     @Override
     public void setup() throws Exception {
@@ -68,26 +63,69 @@ public class MatchMakingTest extends IntegrationTest {
         externalServiceConfigRepository.insert(new ExternalServiceConfig(null, "OLS", Arrays.asList(new String[]{"orphanet::ordo"})));
         externalServiceConfigRepository.insert(new ExternalServiceConfig(null, "OXO", Arrays.asList(new String[]{"ordo::orphanet"})));
 
-        List<String> datasources = Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"});
-        List<String> ontologies = Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"});
+        datasources = Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"});
+        ontologies = Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"});
+    }
 
-        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0, null);
-        user1 = userService.findByEmail(user1.getEmail());
-        project = projectService.retrieveProject(projectDto.getId(), user1);
-        sourceDto = super.createSource(project.getId());
-        Provenance provenance = new Provenance(user1.getName(), user1.getEmail(), DateTime.now());
+    /**
+     * Ancestor: EFO:0005541
+     */
+    @Test
+    public void runMatchmakingWithAncestorTest() throws Exception {
+        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0,
+                new ProjectContextGraphRestrictionDto(Arrays.asList(new String[]{"EFO:0005541"}),
+                        Arrays.asList(new String[]{"rdfs:subClassOf"}),
+                        false,
+                        false));
+        this.runMatchmaking(projectDto);
+    }
 
-        /**
-         * Other examples:
-         * - Hemochromatosis type 1
-         * - Retinal dystrophy
-         */
-        entity = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
-                CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), 10, provenance, EntityStatus.UNMAPPED));
+    /**
+     * Parent: EFO:0005802
+     */
+    @Test
+    public void runMatchmakingWithParentTest() throws Exception {
+        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0,
+                new ProjectContextGraphRestrictionDto(Arrays.asList(new String[]{"EFO:0005802"}),
+                        Arrays.asList(new String[]{"rdfs:subClassOf"}),
+                        true,
+                        false));
+        this.runMatchmaking(projectDto);
     }
 
     @Test
-    public void runMatchmakingTest() {
+    public void runMatchmakingWithRandomAncestorTest() throws Exception {
+        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0,
+                new ProjectContextGraphRestrictionDto(Arrays.asList(new String[]{"EFO:0105802"}),
+                        Arrays.asList(new String[]{"rdfs:subClassOf"}),
+                        false,
+                        false));
+
+        user1 = userService.findByEmail(user1.getEmail());
+        Project project = projectService.retrieveProject(projectDto.getId(), user1);
+        SourceDto sourceDto = super.createSource(project.getId());
+        Provenance provenance = new Provenance(user1.getName(), user1.getEmail(), DateTime.now());
+
+        Entity entity = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
+                CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), 10, provenance, EntityStatus.UNMAPPED));
+
+        matchmakerService.runMatchmaking(sourceDto.getId(), project);
+        Entity updated = entityService.retrieveEntity(entity.getId());
+        assertEquals(EntityStatus.UNMAPPED, updated.getMappingStatus());
+
+        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveAllTerms();
+        assertTrue(ontologyTerms.isEmpty());
+    }
+
+    private void runMatchmaking(ProjectDto projectDto) throws Exception {
+        user1 = userService.findByEmail(user1.getEmail());
+        Project project = projectService.retrieveProject(projectDto.getId(), user1);
+        SourceDto sourceDto = super.createSource(project.getId());
+        Provenance provenance = new Provenance(user1.getName(), user1.getEmail(), DateTime.now());
+
+        Entity entity = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
+                CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), 10, provenance, EntityStatus.UNMAPPED));
+
         matchmakerService.runMatchmaking(sourceDto.getId(), project);
         Entity updated = entityService.retrieveEntity(entity.getId());
         assertEquals(EntityStatus.AUTO_MAPPED, updated.getMappingStatus());
@@ -99,18 +137,6 @@ public class MatchMakingTest extends IntegrationTest {
             if (ontologyTerm.getCurie().equalsIgnoreCase("Orphanet:15")) {
                 assertEquals(TermStatus.CURRENT.name(), CurationUtil.termStatusForContext(ontologyTerm, project.getId(), updated.getContext()));
             }
-            if (ontologyTerm.getCurie().equalsIgnoreCase("MONDO:0007037")) {
-                assertEquals(TermStatus.NEEDS_IMPORT.name(), CurationUtil.termStatusForContext(ontologyTerm, project.getId(), updated.getContext()));
-            }
-        }
-
-        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}));
-        assertEquals(1, mappingSuggestionMap.size());
-        List<MappingSuggestion> mappingSuggestions = mappingSuggestionMap.get(entity.getId());
-        assertEquals(2, mappingSuggestions.size());
-
-        for (MappingSuggestion mappingSuggestion : mappingSuggestions) {
-            assertTrue(ontoMap.containsKey(mappingSuggestion.getOntologyTermId()));
         }
 
         Mapping mapping = mappingService.retrieveMappingForEntity(entity.getId());

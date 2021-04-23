@@ -21,9 +21,9 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 import uk.ac.ebi.spot.ontotools.curation.repository.ExternalServiceConfigRepository;
 import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermRepository;
 import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermUpdateLogEntryRepository;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.EntityService;
 import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
@@ -78,7 +78,7 @@ public class OntologyTermUpdateTaskTest extends IntegrationTest {
         List<String> datasources = Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"});
         List<String> ontologies = Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"});
 
-        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "mondo", 0);
+        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "mondo", 0, null);
         user1 = userService.findByEmail(user1.getEmail());
         Project project = projectService.retrieveProject(projectDto.getId(), user1);
         SourceDto sourceDto = super.createSource(project.getId());
@@ -104,7 +104,7 @@ public class OntologyTermUpdateTaskTest extends IntegrationTest {
 
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(orphaTerm.getIri())), eq(orphaTerm.getIri()))).thenReturn(new ArrayList<>());
         when(olsService.retrieveTerms(eq("mondo"), eq(mondoTerm.getIri()))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(mondoTerm.getIri(), "MONDO:0007037", "Achondroplasia", false, true)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(mondoTerm.getIri(), "MONDO:0007037", "Achondroplasia", "efo", false, true)})
         );
     }
 

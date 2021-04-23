@@ -24,6 +24,8 @@ import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
 import uk.ac.ebi.spot.ontotools.curation.util.CurationUtil;
 
 import javax.annotation.PostConstruct;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +65,7 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
         this.ontoAliases = externalServiceConfigService.retrieveAliases(SERVICE_NAME);
     }
 
+    @Override
     public List<OLSTermDto> retrieveTerms(String ontologyId, String identifierValue) {
         log.info("Calling OLS: {} - {}", ontologyId, identifierValue);
         if (ontoAliases.containsKey(ontologyId.toLowerCase())) {
@@ -75,20 +78,12 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
         String endpoint = uriBuilder.build().toUriString();
 
         try {
-            HttpEntity httpEntity = restInteractionConfig.httpEntity().build();
-            ResponseEntity<OLSResponseDto> response =
-                    restTemplate.exchange(endpoint,
-                            HttpMethod.GET, httpEntity,
-                            new ParameterizedTypeReference<>() {
-                            });
-
-            if (response.getStatusCode().equals(HttpStatus.OK)) {
-                log.info("[{}] OLS: received {} terms.", identifierValue, response.getBody().getEmbedded().getTerms().size());
-                return response.getBody().getEmbedded().getTerms();
+            OLSResponseDto olsResponseDto = this.callOLS(endpoint);
+            if (olsResponseDto != null) {
+                log.info("[{}] OLS: received {} terms.", identifierValue, olsResponseDto.getEmbedded().getTerms().size());
+                return olsResponseDto.getEmbedded().getTerms();
             }
-            if (response.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
-                log.info("[{}] OLS: Term not found.", identifierValue);
-            }
+            log.info("[{}] OLS: Term not found.", identifierValue);
         } catch (Exception e) {
             log.error("Unable to call OLS: {}", e.getMessage(), e);
         }
@@ -129,15 +124,9 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
         String endpoint = uriBuilder.build().toUriString();
 
         try {
-            HttpEntity httpEntity = restInteractionConfig.httpEntity().build();
-            ResponseEntity<OLSResponseDto> response =
-                    restTemplate.exchange(endpoint,
-                            HttpMethod.GET, httpEntity,
-                            new ParameterizedTypeReference<>() {
-                            });
-
-            if (response.getStatusCode().equals(HttpStatus.OK)) {
-                List<OLSTermDto> olsTermDtos = response.getBody().getEmbedded().getTerms();
+            OLSResponseDto olsResponseDto = this.callOLS(endpoint);
+            if (olsResponseDto != null) {
+                List<OLSTermDto> olsTermDtos = olsResponseDto.getEmbedded().getTerms();
                 log.info("OLS terms [{}]: received {} docs.", iri, olsTermDtos.size());
                 for (OLSTermDto olsTermDto : olsTermDtos) {
                     if (olsTermDto.getDefiningOntology() != null && olsTermDto.getDefiningOntology()) {
@@ -148,6 +137,57 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
             }
         } catch (Exception e) {
             log.error("Unable to call OLS: {}", e.getMessage(), e);
+        }
+        return null;
+    }
+
+    @Override
+    public List<OLSTermDto> retrieveAncestors(String ontologyId, String iri, boolean direct) {
+        try {
+            String suffix = direct ? RestInteractionConstants.OLS_PARENTS  : RestInteractionConstants.OLS_ANCESTORS;
+            String endpoint = restInteractionConfig.getOlsOntologiesEndpoint() + "/" + ontologyId + RestInteractionConstants.OLS_TERMS +
+                    "/" + URLEncoder.encode(iri, StandardCharsets.UTF_8.name()) + suffix;
+
+            List<OLSTermDto> completeList = new ArrayList<>();
+            OLSResponseDto olsResponseDto = this.callOLS(endpoint);
+            if (olsResponseDto != null) {
+                completeList.addAll(olsResponseDto.getEmbedded().getTerms());
+                int totalPages = olsResponseDto.getPage().getTotalPages() - 1;
+                int currentPage = 1;
+
+                while (totalPages > 0) {
+                    UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(endpoint)
+                            .queryParam(RestInteractionConstants.OLS_PAGE, currentPage);
+                    String newEndpoint = uriBuilder.build().toUriString();
+
+                    olsResponseDto = this.callOLS(newEndpoint);
+                    if (olsResponseDto != null) {
+                        completeList.addAll(olsResponseDto.getEmbedded().getTerms());
+                        currentPage++;
+                        totalPages--;
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            return completeList;
+        } catch (Exception e) {
+            log.error("Unable to call OLS: {}", e.getMessage(), e);
+        }
+        return new ArrayList<>();
+    }
+
+    private OLSResponseDto callOLS(String endpoint) {
+        HttpEntity httpEntity = restInteractionConfig.httpEntity().build();
+        ResponseEntity<OLSResponseDto> response =
+                restTemplate.exchange(endpoint,
+                        HttpMethod.GET, httpEntity,
+                        new ParameterizedTypeReference<>() {
+                        });
+
+        if (response.getStatusCode().equals(HttpStatus.OK)) {
+            return response.getBody();
         }
         return null;
     }

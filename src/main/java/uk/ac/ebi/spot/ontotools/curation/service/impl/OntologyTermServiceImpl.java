@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
+import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContextGraphRestriction;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
@@ -75,13 +76,22 @@ public class OntologyTermServiceImpl implements OntologyTermService {
 
             List<OLSTermDto> preferredOntoResponse = new ArrayList<>();
             for (String preferredOntology : projectContext.getPreferredMappingOntologies()) {
-                preferredOntoResponse.addAll(olsService.retrieveTerms(preferredOntology, iri));
+                List<OLSTermDto> termList = olsService.retrieveTerms(preferredOntology, iri);
+                if (projectContext.getProjectContextGraphRestriction() != null) {
+                    termList = this.filterGraphRestriction(termList, preferredOntology, projectContext.getProjectContextGraphRestriction());
+                }
+                preferredOntoResponse.addAll(termList);
             }
+
             List<OLSTermDto> parentOntoResponse = new ArrayList<>();
             String ontoId = CurationUtil.ontoFromIRI(iri);
             String termStatus;
             if (!projectContext.getPreferredMappingOntologiesLower().contains(ontoId.toLowerCase())) {
                 parentOntoResponse = olsService.retrieveTerms(ontoId, iri);
+                if (projectContext.getProjectContextGraphRestriction() != null) {
+                    parentOntoResponse = this.filterGraphRestriction(parentOntoResponse, ontoId, projectContext.getProjectContextGraphRestriction());
+                }
+
                 termStatus = parseStatus(preferredOntoResponse, parentOntoResponse, null);
             } else {
                 termStatus = parseStatus(preferredOntoResponse, null, null);
@@ -119,6 +129,27 @@ public class OntologyTermServiceImpl implements OntologyTermService {
         }
 
         return null;
+    }
+
+    private List<OLSTermDto> filterGraphRestriction(List<OLSTermDto> termList, String ontoId,
+                                                    ProjectContextGraphRestriction projectContextGraphRestriction) {
+        List<OLSTermDto> results = new ArrayList<>();
+        for (OLSTermDto olsTermDto : termList) {
+            List<OLSTermDto> ancestors = olsService.retrieveAncestors(ontoId, olsTermDto.getIri(), projectContextGraphRestriction.getDirect());
+            if (this.isGraphRestrictionValid(ancestors, projectContextGraphRestriction.getClasses(), projectContextGraphRestriction.getIncludeSelf())) {
+                results.add(olsTermDto);
+            }
+        }
+        return results;
+    }
+
+    private boolean isGraphRestrictionValid(List<OLSTermDto> ancestors, List<String> classes, Boolean includeSelf) {
+        for (OLSTermDto olsTermDto : ancestors) {
+            if (classes.contains(olsTermDto.getCurie())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

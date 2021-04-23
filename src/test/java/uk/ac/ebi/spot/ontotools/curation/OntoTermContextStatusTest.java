@@ -16,9 +16,9 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 import uk.ac.ebi.spot.ontotools.curation.repository.ExternalServiceConfigRepository;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.zooma.ZoomaResponseDto;
 import uk.ac.ebi.spot.ontotools.curation.service.*;
 import uk.ac.ebi.spot.ontotools.curation.util.CurationUtil;
@@ -81,7 +81,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
      */
     @Test
     public void testCase1() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, datasources, ontologies, "efo", 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, datasources, ontologies, "efo", 0, null);
 
         user1 = userService.findByEmail(user1.getEmail());
         Project project1 = projectService.retrieveProject(projectDto.getId(), user1);
@@ -90,7 +90,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
         Entity entity1 = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
                 CurationConstants.CONTEXT_DEFAULT, sourceDto1.getId(), project1.getId(), 10, provenance, EntityStatus.UNMAPPED));
 
-        projectDto = super.createProject("New Project 2", user1, datasources, ontologies, "efo", 0);
+        projectDto = super.createProject("New Project 2", user1, datasources, ontologies, "efo", 0, null);
         user1 = userService.findByEmail(user1.getEmail());
         Project project2 = projectService.retrieveProject(projectDto.getId(), user1);
         SourceDto sourceDto2 = super.createSource(project2.getId());
@@ -105,7 +105,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
         when(zoomaService.annotate(eq(entity2.getName()), any(), any())).thenReturn(zoomaResponseDtos);
 
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri1)), eq(iri1))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", false, true)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", "efo", false, true)})
         );
 
         matchmakerService.runMatchmaking(sourceDto1.getId(), project1);
@@ -149,7 +149,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
      */
     @Test
     public void testCase2() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, datasources, ontologies, "efo", 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, datasources, ontologies, "efo", 0, null);
         user1 = userService.findByEmail(user1.getEmail());
 
         Project project = projectService.retrieveProject(projectDto.getId(), user1);
@@ -173,7 +173,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
         when(zoomaService.annotate(eq(entity2.getName()), any(), any())).thenReturn(zoomaResponseDtos);
 
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri1)), eq(iri1))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", false, true)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", "efo", false, true)})
         );
 
         matchmakerService.runMatchmaking(sourceDto1.getId(), project);
