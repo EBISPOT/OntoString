@@ -6,6 +6,7 @@ import TermStatusBox from "../../components/TermStatusBox"
 import Entity from "../../dto/Entity"
 import Mapping, { CreateMapping } from "../../dto/Mapping"
 import MappingSuggestion from "../../dto/MappingSuggestion"
+import OntologyTerm from "../../dto/OntologyTerm"
 import Project from "../../dto/Project"
 
 const styles = (theme:Theme) => createStyles({
@@ -24,13 +25,13 @@ interface Props extends WithStyles<typeof styles> {
     entity:Entity
     saving:boolean
 
-    onClickSuggestion:(suggestion:MappingSuggestion)=>void
+    onClickTerm:(term:OntologyTerm)=>void
 }
 
 interface State {
 }
 
-class MappingSuggestionList extends React.Component<Props, State> {
+class MappingList extends React.Component<Props, State> {
 
     constructor(props:Props) {
         super(props)
@@ -67,8 +68,38 @@ class MappingSuggestionList extends React.Component<Props, State> {
 
               return <TableRow
                         selected={selected}
-                        onClick={() => this.onClickSuggestion(suggestion)}
-                        className={classes.tableRow}
+                        onClick={() => this.onClickTerm(suggestion.ontologyTerm)}
+                        className={classes.tableRow + ' curator-suggested'}
+                        key={project.name}>
+                <TableCell>
+                    <Checkbox checked={selected} />
+                </TableCell>
+                <TableCell align="left">
+                    {term.curie}
+                </TableCell>
+                <TableCell align="left">
+                    {term.label}
+                </TableCell>
+                <TableCell align="left">
+                    <TermStatusBox status={term.status} />
+                </TableCell>
+              </TableRow>
+            })}
+
+          {entity.mapping &&
+            entity.mapping.ontologyTerms.filter(t => 
+                entity.mappingSuggestions.filter(s => s.ontologyTerm.iri === t.iri).length === 0
+            )
+            .map
+            ((term:OntologyTerm) => {
+
+              let selected = entity.mapping &&
+                entity.mapping.ontologyTerms.filter(t => t.iri === term.iri).length > 0
+
+              return <TableRow
+                        selected={selected}
+                        onClick={() => this.onClickTerm(term)}
+                        className={classes.tableRow + ' curator-suggested'}
                         key={project.name}>
                 <TableCell>
                     <Checkbox checked={selected} />
@@ -98,12 +129,12 @@ class MappingSuggestionList extends React.Component<Props, State> {
     }
 
 
-    onClickSuggestion = (suggestion:MappingSuggestion) => {
+    onClickTerm = (term:OntologyTerm) => {
 
-        this.props.onClickSuggestion(suggestion)
+        this.props.onClickTerm(term)
 
     }
 
 }
 
-export default withStyles(styles)(MappingSuggestionList)
+export default withStyles(styles)(MappingList)

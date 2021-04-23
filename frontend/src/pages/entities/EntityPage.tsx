@@ -1,5 +1,5 @@
 
-import { Box, Breadcrumbs, Button, CircularProgress, Grid, Link, Paper, TextField, Typography } from "@material-ui/core";
+import { Box, Breadcrumbs, Button, CircularProgress, Grid, Link, Paper, Tab, Tabs, TextField, Typography } from "@material-ui/core";
 import { Search, Add } from '@material-ui/icons'
 import React, { Fragment } from "react";
 import { Redirect } from "react-router-dom";
@@ -13,7 +13,7 @@ import Mapping, { CreateMapping, MappingStatus } from "../../dto/Mapping";
 import MappingSuggestion from "../../dto/MappingSuggestion";
 import OntologyTerm, { OntologyTermStatus } from "../../dto/OntologyTerm";
 import Project from "../../dto/Project";
-import MappingSuggestionList from "./MappingSuggestionList";
+import MappingList from "./MappingList";
 import MappingTermList from "./MappingTermList";
 import { Link as RouterLink } from 'react-router-dom'
 import SearchOntologiesDialog from "./SearchOntologiesDialog";
@@ -24,6 +24,7 @@ import AddReviewDialog from "./AddReviewDialog";
 import AddCommentDialog from "./AddCommentDialog";
 import Header from "../../components/Header";
 import Spinner from "../../components/Spinner";
+import { TabPanel } from "@material-ui/lab";
 
 interface Props {
     projectId:string
@@ -37,6 +38,7 @@ interface State {
     showSearchOntologiesDialog:boolean
     showAddReviewDialog:boolean
     showAddCommentDialog:boolean
+    tab:string
 }
 
 export default class EntityPage extends React.Component<Props, State> {
@@ -50,7 +52,8 @@ export default class EntityPage extends React.Component<Props, State> {
             saving: false,
             showSearchOntologiesDialog: false,
             showAddReviewDialog: false,
-            showAddCommentDialog: false
+            showAddCommentDialog: false,
+            tab: 'mappings'
         }
     }
 
@@ -66,7 +69,7 @@ export default class EntityPage extends React.Component<Props, State> {
             return <Redirect to='/login' />
         }
 
-        if(!project || !entity) {
+        if (!project || !entity) {
             return <Fragment>
                 <Header section='entities' projectId={this.props.projectId} />
                 <main> <Spinner /> </main>
@@ -77,59 +80,74 @@ export default class EntityPage extends React.Component<Props, State> {
             <Header section="entities" projectId={this.props.projectId} />
             <main>
 
-            <Breadcrumbs>
-                <Link color="inherit" component={RouterLink} to="/">
-                    Projects
+                <Breadcrumbs>
+                    <Link color="inherit" component={RouterLink} to="/">
+                        Projects
                 </Link>
-                <Link color="inherit" component={RouterLink} to={`/projects/${project.id!}`}>
-                    {project.name}
+                    <Link color="inherit" component={RouterLink} to={`/projects/${project.id!}`}>
+                        {project.name}
+                    </Link>
+                    <Link color="inherit" component={RouterLink} to={`/projects/${project.id!}`}>
+                        Entities
                 </Link>
-                <Link color="inherit" component={RouterLink} to={`/projects/${project.id!}`}>
-                    Entities
-                </Link>
-                <Typography color="textPrimary">{entity.name}</Typography>
-            </Breadcrumbs>
+                    <Typography color="textPrimary">{entity.name}</Typography>
+                </Breadcrumbs>
 
 
-            <SearchOntologiesDialog open={showSearchOntologiesDialog} onClose={this.closeSearchOntologies} onSelectTerm={this.onSelectOntologyTerm} project={project} />
-            <AddReviewDialog open={showAddReviewDialog} onCancel={this.closeAddReview} onSubmit={this.onAddReview} />
-            <AddCommentDialog open={showAddCommentDialog} onCancel={this.closeAddComment} onSubmit={this.onAddComment} />
+                <SearchOntologiesDialog open={showSearchOntologiesDialog} onClose={this.closeSearchOntologies} onSelectTerm={this.onSelectOntologyTerm} project={project} />
+                <AddReviewDialog open={showAddReviewDialog} onCancel={this.closeAddReview} onSubmit={this.onAddReview} />
+                <AddCommentDialog open={showAddCommentDialog} onCancel={this.closeAddComment} onSubmit={this.onAddComment} />
 
 
 
-            <h1>{entity.name} <EntityStatusBox status={entity.mappingStatus} /></h1>
-            {/* <h2>Mappings</h2>
+                <h1>{entity.name} <EntityStatusBox status={entity.mappingStatus} /></h1>
+
+
+                <Tabs value={this.state.tab} onChange={this.changeTab}>
+                    <Tab label="Mappings" value={'mappings'} />
+                    <Tab label="Reviews" value='reviews' />
+                    <Tab label="Comments" value='comments'  />
+                    <Tab label="History" value='history' />
+                </Tabs>
+                {this.state.tab === 'mappings' && <Fragment>
+                    {/* <h2>Mappings</h2>
             <MappingTermList project={project} entity={entity} onRemoveMappingTerm={this.onRemoveMappingTerm} /> */}
-            <h2>Suggested Mappings</h2>
-            <MappingSuggestionList project={project} entity={entity} saving={saving} onClickSuggestion={this.onClickSuggestion} />
-            <br/>
-            <Button variant="outlined" size="large" color="primary" startIcon={<Search />} onClick={this.openSearchOntologies}>Search Ontologies...</Button>
+                    {/* <h2>Suggested Mappings</h2> */}
+                    <br/>
+                    <MappingList project={project} entity={entity} saving={saving} onClickTerm={this.onClickTerm} />
+                    <br />
+                    <Button variant="outlined" size="large" color="primary" startIcon={<Search />} onClick={this.openSearchOntologies}>Search Ontologies...</Button>
             &nbsp;
             &nbsp;
             <Button variant="outlined" size="large" color="primary" startIcon={<Add />}>Propose New Term...</Button>
+                </Fragment>}
+                {this.state.tab === 'reviews' && <Fragment>
+                    {/* <h2>Reviews</h2> */}
+                    {!entity.mapping && <p><i>Create a mapping to enable reviews</i></p>}
+                    {entity.mapping &&
+                        <Fragment>
+                            <ReviewList mapping={entity.mapping} />
+                            <Button variant="outlined" color="primary" size="large" onClick={this.onClickAddReview}>+ Add Review</Button>
+                        </Fragment>
+                    }
+                </Fragment>}
+                {this.state.tab === 'comments' && <Fragment>
+                    {/* <h2>Comments</h2> */}
+                    {!entity.mapping && <p><i>Create a mapping to enable comments</i></p>}
+                    {entity.mapping &&
+                        <Fragment>
+                            <CommentList mapping={entity.mapping} />
+                            <Button variant="outlined" color="primary" size="large" onClick={this.onClickAddComment}>+ Add Comment</Button>
+                        </Fragment>
+                    }
+                </Fragment>}
+                {this.state.tab === 'history' && <Fragment>
+                    {/* <h2>History</h2> */}
+                    <AuditTrail trail={entity.auditTrail} />
+                </Fragment>}
 
-            <h2>History</h2>
-            <AuditTrail trail={entity.auditTrail} />
-
-            <h2>Reviews</h2>
-            { !entity.mapping && <p><i>Create a mapping to enable reviews</i></p> }
-            { entity.mapping && 
-                <Fragment>
-                    <ReviewList mapping={entity.mapping} />
-                    <Button variant="outlined" color="primary" size="large" onClick={this.onClickAddReview}>+ Add Review</Button>
-                </Fragment>
-                }
-
-            <h2>Comments</h2>
-            { !entity.mapping && <p><i>Create a mapping to enable comments</i></p> }
-            { entity.mapping && 
-                <Fragment>
-                    <CommentList mapping={entity.mapping} />
-                    <Button variant="outlined" color="primary" size="large" onClick={this.onClickAddComment}>+ Add Comment</Button>
-                </Fragment>
-                }
-                </main>
-        </Fragment>
+            </main>
+            </Fragment>
     }
 
     async fetch() {
@@ -146,11 +164,9 @@ export default class EntityPage extends React.Component<Props, State> {
         this.setState(prevState => ({ ...prevState, project, entity }))
     }
 
-    onClickSuggestion = (suggestion:MappingSuggestion) => {
+    onClickTerm = (term:OntologyTerm) => {
 
         let entity = this.state.entity!
-
-        let term = suggestion.ontologyTerm
 
         if(entity.mapping) {
 
@@ -169,7 +185,7 @@ export default class EntityPage extends React.Component<Props, State> {
                     ...entity.mapping,
                     ontologyTerms: [
                         ...entity.mapping.ontologyTerms,
-                        suggestion.ontologyTerm
+                        term
                     ]
                 })
                 
@@ -180,7 +196,7 @@ export default class EntityPage extends React.Component<Props, State> {
             this.createMapping({
                 entityId: entity.id,
                 ontologyTerms: [
-                    suggestion.ontologyTerm
+                    term
                 ]
             })
 
@@ -326,5 +342,9 @@ export default class EntityPage extends React.Component<Props, State> {
 
         await this.fetch()
         await this.setState(prevState => ({ ...prevState, saving: false }))
+    }
+
+    changeTab = (e:any, tab:string) => {
+        this.setState(prevState => ({ ...prevState, tab }))
     }
 }

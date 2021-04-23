@@ -126,3 +126,9 @@ body {
   }
 
 
+
+
+  .curator-suggested > :first::before{
+      content: 'hi';
+  }
+
