@@ -19,13 +19,13 @@ public interface OntologyTermRepository extends MongoRepository<OntologyTerm, St
 
     List<OntologyTerm> findByCurieIn(List<String> curies);
 
-    Page<OntologyTerm> findByHasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(boolean hasMapping, String projectId, String context, String status, Pageable pageable);
+    Page<OntologyTerm> findByContexts_HasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(boolean hasMapping, String projectId, String context, String status, Pageable pageable);
 
-    Stream<OntologyTerm> readByHasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(boolean hasMapping, String projectId, String context, String status);
+    Stream<OntologyTerm> readByContexts_HasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(boolean hasMapping, String projectId, String context, String status);
 
-    List<OntologyTerm> findByHasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(boolean hasMapping, String projectId, String context, String status);
+    List<OntologyTerm> findByContexts_HasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(boolean hasMapping, String projectId, String context, String status);
 
-    long countByHasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(boolean hasMapping, String projectId, String context, String status);
+    long countByContexts_HasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(boolean hasMapping, String projectId, String context, String status);
 
     @Query(value = "{}")
     Stream<OntologyTerm> findAllByCustomQueryAndStream();

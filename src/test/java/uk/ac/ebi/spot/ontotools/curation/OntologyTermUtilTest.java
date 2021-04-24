@@ -84,13 +84,13 @@ public class OntologyTermUtilTest extends IntegrationTest {
         entity1 = entityRepository.insert(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
                 CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), null, provenance, EntityStatus.AUTO_MAPPED));
 
-        orphaTerm = ontologyTermRepository.insert(new OntologyTerm("Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
+        orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
                 DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia",
                 Arrays.asList(new OntologyTermContext[]{
                         new OntologyTermContext(entity1.getProjectId(), entity1.getContext(), TermStatus.NEEDS_IMPORT.name())
                 }), null, null));
 
-        mondoTerm = ontologyTermRepository.insert(new OntologyTerm("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
+        mondoTerm = ontologyTermRepository.insert(new OntologyTerm(null, "MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
                 DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia",
                 Arrays.asList(new OntologyTermContext[]{
                         new OntologyTermContext(entity1.getProjectId(), entity1.getContext(), TermStatus.NEEDS_CREATION.name())

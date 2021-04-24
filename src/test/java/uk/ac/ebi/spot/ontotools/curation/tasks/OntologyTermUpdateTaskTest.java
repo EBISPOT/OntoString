@@ -84,13 +84,13 @@ public class OntologyTermUpdateTaskTest extends IntegrationTest {
         SourceDto sourceDto = super.createSource(project.getId());
         Provenance provenance = new Provenance(user1.getName(), user1.getEmail(), DateTime.now());
 
-        this.orphaTerm = ontologyTermRepository.insert(new OntologyTerm("Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
+        this.orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
                 DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia",
                 Arrays.asList(new OntologyTermContext[]{
                         new OntologyTermContext(project.getId(), CurationConstants.CONTEXT_DEFAULT, TermStatus.CURRENT.name())
                 }), null, null));
 
-        this.mondoTerm = ontologyTermRepository.insert(new OntologyTerm("MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
+        this.mondoTerm = ontologyTermRepository.insert(new OntologyTerm(null, "MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
                 DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia", Arrays.asList(new OntologyTermContext[]{
                 new OntologyTermContext(project.getId(), CurationConstants.CONTEXT_DEFAULT, TermStatus.NEEDS_IMPORT.name())
         }), null, null));

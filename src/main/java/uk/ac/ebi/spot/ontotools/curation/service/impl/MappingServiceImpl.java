@@ -48,7 +48,7 @@ public class MappingServiceImpl implements MappingService {
         for (OntologyTerm ontologyTerm : ontologyTerms) {
             auditEntryService.addEntry(AuditEntryConstants.ADDED_MAPPING.name(), entity.getId(), provenance,
                     Arrays.asList(new MetadataEntry[]{new MetadataEntry(ontologyTerm.getIri(), ontologyTerm.getLabel(), AuditEntryConstants.ADDED.name())}));
-            ontologyTerm.addMapping(created.getId());
+            ontologyTerm.addMapping(created);
             ontologyTermService.saveOntologyTerm(ontologyTerm);
         }
         log.info("Mapping for between entity [{}] and ontology term [{}] created: {}", entity.getName(), ontologyTerms, created.getId());
@@ -68,7 +68,7 @@ public class MappingServiceImpl implements MappingService {
         Map<String, String> oldIRIs = new LinkedHashMap<>();
         for (OntologyTerm ontologyTerm : oldTerms) {
             oldIRIs.put(ontologyTerm.getIri(), ontologyTerm.getLabel());
-            ontologyTerm.removeMapping(mapping.getId());
+            ontologyTerm.removeMapping(mapping);
             ontologyTermService.saveOntologyTerm(ontologyTerm);
         }
         Map<String, String> newIRIs = new LinkedHashMap<>();
@@ -76,7 +76,7 @@ public class MappingServiceImpl implements MappingService {
         for (OntologyTerm ontologyTerm : newTerms) {
             newIRIs.put(ontologyTerm.getIri(), ontologyTerm.getLabel());
             newTermIds.add(ontologyTerm.getId());
-            ontologyTerm.addMapping(mapping.getId());
+            ontologyTerm.addMapping(mapping);
             ontologyTermService.saveOntologyTerm(ontologyTerm);
         }
 

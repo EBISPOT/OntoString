@@ -115,7 +115,7 @@ public class OntologyTermServiceImpl implements OntologyTermService {
                     log.info("Updated ontology term [{} | {}]: {} | {} | {}", ot.getCurie(), ot.getLabel(), projectContext.getProjectId(),
                             projectContext.getName(), termStatus);
                 } else {
-                    ot = new OntologyTerm(olsTermDto.getCurie(), olsTermDto.getIri(),
+                    ot = new OntologyTerm(null, olsTermDto.getCurie(), olsTermDto.getIri(),
                             DigestUtils.sha256Hex(iri), olsTermDto.getLabel(),
                             Arrays.asList(new OntologyTermContext[]{otc}), null, null);
                     ot = ontologyTermRepository.insert(ot);
@@ -172,7 +172,7 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     @Override
     public Page<OntologyTerm> retrieveTermsByStatus(String projectId, String context, String status, Pageable pageable) {
         log.info("Retrieving terms by status: {} | {} | {}", projectId, context, status);
-        Page<OntologyTerm> ontologyTerms = ontologyTermRepository.findByHasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(true, projectId, context, status, pageable);
+        Page<OntologyTerm> ontologyTerms = ontologyTermRepository.findByContexts_HasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(true, projectId, context, status, pageable);
         return ontologyTerms;
     }
 
@@ -185,10 +185,10 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     public Map<String, Integer> retrieveTermStats(String projectId, String context) {
         log.info("Retrieving term stats for: {} | {}", projectId, context);
         Map<String, Integer> stats = new LinkedHashMap<>();
-        long count = ontologyTermRepository.countByHasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(true, projectId, context, TermStatus.NEEDS_IMPORT.name());
+        long count = ontologyTermRepository.countByContexts_HasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(true, projectId, context, TermStatus.NEEDS_IMPORT.name());
         stats.put(TermStatus.NEEDS_IMPORT.name(), (int) count);
 
-        count = ontologyTermRepository.countByHasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(true, projectId, context, TermStatus.NEEDS_CREATION.name());
+        count = ontologyTermRepository.countByContexts_HasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(true, projectId, context, TermStatus.NEEDS_CREATION.name());
         stats.put(TermStatus.NEEDS_CREATION.name(), (int) count);
         return stats;
     }
