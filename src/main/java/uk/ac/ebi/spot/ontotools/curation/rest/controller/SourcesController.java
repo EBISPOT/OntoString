@@ -1,6 +1,5 @@
 package uk.ac.ebi.spot.ontotools.curation.rest.controller;
 
-import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,17 +9,22 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
+import uk.ac.ebi.spot.ontotools.curation.constants.DataImportFileType;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.Source;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
+import uk.ac.ebi.spot.ontotools.curation.exception.FileProcessingException;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.SourceDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.service.*;
+import uk.ac.ebi.spot.ontotools.curation.service.impl.dataimport.DataImportAdapter;
+import uk.ac.ebi.spot.ontotools.curation.service.impl.dataimport.DataImportFactory;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
+import uk.ac.ebi.spot.ontotools.curation.util.DataImportFileTypeDetector;
 import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +57,9 @@ public class SourcesController {
 
     @Autowired
     private DataImportService dataImportService;
+
+    @Autowired
+    private DataImportFactory dataImportFactory;
 
     /**
      * POST /v1/projects/{projectId}/sources
@@ -129,11 +136,21 @@ public class SourcesController {
         Source source = sourceService.getSource(sourceId, projectId);
 
         try {
-            String fileData = IOUtils.toString(file.getInputStream(), "UTF-8");
-            dataImportService.importData(fileData, projectId, source, user);
+            String fileType = new DataImportFileTypeDetector(file.getInputStream()).getFileType();
+            if (fileType.equals(DataImportFileType.UNKNOWN)) {
+                log.error("Unable to detect file format");
+                throw new FileProcessingException("Unable to detect file format");
+            }
+
+            DataImportAdapter dataImportAdapter = dataImportFactory.getAdapter(fileType);
+            String outcome = dataImportAdapter.importData(file.getInputStream(), projectId, source, user);
+            if (outcome != null) {
+                log.error("Error occurred file validating import data: {}", outcome);
+                throw new FileProcessingException("Error occurred file validating import data: " + outcome);
+            }
         } catch (IOException e) {
             log.error("Unable to deserialize import data file: {}", e.getMessage(), e);
+            throw new FileProcessingException("Unable to deserialize import data file: " + e.getMessage());
         }
-
     }
 }
