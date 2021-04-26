@@ -43,6 +43,7 @@
         <junit.version>4.13.1</junit.version>
         <mockito.core>3.7.7</mockito.core>
         <equalsverifier.version>3.5.2</equalsverifier.version>
+        <opencsv.version>5.4</opencsv.version>
 
         <jacoco.plugin.version>0.8.6</jacoco.plugin.version>
         <skip.coverage>false</skip.coverage>
@@ -282,6 +283,11 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
             <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>${opencsv.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
