@@ -19,6 +19,9 @@ public final class ProjectContextGraphRestrictionDto implements Serializable {
     @JsonProperty("classes")
     private final List<String> classes;
 
+    @JsonProperty("iris")
+    private final List<String> iris;
+
     @NotEmpty
     @JsonProperty("relations")
     private final List<String> relations;
@@ -33,10 +36,12 @@ public final class ProjectContextGraphRestrictionDto implements Serializable {
 
     @JsonCreator
     public ProjectContextGraphRestrictionDto(@JsonProperty("classes") List<String> classes,
+                                             @JsonProperty("iris") List<String> iris,
                                              @JsonProperty("relations") List<String> relations,
                                              @JsonProperty("direct") Boolean direct,
                                              @JsonProperty("include_self") Boolean includeSelf) {
         this.classes = classes;
+        this.iris = iris;
         this.relations = relations;
         this.direct = direct;
         this.includeSelf = includeSelf;
@@ -44,6 +49,10 @@ public final class ProjectContextGraphRestrictionDto implements Serializable {
 
     public List<String> getClasses() {
         return classes;
+    }
+
+    public List<String> getIris() {
+        return iris;
     }
 
     public List<String> getRelations() {
