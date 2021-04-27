@@ -66,11 +66,11 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
     }
 
     @Override
-    public Map<String, List<MappingSuggestion>> retrieveMappingSuggestionsForEntities(List<String> entityIds) {
+    public Map<String, List<MappingSuggestion>> retrieveMappingSuggestionsForEntities(List<String> entityIds, String projectId, String context) {
         log.info("Retrieving mapping suggestions for entities: {}", entityIds);
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionRepository.findByEntityIdIn(entityIds);
         List<String> ontologyTermIds = mappingSuggestions.stream().map(MappingSuggestion::getOntologyTermId).collect(Collectors.toList());
-        Map<String, OntologyTerm> ontologyTermMap = ontologyTermService.retrieveTerms(ontologyTermIds);
+        Map<String, OntologyTerm> ontologyTermMap = ontologyTermService.retrieveTerms(ontologyTermIds, projectId, context);
         log.info("Found {} mapping suggestions.", mappingSuggestions.size());
         Map<String, List<MappingSuggestion>> result = new HashMap<>();
         for (MappingSuggestion mappingSuggestion : mappingSuggestions) {
@@ -88,11 +88,11 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
     }
 
     @Override
-    public List<MappingSuggestion> retrieveMappingSuggestionsForEntity(String entityId) {
-        log.info("Retrieving mapping suggestions for entity: {}", entityId);
-        List<MappingSuggestion> mappingSuggestions = mappingSuggestionRepository.findByEntityId(entityId);
+    public List<MappingSuggestion> retrieveMappingSuggestionsForEntity(Entity entity) {
+        log.info("Retrieving mapping suggestions for entity: {}", entity.getId());
+        List<MappingSuggestion> mappingSuggestions = mappingSuggestionRepository.findByEntityId(entity.getId());
         List<String> ontologyTermIds = mappingSuggestions.stream().map(MappingSuggestion::getOntologyTermId).collect(Collectors.toList());
-        Map<String, OntologyTerm> ontologyTermMap = ontologyTermService.retrieveTerms(ontologyTermIds);
+        Map<String, OntologyTerm> ontologyTermMap = ontologyTermService.retrieveTerms(ontologyTermIds, entity.getProjectId(), entity.getContext());
         log.info("Found {} mapping suggestions.", mappingSuggestions.size());
         List<MappingSuggestion> result = new ArrayList<>();
         for (MappingSuggestion mappingSuggestion : mappingSuggestions) {

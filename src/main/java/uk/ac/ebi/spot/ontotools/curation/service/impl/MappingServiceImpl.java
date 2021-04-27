@@ -43,14 +43,14 @@ public class MappingServiceImpl implements MappingService {
         List<String> ontologyTermIds = ontologyTerms.stream().map(OntologyTerm::getId).collect(Collectors.toList());
         Mapping created = mappingRepository.insert(new Mapping(null, entity.getId(), entity.getContext(), ontologyTermIds, entity.getProjectId(),
                 false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(), provenance, null));
-        created.setOntologyTerms(ontologyTerms);
 
+        List<OntologyTerm> newTerms = new ArrayList<>();
         for (OntologyTerm ontologyTerm : ontologyTerms) {
             auditEntryService.addEntry(AuditEntryConstants.ADDED_MAPPING.name(), entity.getId(), provenance,
                     Arrays.asList(new MetadataEntry[]{new MetadataEntry(ontologyTerm.getIri(), ontologyTerm.getLabel(), AuditEntryConstants.ADDED.name())}));
-            ontologyTerm.addMapping(created);
-            ontologyTermService.saveOntologyTerm(ontologyTerm);
+            newTerms.add(ontologyTermService.mapTerm(ontologyTerm, created, true));
         }
+        created.setOntologyTerms(newTerms);
         log.info("Mapping for between entity [{}] and ontology term [{}] created: {}", entity.getName(), ontologyTerms, created.getId());
         return created;
     }
@@ -68,16 +68,15 @@ public class MappingServiceImpl implements MappingService {
         Map<String, String> oldIRIs = new LinkedHashMap<>();
         for (OntologyTerm ontologyTerm : oldTerms) {
             oldIRIs.put(ontologyTerm.getIri(), ontologyTerm.getLabel());
-            ontologyTerm.removeMapping(mapping);
-            ontologyTermService.saveOntologyTerm(ontologyTerm);
+            ontologyTermService.mapTerm(ontologyTerm, mapping, false);
         }
         Map<String, String> newIRIs = new LinkedHashMap<>();
         List<String> newTermIds = new ArrayList<>();
+        List<OntologyTerm> newTermList = new ArrayList<>();
         for (OntologyTerm ontologyTerm : newTerms) {
             newIRIs.put(ontologyTerm.getIri(), ontologyTerm.getLabel());
             newTermIds.add(ontologyTerm.getId());
-            ontologyTerm.addMapping(mapping);
-            ontologyTermService.saveOntologyTerm(ontologyTerm);
+            newTermList.add(ontologyTermService.mapTerm(ontologyTerm, mapping, true));
         }
 
         mapping.setOntologyTermIds(newTermIds);
@@ -94,7 +93,9 @@ public class MappingServiceImpl implements MappingService {
         }
 
         auditEntryService.addEntry(AuditEntryConstants.UPDATED_MAPPING.name(), mappingOp.get().getEntityId(), provenance, metadata);
-        return mappingRepository.save(mapping);
+        mapping = mappingRepository.save(mapping);
+        mapping.setOntologyTerms(newTermList);
+        return mapping;
     }
 
     @Override
@@ -120,7 +121,7 @@ public class MappingServiceImpl implements MappingService {
     }
 
     @Override
-    public Map<String, Mapping> retrieveMappingsForEntities(List<String> entityIds) {
+    public Map<String, Mapping> retrieveMappingsForEntities(List<String> entityIds, String projectId, String context) {
         log.info("Retrieving mappings for entities: {}", entityIds);
         List<Mapping> mappings = mappingRepository.findByEntityIdIn(entityIds);
         List<String> ontologyTermIds = new ArrayList<>();
@@ -131,7 +132,7 @@ public class MappingServiceImpl implements MappingService {
                 }
             }
         }
-        Map<String, OntologyTerm> ontologyTermMap = ontologyTermService.retrieveTerms(ontologyTermIds);
+        Map<String, OntologyTerm> ontologyTermMap = ontologyTermService.retrieveTerms(ontologyTermIds, projectId, context);
         log.info("Found {} mappings.", mappings.size());
         Map<String, Mapping> result = new HashMap<>();
         for (Mapping mapping : mappings) {
@@ -156,7 +157,8 @@ public class MappingServiceImpl implements MappingService {
         Optional<Mapping> mappingOptional = mappingRepository.findByEntityId(entityId);
         if (mappingOptional.isPresent()) {
             Mapping mapping = mappingOptional.get();
-            Map<String, OntologyTerm> ontologyTermMap = ontologyTermService.retrieveTerms(mapping.getOntologyTermIds());
+            Map<String, OntologyTerm> ontologyTermMap = ontologyTermService.retrieveTerms(mapping.getOntologyTermIds(), mapping.getProjectId(),
+                    mapping.getContext());
 
             List<OntologyTerm> ontologyTerms = new ArrayList<>();
             for (String oId : mapping.getOntologyTermIds()) {

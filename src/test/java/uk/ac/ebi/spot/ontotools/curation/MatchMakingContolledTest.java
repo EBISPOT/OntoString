@@ -16,6 +16,7 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.repository.ExternalServiceConfigRepository;
+import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermRepository;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
@@ -75,6 +76,9 @@ public class MatchMakingContolledTest extends IntegrationTest {
     @Autowired
     private OLSService olsService;
 
+    @Autowired
+    private OntologyTermRepository ontologyTermRepository;
+
     @Override
     public void setup() throws Exception {
         super.setup();
@@ -128,7 +132,7 @@ public class MatchMakingContolledTest extends IntegrationTest {
         Entity updated = entityService.retrieveEntity(entity.getId());
         assertEquals(EntityStatus.AUTO_MAPPED, updated.getMappingStatus());
 
-        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveAllTerms();
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findAll();
         assertEquals(2, ontologyTerms.size());
         Map<String, OntologyTerm> ontoMap = new HashMap<>();
         for (OntologyTerm ontologyTerm : ontologyTerms) {
@@ -137,7 +141,7 @@ public class MatchMakingContolledTest extends IntegrationTest {
         assertTrue(ontoMap.containsKey("Orphanet:15"));
         assertTrue(ontoMap.containsKey("MONDO:0007037"));
 
-        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}));
+        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}), entity.getProjectId(), entity.getContext());
         assertEquals(1, mappingSuggestionMap.size());
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionMap.get(entity.getId());
         assertEquals(2, mappingSuggestions.size());
@@ -175,7 +179,7 @@ public class MatchMakingContolledTest extends IntegrationTest {
         Entity updated = entityService.retrieveEntity(entity.getId());
         assertEquals(EntityStatus.SUGGESTIONS_PROVIDED, updated.getMappingStatus());
 
-        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveAllTerms();
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findAll();
         assertEquals(2, ontologyTerms.size());
         Map<String, OntologyTerm> ontoMap = new HashMap<>();
         for (OntologyTerm ontologyTerm : ontologyTerms) {
@@ -184,7 +188,7 @@ public class MatchMakingContolledTest extends IntegrationTest {
         assertTrue(ontoMap.containsKey("ICD:12356"));
         assertTrue(ontoMap.containsKey("MONDO:0007037"));
 
-        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}));
+        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}), entity.getProjectId(), entity.getContext());
         assertEquals(1, mappingSuggestionMap.size());
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionMap.get(entity.getId());
         assertEquals(2, mappingSuggestions.size());
@@ -227,7 +231,7 @@ public class MatchMakingContolledTest extends IntegrationTest {
         Entity updated = entityService.retrieveEntity(entity.getId());
         assertEquals(EntityStatus.SUGGESTIONS_PROVIDED, updated.getMappingStatus());
 
-        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveAllTerms();
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findAll();
         assertEquals(1, ontologyTerms.size());
         Map<String, OntologyTerm> ontoMap = new HashMap<>();
         for (OntologyTerm ontologyTerm : ontologyTerms) {
@@ -235,7 +239,7 @@ public class MatchMakingContolledTest extends IntegrationTest {
         }
         assertEquals("MONDO:0007037", ontologyTerms.get(0).getCurie());
 
-        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}));
+        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}), entity.getProjectId(), entity.getContext());
         assertEquals(1, mappingSuggestionMap.size());
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionMap.get(entity.getId());
         assertEquals(1, mappingSuggestions.size());
@@ -272,7 +276,7 @@ public class MatchMakingContolledTest extends IntegrationTest {
         Entity updated = entityService.retrieveEntity(entity.getId());
         assertEquals(EntityStatus.AUTO_MAPPED, updated.getMappingStatus());
 
-        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveAllTerms();
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findAll();
         assertEquals(2, ontologyTerms.size());
         Map<String, OntologyTerm> ontoMap = new HashMap<>();
         for (OntologyTerm ontologyTerm : ontologyTerms) {
@@ -281,7 +285,7 @@ public class MatchMakingContolledTest extends IntegrationTest {
         assertTrue(ontoMap.containsKey("Orphanet:15"));
         assertTrue(ontoMap.containsKey("MONDO:0007037"));
 
-        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}));
+        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}), entity.getProjectId(), entity.getContext());
         assertEquals(1, mappingSuggestionMap.size());
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionMap.get(entity.getId());
         assertEquals(2, mappingSuggestions.size());
@@ -318,7 +322,7 @@ public class MatchMakingContolledTest extends IntegrationTest {
         Entity updated = entityService.retrieveEntity(entity.getId());
         assertEquals(EntityStatus.SUGGESTIONS_PROVIDED, updated.getMappingStatus());
 
-        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveAllTerms();
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findAll();
         assertEquals(2, ontologyTerms.size());
         Map<String, OntologyTerm> ontoMap = new HashMap<>();
         for (OntologyTerm ontologyTerm : ontologyTerms) {
@@ -327,7 +331,7 @@ public class MatchMakingContolledTest extends IntegrationTest {
         assertTrue(ontoMap.containsKey("Orphanet:15"));
         assertTrue(ontoMap.containsKey("MONDO:0007037"));
 
-        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}));
+        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}), entity.getProjectId(), entity.getContext());
         assertEquals(1, mappingSuggestionMap.size());
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionMap.get(entity.getId());
         assertEquals(2, mappingSuggestions.size());

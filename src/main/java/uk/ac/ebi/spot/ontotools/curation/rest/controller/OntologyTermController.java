@@ -16,6 +16,7 @@ import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.ExtendedOntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.ExtendedOntologyTermDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.OntologyTermDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS)
@@ -64,9 +66,9 @@ public class OntologyTermController {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to create ontology term: {} | {}", user.getEmail(), projectId, ontologyTermCreationDto.getOntologyTerm().getCurie());
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
-        OntologyTerm created = ontologyTermService.createTerm(OntologyTermDtoAssembler.disassemble(ontologyTermCreationDto.getOntologyTerm(), projectId,
-                ontologyTermCreationDto.getContext()));
-        return OntologyTermDtoAssembler.assemble(created, projectId, ontologyTermCreationDto.getContext());
+        OntologyTerm created = ontologyTermService.createTerm(OntologyTermDtoAssembler.disassemble(ontologyTermCreationDto.getOntologyTerm()), projectId,
+                ontologyTermCreationDto.getContext(), ontologyTermCreationDto.getOntologyTerm().getStatus());
+        return OntologyTermDtoAssembler.assemble(created);
     }
 
     /**
@@ -78,20 +80,21 @@ public class OntologyTermController {
     public RestResponsePage<ExtendedOntologyTermDto> getOntologyTerms(@PathVariable String projectId,
                                                                       @RequestParam(value = CurationConstants.PARAM_STATUS) String status,
                                                                       @RequestParam(value = CurationConstants.PARAM_CONTEXT) String context,
-                                                                      @PageableDefault(size = 20, page = 0) Pageable pageable,
+                                                                      @PageableDefault(size = 20) Pageable pageable,
                                                                       HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to get ontology terms: {} | {} | {}", user.getEmail(), projectId, status, context);
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
-        Page<OntologyTerm> ontologyTermsPage = ontologyTermService.retrieveTermsByStatus(projectId, context, status, pageable);
-        Map<String, Map<String, String>> entityData = ontologyTermUtilService.retrieveEntityData(ontologyTermsPage.getContent(), projectId, context);
+        Page<OntologyTermContext> ontologyTermContextsPage = ontologyTermService.retrieveMappedTermsByStatus(projectId, context, status, pageable);
+
+        List<String> ontoTermIds = ontologyTermContextsPage.getContent().stream().map(OntologyTermContext::getOntologyTermId).collect(Collectors.toList());
+        Map<OntologyTerm, Map<String, String>> entityData = ontologyTermUtilService.retrieveEntityData(ontoTermIds, ontologyTermContextsPage.getContent(), projectId, context);
         List<ExtendedOntologyTermDto> extendedOntologyTermDtos = new ArrayList<>();
-        for (OntologyTerm ontologyTerm : ontologyTermsPage.getContent()) {
-            Map<String, String> entityMap = entityData.get(ontologyTerm.getId());
-            extendedOntologyTermDtos.add(ExtendedOntologyTermDtoAssembler.assemble(new ExtendedOntologyTerm(entityMap, ontologyTerm),
-                    projectId, context));
+        for (OntologyTerm ontologyTerm : entityData.keySet()) {
+            Map<String, String> entityMap = entityData.get(ontologyTerm);
+            extendedOntologyTermDtos.add(ExtendedOntologyTermDtoAssembler.assemble(new ExtendedOntologyTerm(entityMap, ontologyTerm)));
         }
-        return new RestResponsePage<>(extendedOntologyTermDtos, pageable, ontologyTermsPage.getTotalElements());
+        return new RestResponsePage<>(extendedOntologyTermDtos, pageable, ontologyTermContextsPage.getTotalElements());
     }
 
     /**

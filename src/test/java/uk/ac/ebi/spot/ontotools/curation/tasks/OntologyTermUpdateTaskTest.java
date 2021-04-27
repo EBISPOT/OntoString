@@ -85,15 +85,20 @@ public class OntologyTermUpdateTaskTest extends IntegrationTest {
         Provenance provenance = new Provenance(user1.getName(), user1.getEmail(), DateTime.now());
 
         this.orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
-                DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia",
-                Arrays.asList(new OntologyTermContext[]{
-                        new OntologyTermContext(project.getId(), CurationConstants.CONTEXT_DEFAULT, TermStatus.CURRENT.name())
-                }), null, null));
+                DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia", null, null, new ArrayList<>(), null));
+        OntologyTermContext ontologyTermContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                null, orphaTerm.getId(), project.getId(), CurationConstants.CONTEXT_DEFAULT, TermStatus.CURRENT.name(), new ArrayList<>(), false
+        ));
+        orphaTerm.getOntoTermContexts().add(ontologyTermContext.getId());
+        orphaTerm = ontologyTermRepository.save(orphaTerm);
 
         this.mondoTerm = ontologyTermRepository.insert(new OntologyTerm(null, "MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
-                DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia", Arrays.asList(new OntologyTermContext[]{
-                new OntologyTermContext(project.getId(), CurationConstants.CONTEXT_DEFAULT, TermStatus.NEEDS_IMPORT.name())
-        }), null, null));
+                DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia", null, null, new ArrayList<>(), null));
+        ontologyTermContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                null, mondoTerm.getId(), project.getId(), CurationConstants.CONTEXT_DEFAULT, TermStatus.NEEDS_IMPORT.name(), new ArrayList<>(), false
+        ));
+        mondoTerm.getOntoTermContexts().add(ontologyTermContext.getId());
+        mondoTerm = ontologyTermRepository.save(mondoTerm);
 
         entity = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
                 CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), 10, provenance, EntityStatus.UNMAPPED));
@@ -113,13 +118,17 @@ public class OntologyTermUpdateTaskTest extends IntegrationTest {
         ontologyTermUpdateTask.updateOntologyTerms();
 
         OntologyTerm ontologyTerm = ontologyTermRepository.findById(this.orphaTerm.getId()).get();
-        assertEquals(TermStatus.DELETED.name(), ontologyTerm.getContexts().get(0).getStatus());
+        List<OntologyTermContext> ontologyTermContexts = ontologyTermContextRepository.findByOntologyTermId(ontologyTerm.getId());
+        assertEquals(1, ontologyTermContexts.size());
+        assertEquals(TermStatus.DELETED.name(), ontologyTermContexts.get(0).getStatus());
 
         Mapping newMapping = mappingRepository.findById(mapping.getId()).get();
         assertEquals(MappingStatus.HAS_OBSOLETE_TERM.name(), newMapping.getStatus());
 
         ontologyTerm = ontologyTermRepository.findById(this.mondoTerm.getId()).get();
-        assertEquals(TermStatus.CURRENT.name(), ontologyTerm.getContexts().get(0).getStatus());
+        ontologyTermContexts = ontologyTermContextRepository.findByOntologyTermId(ontologyTerm.getId());
+        assertEquals(1, ontologyTermContexts.size());
+        assertEquals(TermStatus.CURRENT.name(), ontologyTermContexts.get(0).getStatus());
         assertEquals(2, ontologyTermUpdateLogEntryRepository.findAll().size());
     }
 }

@@ -10,14 +10,14 @@ import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.OntologyTermDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.audit.AuditEntryDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.audit.MetadataEntryDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
@@ -72,7 +72,7 @@ public class MappingsControllerTest extends IntegrationTest {
     @Test
     public void shouldCreateMapping() throws Exception {
         OntologyTerm ontologyTerm = ontologyTermRepository.findByCurie("MONDO:0007037").get();
-        OntologyTermDto ontologyTermDto = OntologyTermDtoAssembler.assemble(ontologyTerm, project.getId(), entity.getContext());
+        OntologyTermDto ontologyTermDto = OntologyTermDtoAssembler.assemble(ontologyTerm);
         MappingCreationDto mappingCreationDto = new MappingCreationDto(entity.getId(), Arrays.asList(new OntologyTermDto[]{ontologyTermDto}));
         mappingRepository.deleteAll();
 
@@ -138,8 +138,8 @@ public class MappingsControllerTest extends IntegrationTest {
     public void shouldUpdateMapping() throws Exception {
         MappingDto mappingDto = super.retrieveMapping(project.getId());
         List<OntologyTermDto> ontologyTermDtos = new ArrayList<>();
-        ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("MONDO:0007037").get(), project.getId(), entity.getContext()));
-        ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("Orphanet:15").get(), project.getId(), entity.getContext()));
+        ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("MONDO:0007037").get()));
+        ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTermRepository.findByCurie("Orphanet:15").get()));
 
         MappingDto updated = new MappingDto(mappingDto.getId(),
                 mappingDto.getEntityId(),

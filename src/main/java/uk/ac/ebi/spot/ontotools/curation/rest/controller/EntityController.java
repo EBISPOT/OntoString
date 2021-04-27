@@ -77,8 +77,8 @@ public class EntityController {
 
         Page<Entity> entities = entityService.retrieveEntitiesForProject(projectId, prefix, context, pageable);
         List<String> entityIds = entities.get().map(Entity::getId).collect(Collectors.toList());
-        Map<String, Mapping> mappings = mappingService.retrieveMappingsForEntities(entityIds);
-        Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(entityIds);
+        Map<String, Mapping> mappings = mappingService.retrieveMappingsForEntities(entityIds, projectId, context);
+        Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(entityIds, projectId, context);
         log.info("Assembling results ...");
         List<EntityDto> entityDtos = new ArrayList<>();
         for (Entity entity : entities.getContent()) {
@@ -104,7 +104,7 @@ public class EntityController {
         Entity entity = entityService.retrieveEntity(entityId);
         Source source = sourceService.getSource(entity.getSourceId(), projectId);
         Mapping mapping = mappingService.retrieveMappingForEntity(entityId);
-        Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entityId}));
+        Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entityId}), projectId, entity.getContext());
         return EntityDtoAssembler.assemble(entity, SourceDtoAssembler.assemble(source),
                 mapping, mappingSuggestions.get(entityId),
                 auditEntryService.retrieveAuditEntries(entity.getId()));

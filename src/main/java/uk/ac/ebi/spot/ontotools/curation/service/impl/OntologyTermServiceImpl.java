@@ -11,9 +11,11 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContextGraphRestriction;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
+import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermContextRepository;
 import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermRepository;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
@@ -31,29 +33,46 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     private OntologyTermRepository ontologyTermRepository;
 
     @Autowired
+    private OntologyTermContextRepository ontologyTermContextRepository;
+
+    @Autowired
     private OLSService olsService;
 
     @Override
-    public OntologyTerm createTerm(OntologyTerm term) {
+    public OntologyTerm createTerm(OntologyTerm term, String projectId, String context, String status) {
+        if (status == null) {
+            status = TermStatus.NEEDS_CREATION.name();
+        }
+
         log.info("Creating term manually: {}", term.getCurie());
         Optional<OntologyTerm> ontologyTermOp = ontologyTermRepository.findByIriHash(DigestUtils.sha256Hex(term.getIri()));
         if (ontologyTermOp.isPresent()) {
             OntologyTerm existing = ontologyTermOp.get();
-            OntologyTermContext ontologyTermContext = term.getContexts().get(0);
-            for (OntologyTermContext existingOTC : existing.getContexts()) {
-                if (existingOTC.getContext().equals(ontologyTermContext.getContext())) {
-                    log.warn("Ontology term already exists: {} | {} | {}", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel(), ontologyTermContext.getContext());
-                    return existing;
-                }
+            Optional<OntologyTermContext> optionalOntologyTermContext = ontologyTermContextRepository.findByOntologyTermIdAndProjectIdAndContext(existing.getId(), projectId, context);
+            if (optionalOntologyTermContext.isPresent()) {
+                log.warn("Ontology term already exists: {} [{}] | {} [{}]", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel(), projectId, context);
+                existing.setStatus(optionalOntologyTermContext.get().getStatus());
+                return existing;
             }
+            log.info("Ontology term already exists, but in a different context: {} [{}] | {} [{}]", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel(), projectId, context);
+            OntologyTermContext newContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                    null, existing.getId(), projectId, context, status, new ArrayList<>(), false
+            ));
 
-            log.info("Ontology term already exists, but in a different context: {} | {} | {}", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel(), ontologyTermContext.getContext());
-            existing.getContexts().add(ontologyTermContext);
+            existing.getOntoTermContexts().add(newContext.getId());
             existing = ontologyTermRepository.save(existing);
+            existing.setStatus(newContext.getStatus());
             return existing;
         }
 
         OntologyTerm ontologyTerm = ontologyTermRepository.insert(term);
+        OntologyTermContext newContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                null, ontologyTerm.getId(), projectId, context, status, new ArrayList<>(), false
+        ));
+
+        ontologyTerm.getOntoTermContexts().add(newContext.getId());
+        ontologyTerm = ontologyTermRepository.save(ontologyTerm);
+        ontologyTerm.setStatus(newContext.getStatus());
         log.info("Term [{}] created: {}", ontologyTerm.getCurie(), ontologyTerm.getId());
         return ontologyTerm;
     }
@@ -65,10 +84,14 @@ public class OntologyTermServiceImpl implements OntologyTermService {
             OntologyTerm ot = null;
             Optional<OntologyTerm> ontologyTermOp = ontologyTermRepository.findByIriHash(DigestUtils.sha256Hex(iri));
             if (ontologyTermOp.isPresent()) {
-                String status = CurationUtil.termStatusForContext(ontologyTermOp.get(), projectContext.getProjectId(), projectContext.getName());
-                if (status != null) {
-                    log.warn("Ontology term already exists: {} | {} | {}", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel(), status);
-                    return ontologyTermOp.get();
+                Optional<OntologyTermContext> optionalOntologyTermContext = ontologyTermContextRepository.findByOntologyTermIdAndProjectIdAndContext(
+                        ontologyTermOp.get().getId(), projectContext.getProjectId(), projectContext.getName());
+                if (optionalOntologyTermContext.isPresent()) {
+                    log.warn("Ontology term already exists: {} [{}] | {} [{}]", ontologyTermOp.get().getCurie(), ontologyTermOp.get().getLabel(),
+                            projectContext.getProjectId(), optionalOntologyTermContext.get().getStatus());
+                    OntologyTerm ontologyTerm = ontologyTermOp.get();
+                    ontologyTerm.setStatus(optionalOntologyTermContext.get().getStatus());
+                    return ontologyTerm;
                 } else {
                     ot = ontologyTermOp.get();
                 }
@@ -101,24 +124,29 @@ public class OntologyTermServiceImpl implements OntologyTermService {
                 log.warn("Found DELETED term: {}", iri);
                 return null;
             } else {
-                if (ot != null) {
-                    if (ot.getContexts() == null) {
-                        ot.setContexts(new ArrayList<>());
-                    }
-                }
-
-                OntologyTermContext otc = new OntologyTermContext(projectContext.getProjectId(), projectContext.getName(), termStatus);
                 OLSTermDto olsTermDto = termStatus.equalsIgnoreCase(TermStatus.CURRENT.name()) ? preferredOntoResponse.get(0) : parentOntoResponse.get(0);
                 if (ot != null) {
-                    ot.getContexts().add(otc);
+                    OntologyTermContext newContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                            null, ot.getId(), projectContext.getProjectId(), projectContext.getName(), termStatus, new ArrayList<>(), false
+                    ));
+
+                    ot.getOntoTermContexts().add(newContext.getId());
                     ot = ontologyTermRepository.save(ot);
+                    ot.setStatus(newContext.getStatus());
                     log.info("Updated ontology term [{} | {}]: {} | {} | {}", ot.getCurie(), ot.getLabel(), projectContext.getProjectId(),
                             projectContext.getName(), termStatus);
                 } else {
                     ot = new OntologyTerm(null, olsTermDto.getCurie(), olsTermDto.getIri(),
                             DigestUtils.sha256Hex(iri), olsTermDto.getLabel(),
-                            Arrays.asList(new OntologyTermContext[]{otc}), null, null);
+                            null, null, new ArrayList<>(), null);
                     ot = ontologyTermRepository.insert(ot);
+                    OntologyTermContext newContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                            null, ot.getId(), projectContext.getProjectId(), projectContext.getName(), termStatus, new ArrayList<>(), false
+                    ));
+
+                    ot.getOntoTermContexts().add(newContext.getId());
+                    ot = ontologyTermRepository.save(ot);
+                    ot.setStatus(newContext.getStatus());
                     log.info("Created ontology term [{} | {}]: {}", ot.getCurie(), ot.getLabel(), ot.getId());
                 }
             }
@@ -176,44 +204,67 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     }
 
     @Override
-    public Page<OntologyTerm> retrieveTermsByStatus(String projectId, String context, String status, Pageable pageable) {
+    public Page<OntologyTermContext> retrieveMappedTermsByStatus(String projectId, String context, String status, Pageable pageable) {
         log.info("Retrieving terms by status: {} | {} | {}", projectId, context, status);
-        Page<OntologyTerm> ontologyTerms = ontologyTermRepository.findByContexts_HasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(true, projectId, context, status, pageable);
-        return ontologyTerms;
-    }
-
-    @Override
-    public void saveOntologyTerm(OntologyTerm ontologyTerm) {
-        this.ontologyTermRepository.save(ontologyTerm);
+        Page<OntologyTermContext> ontologyTermContextPage = ontologyTermContextRepository.findByHasMappingAndProjectIdAndContextAndStatus(true, projectId, context, status, pageable);
+        return ontologyTermContextPage;
     }
 
     @Override
     public Map<String, Integer> retrieveTermStats(String projectId, String context) {
         log.info("Retrieving term stats for: {} | {}", projectId, context);
         Map<String, Integer> stats = new LinkedHashMap<>();
-        long count = ontologyTermRepository.countByContexts_HasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(true, projectId, context, TermStatus.NEEDS_IMPORT.name());
+        long count = ontologyTermContextRepository.countByHasMappingAndProjectIdAndContextAndStatus(true, projectId, context, TermStatus.NEEDS_IMPORT.name());
         stats.put(TermStatus.NEEDS_IMPORT.name(), (int) count);
 
-        count = ontologyTermRepository.countByContexts_HasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(true, projectId, context, TermStatus.NEEDS_CREATION.name());
+        count = ontologyTermContextRepository.countByHasMappingAndProjectIdAndContextAndStatus(true, projectId, context, TermStatus.NEEDS_CREATION.name());
         stats.put(TermStatus.NEEDS_CREATION.name(), (int) count);
         return stats;
     }
 
     @Override
-    public Map<String, OntologyTerm> retrieveTerms(List<String> ontologyTermIds) {
+    public OntologyTerm mapTerm(OntologyTerm ontologyTerm, Mapping mapping, boolean add) {
+        log.info("Adding mapping to term: {} | [{} :: {}] | {}", ontologyTerm.getId(), mapping.getProjectId(), mapping.getContext(), mapping.getId());
+        Optional<OntologyTermContext> optionalOntologyTermContext = ontologyTermContextRepository.findByOntologyTermIdAndProjectIdAndContext(ontologyTerm.getId(),
+                mapping.getProjectId(), mapping.getContext());
+        if (!optionalOntologyTermContext.isPresent()) {
+            log.warn("Onto term context missing: {} | {} [{}]", ontologyTerm.getId(), mapping.getProjectId(), mapping.getContext());
+            return ontologyTerm;
+        }
+
+        OntologyTermContext ontologyTermContext = optionalOntologyTermContext.get();
+        if (add) {
+            if (!ontologyTermContext.getMappings().contains(mapping.getId())) {
+                ontologyTermContext.getMappings().add(mapping.getId());
+            }
+            ontologyTermContext.setHasMapping(true);
+        } else {
+            if (ontologyTermContext.getMappings().contains(mapping.getId())) {
+                ontologyTermContext.getMappings().remove(mapping.getId());
+            }
+            if (ontologyTermContext.getMappings().isEmpty()) {
+                ontologyTermContext.setHasMapping(false);
+            }
+        }
+        ontologyTermContext = ontologyTermContextRepository.save(ontologyTermContext);
+        ontologyTerm.setStatus(ontologyTermContext.getStatus());
+        return ontologyTerm;
+    }
+
+    @Override
+    public Map<String, OntologyTerm> retrieveTerms(List<String> ontologyTermIds, String projectId, String context) {
         log.info("Retrieving {} ontology terms.", ontologyTermIds.size());
         Map<String, OntologyTerm> result = new HashMap<>();
         List<OntologyTerm> ontologyTerms = ontologyTermRepository.findByIdIn(ontologyTermIds);
         for (OntologyTerm ontologyTerm : ontologyTerms) {
+            Optional<OntologyTermContext> ontologyTermContextOp = ontologyTermContextRepository.findByOntologyTermIdAndProjectIdAndContext(ontologyTerm.getId(),
+                    projectId, context);
+            if (ontologyTermContextOp.isPresent()) {
+                ontologyTerm.setStatus(ontologyTermContextOp.get().getStatus());
+            }
             result.put(ontologyTerm.getId(), ontologyTerm);
         }
         return result;
-    }
-
-    @Override
-    public List<OntologyTerm> retrieveAllTerms() {
-        log.info("Retrieving all ontology terms.");
-        return ontologyTermRepository.findAll();
     }
 
     @Override

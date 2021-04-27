@@ -9,14 +9,13 @@ import java.util.List;
 
 public class ExtendedOntologyTermDtoAssembler {
 
-    public static ExtendedOntologyTermDto assemble(ExtendedOntologyTerm extendedOntologyTerm, String projectId, String context) {
+    public static ExtendedOntologyTermDto assemble(ExtendedOntologyTerm extendedOntologyTerm) {
         List<ShortEntityInfoDto> entities = new ArrayList<>();
         for (String id : extendedOntologyTerm.getEntities().keySet()) {
             entities.add(new ShortEntityInfoDto(id, extendedOntologyTerm.getEntities().get(id)));
         }
 
-        return new ExtendedOntologyTermDto(entities,
-                OntologyTermDtoAssembler.assemble(extendedOntologyTerm.getOntologyTerm(), projectId, context));
+        return new ExtendedOntologyTermDto(entities, OntologyTermDtoAssembler.assemble(extendedOntologyTerm.getOntologyTerm()));
     }
 
 }
