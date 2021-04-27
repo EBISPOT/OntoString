@@ -74,6 +74,7 @@ public class MatchMakingWithGraphRestrictionTest extends IntegrationTest {
     public void runMatchmakingWithAncestorTest() throws Exception {
         ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0,
                 new ProjectContextGraphRestrictionDto(Arrays.asList(new String[]{"EFO:0005541"}),
+                        Arrays.asList(new String[]{"http://www.ebi.ac.uk/efo/EFO_0005541"}),
                         Arrays.asList(new String[]{"rdfs:subClassOf"}),
                         false,
                         false));
@@ -87,6 +88,7 @@ public class MatchMakingWithGraphRestrictionTest extends IntegrationTest {
     public void runMatchmakingWithParentTest() throws Exception {
         ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0,
                 new ProjectContextGraphRestrictionDto(Arrays.asList(new String[]{"EFO:0005802"}),
+                        Arrays.asList(new String[]{"http://www.ebi.ac.uk/efo/EFO_0005802"}),
                         Arrays.asList(new String[]{"rdfs:subClassOf"}),
                         true,
                         false));
@@ -97,6 +99,7 @@ public class MatchMakingWithGraphRestrictionTest extends IntegrationTest {
     public void runMatchmakingWithRandomAncestorTest() throws Exception {
         ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0,
                 new ProjectContextGraphRestrictionDto(Arrays.asList(new String[]{"EFO:0105802"}),
+                        Arrays.asList(new String[]{"http://www.ebi.ac.uk/efo/EFO_0005802"}),
                         Arrays.asList(new String[]{"rdfs:subClassOf"}),
                         false,
                         false));

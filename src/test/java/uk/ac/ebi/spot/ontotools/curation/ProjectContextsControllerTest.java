@@ -14,8 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,7 +42,8 @@ public class ProjectContextsControllerTest extends IntegrationTest {
                 Arrays.asList(new String[]{"efo", "mondo", "mp"}),
                 Arrays.asList(new String[]{"efo"}),
                 new ProjectContextGraphRestrictionDto(
-                        Arrays.asList(new String[]{"efo:test"}),
+                        Arrays.asList(new String[]{"EFO:0005802"}),
+                        null,
                         Arrays.asList(new String[]{"rdfs:subClassOf"}),
                         false,
                         false
@@ -75,7 +75,8 @@ public class ProjectContextsControllerTest extends IntegrationTest {
                 assertEquals(newProjectContextDto.getPreferredMappingOntologies().size(), projectContextDto.getPreferredMappingOntologies().size());
                 ProjectContextGraphRestrictionDto pcgr = newProjectContextDto.getGraphRestriction();
                 ProjectContextGraphRestrictionDto actual = projectContextDto.getGraphRestriction();
-                assertEquals(pcgr, actual);
+                assertEquals(pcgr.getClasses(), actual.getClasses());
+                assertFalse(actual.getIris().isEmpty());
             }
         }
     }

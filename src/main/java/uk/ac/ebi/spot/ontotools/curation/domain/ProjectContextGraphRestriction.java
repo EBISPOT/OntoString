@@ -11,6 +11,8 @@ public class ProjectContextGraphRestriction {
 
     private List<String> classes;
 
+    private List<String> iris;
+
     private List<String> relations;
 
     private Boolean direct;

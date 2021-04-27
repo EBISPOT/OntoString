@@ -136,17 +136,23 @@ public class OntologyTermServiceImpl implements OntologyTermService {
         List<OLSTermDto> results = new ArrayList<>();
         for (OLSTermDto olsTermDto : termList) {
             List<OLSTermDto> ancestors = olsService.retrieveAncestors(ontoId, olsTermDto.getIri(), projectContextGraphRestriction.getDirect());
-            if (this.isGraphRestrictionValid(ancestors, projectContextGraphRestriction.getClasses(), projectContextGraphRestriction.getIncludeSelf())) {
+            if (this.isGraphRestrictionValid(olsTermDto.getCurie(), ancestors, projectContextGraphRestriction.getClasses(), projectContextGraphRestriction.getIncludeSelf())) {
                 results.add(olsTermDto);
             }
         }
         return results;
     }
 
-    private boolean isGraphRestrictionValid(List<OLSTermDto> ancestors, List<String> classes, Boolean includeSelf) {
-        for (OLSTermDto olsTermDto : ancestors) {
-            if (classes.contains(olsTermDto.getCurie())) {
-                return true;
+    private boolean isGraphRestrictionValid(String curie, List<OLSTermDto> ancestors, List<String> classes, Boolean includeSelf) {
+        for (OLSTermDto ancestor : ancestors) {
+            if (classes.contains(ancestor.getCurie())) {
+                if (!includeSelf) {
+                    if (!ancestor.getCurie().equals(curie)) {
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
             }
         }
         return false;

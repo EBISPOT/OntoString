@@ -22,9 +22,17 @@ public class RestInteractionConstants {
 
     public static final String OLS_IDTYPE_IRI = "iri";
 
+    public static final String OLS_IDTYPE_OBOID = "obo_id";
+
     public static final String OLS_PAGE = "page";
 
     public static final String OLS_PARAM_Q = "q";
+
+    public static final String OLS_PARAM_ONTOLOGY = "ontology";
+
+    public static final String OLS_PARAM_ALLCHILDRENOF = "allChildrenOf";
+
+    public static final String OLS_PARAM_CHILDRENOF = "childrenOf";
 
     public static String zoomaFilterValueFromList(List<String> datasources, List<String> ontologies) {
         if (datasources != null && !datasources.isEmpty()) {

@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.ontotools.curation.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.ac.ebi.spot.ontotools.curation.config.RestInteractionConfig;
 import uk.ac.ebi.spot.ontotools.curation.constants.RestInteractionConstants;
+import uk.ac.ebi.spot.ontotools.curation.domain.Project;
+import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSQueryDocDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSQueryResponseDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSResponseDto;
@@ -91,12 +94,34 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
     }
 
     @Override
-    public List<OLSQueryDocDto> query(String prefix) {
+    public List<OLSQueryDocDto> query(String prefix, Project project, String context, boolean usePreferred, boolean useGraphRestrictions) {
         log.info("Calling OLS search: {}", prefix);
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(restInteractionConfig.getOlsSearchEndpoint())
                 .queryParam(RestInteractionConstants.OLS_PARAM_Q, prefix);
-        String endpoint = uriBuilder.build().toUriString();
+        ProjectContext found = null;
+        for (ProjectContext projectContext : project.getContexts()) {
+            if (projectContext.getName().equalsIgnoreCase(context)) {
+                found = projectContext;
+                break;
+            }
+        }
 
+        if (usePreferred && found != null) {
+            String ontoParam = "";
+            if (found.getOntologies() != null) {
+                ontoParam = StringUtils.join(found.getOntologies(), ",").toLowerCase();
+            }
+            if (!"".equalsIgnoreCase(ontoParam)) {
+                uriBuilder = uriBuilder.queryParam(RestInteractionConstants.OLS_PARAM_ONTOLOGY, ontoParam);
+            }
+        }
+
+        if (useGraphRestrictions && found != null && found.getProjectContextGraphRestriction() != null) {
+            String qProperty = found.getProjectContextGraphRestriction().getDirect() ? RestInteractionConstants.OLS_PARAM_CHILDRENOF : RestInteractionConstants.OLS_PARAM_ALLCHILDRENOF;
+            uriBuilder = uriBuilder.queryParam(qProperty, StringUtils.join(found.getProjectContextGraphRestriction().getIris(), ","));
+        }
+
+        String endpoint = uriBuilder.build().toUriString();
         try {
             HttpEntity httpEntity = restInteractionConfig.httpEntity().build();
             ResponseEntity<OLSQueryResponseDto> response =
@@ -117,17 +142,21 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
     }
 
     @Override
-    public OLSTermDto retrieveOriginalTerm(String iri) {
-        log.info("Calling OLS terms: {}", iri);
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(restInteractionConfig.getOlsTermsEndpoint())
-                .queryParam(RestInteractionConstants.OLS_IDTYPE_IRI, iri);
+    public OLSTermDto retrieveOriginalTerm(String termId, boolean retrieveByIRI) {
+        log.info("Calling OLS terms: {}", termId);
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(restInteractionConfig.getOlsTermsEndpoint());
+        if (retrieveByIRI) {
+            uriBuilder = uriBuilder.queryParam(RestInteractionConstants.OLS_IDTYPE_IRI, termId);
+        } else {
+            uriBuilder = uriBuilder.queryParam(RestInteractionConstants.OLS_IDTYPE_OBOID, termId);
+        }
         String endpoint = uriBuilder.build().toUriString();
 
         try {
             OLSResponseDto olsResponseDto = this.callOLS(endpoint);
             if (olsResponseDto != null) {
                 List<OLSTermDto> olsTermDtos = olsResponseDto.getEmbedded().getTerms();
-                log.info("OLS terms [{}]: received {} docs.", iri, olsTermDtos.size());
+                log.info("OLS terms [{}]: received {} docs.", termId, olsTermDtos.size());
                 for (OLSTermDto olsTermDto : olsTermDtos) {
                     if (olsTermDto.getDefiningOntology() != null && olsTermDto.getDefiningOntology()) {
                         return olsTermDto;
@@ -144,7 +173,7 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
     @Override
     public List<OLSTermDto> retrieveAncestors(String ontologyId, String iri, boolean direct) {
         try {
-            String suffix = direct ? RestInteractionConstants.OLS_PARENTS  : RestInteractionConstants.OLS_ANCESTORS;
+            String suffix = direct ? RestInteractionConstants.OLS_PARENTS : RestInteractionConstants.OLS_ANCESTORS;
             String endpoint = restInteractionConfig.getOlsOntologiesEndpoint() + "/" + ontologyId + RestInteractionConstants.OLS_TERMS +
                     "/" + URLEncoder.encode(iri, StandardCharsets.UTF_8.name()) + suffix;
 
