@@ -12,6 +12,7 @@ import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.*;
 import uk.ac.ebi.spot.ontotools.curation.repository.EntityRepository;
 import uk.ac.ebi.spot.ontotools.curation.repository.MappingRepository;
+import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermContextRepository;
 import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.OntologyTermUtilService;
 import uk.ac.ebi.spot.ontotools.curation.util.ContentCompiler;
@@ -33,18 +34,21 @@ public class OntologyTermUtilServiceImpl implements OntologyTermUtilService {
     @Autowired
     private EntityRepository entityRepository;
 
+    @Autowired
+    private OntologyTermContextRepository ontologyTermContextRepository;
+
     @Override
     public void actionTerms(String projectId, String context, String status, String comment, User user) {
         log.info("Updating status for terms: {} | {} | {}", projectId, context, status);
-        Stream<OntologyTerm> ontologyTermStream = ontologyTermRepository.readByContexts_HasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(true, projectId, context, status);
-        ontologyTermStream.forEach(ontologyTerm -> this.updateStatus(ontologyTerm, status, projectId, context, comment, user));
-        ontologyTermStream.close();
+        Stream<OntologyTermContext> ontologyTermContextStream = ontologyTermContextRepository.readByHasMappingAndProjectIdAndContextAndStatus(true, projectId, context, status);
+        ontologyTermContextStream.forEach(ontologyTermContext -> this.updateStatus(ontologyTermContext, status, comment, user));
+        ontologyTermContextStream.close();
     }
 
     @Override
     public String exportOntologyTerms(String projectId, String context, String status) {
         ContentCompiler contentCompiler = new ContentCompiler();
-        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findByContexts_HasMappingAndContexts_ProjectIdAndContexts_ContextAndContexts_Status(true, projectId, context, status);
+        List<OntologyTermContext> ontologyTermContexts = ontologyTermContextRepository.findByHasMappingAndProjectIdAndContextAndStatus(true, projectId, context, status);
 
         List<Entity> entities = entityRepository.findByProjectIdAndContext(projectId, context);
         Map<String, Entity> entityMap = new LinkedHashMap<>();
@@ -65,7 +69,8 @@ public class OntologyTermUtilServiceImpl implements OntologyTermUtilService {
             }
         }
 
-        for (OntologyTerm ontologyTerm : ontologyTerms) {
+        for (OntologyTermContext ontologyTermContext : ontologyTermContexts) {
+            OntologyTerm ontologyTerm = ontologyTermRepository.findById(ontologyTermContext.getOntologyTermId()).get();
             List<String> entityNames = mappingMap.get(ontologyTerm.getId());
             contentCompiler.addOntologyTerm(ontologyTerm, StringUtils.join(entityNames, " | "));
         }
@@ -74,57 +79,40 @@ public class OntologyTermUtilServiceImpl implements OntologyTermUtilService {
     }
 
     @Override
-    public Map<String, Map<String, String>> retrieveEntityData(List<OntologyTerm> ontologyTerms, String projectId, String context) {
+    public Map<OntologyTerm, Map<String, String>> retrieveEntityData(List<String> ontoTermIds, List<OntologyTermContext> ontologyTermContexts, String projectId, String context) {
         List<Entity> entities = entityRepository.findByProjectIdAndContext(projectId, context);
         Map<String, String> entityMap = new LinkedHashMap<>();
         for (Entity entity : entities) {
             entityMap.put(entity.getId(), entity.getName());
         }
 
-        List<Mapping> mappings = mappingRepository.findByProjectIdAndContext(projectId, context);
-        Map<String, Map<String, String>> result = new LinkedHashMap<>();
-
-        for (OntologyTerm ontologyTerm : ontologyTerms) {
+        Map<OntologyTerm, Map<String, String>> result = new LinkedHashMap<>();
+        for (OntologyTermContext ontologyTermContext : ontologyTermContexts) {
+            OntologyTerm ontologyTerm = ontologyTermRepository.findById(ontologyTermContext.getOntologyTermId()).get();
+            List<Mapping> mappings = mappingRepository.findByIdIn(ontologyTermContext.getMappings());
             Map<String, String> entityNames = new HashMap<>();
 
             for (Mapping mapping : mappings) {
-                if (mapping.getOntologyTermIds().contains(ontologyTerm.getId())) {
-                    entityNames.put(mapping.getEntityId(), entityMap.get(mapping.getEntityId()));
-                }
+                entityNames.put(mapping.getEntityId(), entityMap.get(mapping.getEntityId()));
             }
-            result.put(ontologyTerm.getId(), entityNames);
+            ontologyTerm.setStatus(ontologyTermContext.getStatus());
+            result.put(ontologyTerm, entityNames);
         }
         return result;
     }
 
-    private void updateStatus(OntologyTerm ontologyTerm, String oldStatus, String projectId, String context, String comment, User user) {
+    private void updateStatus(OntologyTermContext ontologyTermContext, String oldStatus, String comment, User user) {
         String newStatus = TermStatus.AWAITING_IMPORT.name();
         if (oldStatus.equals(TermStatus.NEEDS_CREATION.name())) {
             newStatus = TermStatus.AWAITING_CREATION.name();
         }
+        ontologyTermContext.setStatus(newStatus);
+        ontologyTermContextRepository.save(ontologyTermContext);
 
-        List<OntologyTermContext> ontologyTermContexts = ontologyTerm.getContexts();
-        OntologyTermContext found = null;
-        for (OntologyTermContext ontologyTermContext : ontologyTermContexts) {
-            if (ontologyTermContext.getProjectId().equals(projectId) && ontologyTermContext.getContext().equals(context)) {
-                found = ontologyTermContext;
-                break;
-            }
-        }
-
-        if (found != null) {
-            ontologyTerm.getContexts().remove(found);
-            found.setStatus(newStatus);
-            ontologyTerm.getContexts().add(found);
-            ontologyTermRepository.save(ontologyTerm);
-
-            List<Mapping> mappings = mappingRepository.findByProjectIdAndContextAndOntologyTermIdsContains(projectId, context, ontologyTerm.getId());
-            for (Mapping mapping : mappings) {
-                mapping.getComments().add(new Comment(comment, new Provenance(user.getName(), user.getEmail(), DateTime.now())));
-                mappingRepository.save(mapping);
-            }
-        } else {
-            log.error("Unable to find context [{}] for ontology term: {} | {}", context, ontologyTerm.getCurie(), projectId);
+        List<Mapping> mappings = mappingRepository.findByIdIn(ontologyTermContext.getMappings());
+        for (Mapping mapping : mappings) {
+            mapping.getComments().add(new Comment(comment, new Provenance(user.getName(), user.getEmail(), DateTime.now())));
+            mappingRepository.save(mapping);
         }
     }
 }

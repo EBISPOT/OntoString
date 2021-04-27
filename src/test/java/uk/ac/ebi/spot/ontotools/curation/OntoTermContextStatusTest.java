@@ -51,9 +51,6 @@ public class OntoTermContextStatusTest extends IntegrationTest {
     @Autowired
     private MatchmakerService matchmakerService;
 
-    @Autowired
-    private OntologyTermService ontologyTermService;
-
     private List<String> datasources;
 
     private List<String> ontologies;
@@ -117,20 +114,21 @@ public class OntoTermContextStatusTest extends IntegrationTest {
         updated = entityService.retrieveEntity(entity2.getId());
         assertEquals(EntityStatus.AUTO_MAPPED, updated.getMappingStatus());
 
-        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveAllTerms();
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findAll();
         assertEquals(1, ontologyTerms.size());
         OntologyTerm ontologyTerm = ontologyTerms.get(0);
-        assertEquals(2, ontologyTerm.getContexts().size());
+        List<OntologyTermContext> ontologyTermContexts = ontologyTermContextRepository.findByOntologyTermId(ontologyTerm.getId());
+        assertEquals(2, ontologyTermContexts.size());
 
         Map<String, String> projectMap = new HashMap<>();
-        for (OntologyTermContext ontologyTermContext : ontologyTerm.getContexts()) {
+        for (OntologyTermContext ontologyTermContext : ontologyTermContexts) {
             projectMap.put(ontologyTermContext.getProjectId(), "");
         }
 
         assertEquals(2, projectMap.size());
         assertTrue(projectMap.containsKey(project1.getId()));
         assertTrue(projectMap.containsKey(project2.getId()));
-        for (OntologyTermContext ontologyTermContext : ontologyTerm.getContexts()) {
+        for (OntologyTermContext ontologyTermContext : ontologyTermContexts) {
             if (ontologyTermContext.getProjectId().equalsIgnoreCase(project1.getId())) {
                 assertEquals(CurationConstants.CONTEXT_DEFAULT, ontologyTermContext.getContext());
                 assertEquals(TermStatus.NEEDS_IMPORT.name(), ontologyTermContext.getStatus());
@@ -185,19 +183,20 @@ public class OntoTermContextStatusTest extends IntegrationTest {
         updated = entityService.retrieveEntity(entity2.getId());
         assertEquals(EntityStatus.AUTO_MAPPED, updated.getMappingStatus());
 
-        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveAllTerms();
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findAll();
         assertEquals(1, ontologyTerms.size());
         OntologyTerm ontologyTerm = ontologyTerms.get(0);
-        assertEquals(2, ontologyTerm.getContexts().size());
+        List<OntologyTermContext> ontologyTermContexts = ontologyTermContextRepository.findByOntologyTermId(ontologyTerm.getId());
+        assertEquals(2, ontologyTermContexts.size());
 
         Map<String, String> projectMap = new HashMap<>();
-        for (OntologyTermContext ontologyTermContext : ontologyTerm.getContexts()) {
+        for (OntologyTermContext ontologyTermContext : ontologyTermContexts) {
             projectMap.put(ontologyTermContext.getProjectId(), "");
         }
 
         assertEquals(1, projectMap.size());
         assertTrue(projectMap.containsKey(project.getId()));
-        for (OntologyTermContext ontologyTermContext : ontologyTerm.getContexts()) {
+        for (OntologyTermContext ontologyTermContext : ontologyTermContexts) {
             if (ontologyTermContext.getProjectId().equalsIgnoreCase(project.getId()) && ontologyTermContext.getContext().equals(CurationConstants.CONTEXT_DEFAULT)) {
                 assertEquals(TermStatus.NEEDS_IMPORT.name(), ontologyTermContext.getStatus());
             }

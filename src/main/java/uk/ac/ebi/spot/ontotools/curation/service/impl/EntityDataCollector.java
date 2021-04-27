@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.OntologyTermDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.ProvenanceDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.export.ExportEntityDto;
@@ -18,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -39,17 +39,13 @@ public class EntityDataCollector {
         ExportMappingDto exportMappingDto = null;
 
         if (mapping != null) {
-            List<OntologyTermDto> ontologyTermDtos = new ArrayList<>();
-            for (OntologyTerm ontologyTerm : mapping.getOntologyTerms()) {
-                ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTerm, projectId, entity.getContext()));
-            }
+            List<OntologyTermDto> ontologyTermDtos = mapping.getOntologyTerms().stream().map(OntologyTermDtoAssembler::assemble).collect(Collectors.toList());
             exportMappingDto = new ExportMappingDto(ontologyTermDtos, mapping.isReviewed(),
                     mapping.getStatus(), ProvenanceDtoAssembler.assemble(mapping.getCreated()));
         }
         if (mappingSuggestionList != null) {
             for (MappingSuggestion mappingSuggestion : mappingSuggestionList) {
-                mappingSuggestions.add(new ExportMappingSuggestionDto(OntologyTermDtoAssembler.assemble(mappingSuggestion.getOntologyTerm(),
-                        projectId, entity.getContext()), ProvenanceDtoAssembler.assemble(mappingSuggestion.getCreated())));
+                mappingSuggestions.add(new ExportMappingSuggestionDto(OntologyTermDtoAssembler.assemble(mappingSuggestion.getOntologyTerm()), ProvenanceDtoAssembler.assemble(mappingSuggestion.getCreated())));
             }
         }
 

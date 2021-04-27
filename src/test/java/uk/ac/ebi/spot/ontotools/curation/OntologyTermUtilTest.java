@@ -33,6 +33,7 @@ import uk.ac.ebi.spot.ontotools.curation.service.UserService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -85,16 +86,20 @@ public class OntologyTermUtilTest extends IntegrationTest {
                 CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), null, provenance, EntityStatus.AUTO_MAPPED));
 
         orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
-                DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia",
-                Arrays.asList(new OntologyTermContext[]{
-                        new OntologyTermContext(entity1.getProjectId(), entity1.getContext(), TermStatus.NEEDS_IMPORT.name())
-                }), null, null));
+                DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia", null, null, new ArrayList<>(), null));
+        OntologyTermContext ontologyTermContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                null, orphaTerm.getId(), entity1.getProjectId(), entity1.getContext(), TermStatus.NEEDS_IMPORT.name(), new ArrayList<>(), false
+        ));
+        orphaTerm.getOntoTermContexts().add(ontologyTermContext.getId());
+        orphaTerm = ontologyTermRepository.save(orphaTerm);
 
         mondoTerm = ontologyTermRepository.insert(new OntologyTerm(null, "MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
-                DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia",
-                Arrays.asList(new OntologyTermContext[]{
-                        new OntologyTermContext(entity1.getProjectId(), entity1.getContext(), TermStatus.NEEDS_CREATION.name())
-                }), null, null));
+                DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia", null, null, new ArrayList<>(), null));
+        ontologyTermContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                null, mondoTerm.getId(), entity1.getProjectId(), entity1.getContext(), TermStatus.NEEDS_CREATION.name(), new ArrayList<>(), false
+        ));
+        mondoTerm.getOntoTermContexts().add(ontologyTermContext.getId());
+        mondoTerm = ontologyTermRepository.save(mondoTerm);
 
         orphaMapping = mappingService.createMapping(entity1, Arrays.asList(new OntologyTerm[]{orphaTerm}), provenance);
         mondoMapping = mappingService.createMapping(entity1, Arrays.asList(new OntologyTerm[]{mondoTerm}), provenance);
@@ -118,13 +123,17 @@ public class OntologyTermUtilTest extends IntegrationTest {
                 .andExpect(status().isCreated());
 
         orphaTerm = ontologyTermRepository.findById(orphaTerm.getId()).get();
-        assertEquals(TermStatus.AWAITING_IMPORT.name(), orphaTerm.getContexts().get(0).getStatus());
+        List<OntologyTermContext> ontologyTermContexts = ontologyTermContextRepository.findByOntologyTermId(orphaTerm.getId());
+        assertEquals(1, ontologyTermContexts.size());
+        assertEquals(TermStatus.AWAITING_IMPORT.name(), ontologyTermContexts.get(0).getStatus());
         orphaMapping = mappingRepository.findById(orphaMapping.getId()).get();
         assertEquals(1, orphaMapping.getComments().size());
         assertEquals("New Comment", orphaMapping.getComments().get(0).getBody());
 
         mondoTerm = ontologyTermRepository.findById(mondoTerm.getId()).get();
-        assertEquals(TermStatus.NEEDS_CREATION.name(), mondoTerm.getContexts().get(0).getStatus());
+        ontologyTermContexts = ontologyTermContextRepository.findByOntologyTermId(mondoTerm.getId());
+        assertEquals(1, ontologyTermContexts.size());
+        assertEquals(TermStatus.NEEDS_CREATION.name(), ontologyTermContexts.get(0).getStatus());
         mondoMapping = mappingRepository.findById(mondoMapping.getId()).get();
         assertEquals(0, mondoMapping.getComments().size());
 
@@ -139,13 +148,17 @@ public class OntologyTermUtilTest extends IntegrationTest {
                 .andExpect(status().isCreated());
 
         orphaTerm = ontologyTermRepository.findById(orphaTerm.getId()).get();
-        assertEquals(TermStatus.AWAITING_IMPORT.name(), orphaTerm.getContexts().get(0).getStatus());
+        ontologyTermContexts = ontologyTermContextRepository.findByOntologyTermId(orphaTerm.getId());
+        assertEquals(1, ontologyTermContexts.size());
+        assertEquals(TermStatus.AWAITING_IMPORT.name(), ontologyTermContexts.get(0).getStatus());
         orphaMapping = mappingRepository.findById(orphaMapping.getId()).get();
         assertEquals(1, orphaMapping.getComments().size());
         assertEquals("New Comment", orphaMapping.getComments().get(0).getBody());
 
         mondoTerm = ontologyTermRepository.findById(mondoTerm.getId()).get();
-        assertEquals(TermStatus.AWAITING_CREATION.name(), mondoTerm.getContexts().get(0).getStatus());
+        ontologyTermContexts = ontologyTermContextRepository.findByOntologyTermId(mondoTerm.getId());
+        assertEquals(1, ontologyTermContexts.size());
+        assertEquals(TermStatus.AWAITING_CREATION.name(), ontologyTermContexts.get(0).getStatus());
         mondoMapping = mappingRepository.findById(mondoMapping.getId()).get();
         assertEquals(1, mondoMapping.getComments().size());
         assertEquals("New Comment", mondoMapping.getComments().get(0).getBody());

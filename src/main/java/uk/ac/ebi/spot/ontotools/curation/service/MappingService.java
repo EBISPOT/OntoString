@@ -13,7 +13,7 @@ public interface MappingService {
 
     Mapping createMapping(Entity entity, List<OntologyTerm> ontologyTerms, Provenance provenance);
 
-    Map<String, Mapping> retrieveMappingsForEntities(List<String> entityIds);
+    Map<String, Mapping> retrieveMappingsForEntities(List<String> entityIds, String projectId, String context);
 
     Mapping retrieveMappingForEntity(String entityId);
 

@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 
 public class MappingDtoAssembler {
 
-    public static MappingDto assemble(Mapping mapping, String projectId, String context) {
+    public static MappingDto assemble(Mapping mapping) {
         List<OntologyTermDto> ontologyTermDtos = new ArrayList<>();
         for (OntologyTerm ontologyTerm : mapping.getOntologyTerms()) {
-            ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTerm, projectId, context));
+            ontologyTermDtos.add(OntologyTermDtoAssembler.assemble(ontologyTerm));
         }
 
         return new MappingDto(mapping.getId(),

@@ -102,6 +102,9 @@ public abstract class IntegrationTest {
     protected OntologyTermRepository ontologyTermRepository;
 
     @Autowired
+    protected OntologyTermContextRepository ontologyTermContextRepository;
+
+    @Autowired
     protected MappingSuggestionRepository mappingSuggestionRepository;
 
     @Autowired
@@ -226,16 +229,20 @@ public abstract class IntegrationTest {
                 CurationConstants.CONTEXT_DEFAULT, sourceId, projectId, null, provenance, EntityStatus.AUTO_MAPPED));
 
         OntologyTerm orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
-                DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia",
-                Arrays.asList(new OntologyTermContext[]{
-                        new OntologyTermContext(entity.getProjectId(), entity.getContext(), TermStatus.CURRENT.name())
-                }), null, null));
+                DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia", null, null, new ArrayList<>(), null));
+        OntologyTermContext ontologyTermContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                null, orphaTerm.getId(), entity.getProjectId(), entity.getContext(), TermStatus.CURRENT.name(), new ArrayList<>(), false
+        ));
+        orphaTerm.getOntoTermContexts().add(ontologyTermContext.getId());
+        orphaTerm = ontologyTermRepository.save(orphaTerm);
 
         OntologyTerm mondoTerm = ontologyTermRepository.insert(new OntologyTerm(null, "MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
-                DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia",
-                Arrays.asList(new OntologyTermContext[]{
-                        new OntologyTermContext(entity.getProjectId(), entity.getContext(), TermStatus.CURRENT.name())
-                }), null, null));
+                DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia", null, null, new ArrayList<>(), null));
+        ontologyTermContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                null, mondoTerm.getId(), entity.getProjectId(), entity.getContext(), TermStatus.CURRENT.name(), new ArrayList<>(), false
+        ));
+        mondoTerm.getOntoTermContexts().add(ontologyTermContext.getId());
+        mondoTerm = ontologyTermRepository.save(mondoTerm);
 
         mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), orphaTerm.getId(), projectId, provenance, null));
         mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), mondoTerm.getId(), projectId, provenance, null));
