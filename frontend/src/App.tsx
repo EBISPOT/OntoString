@@ -12,6 +12,8 @@ import ProjectsPage from './pages/projects/ProjectsPage';
 import EntitiesPage from './pages/entities/EntitiesPage';
 import TermsPage from './pages/terms/TermsPage';
 import About from './pages/About';
+import ProjectSettingsPage from './pages/projects/ProjectSettingsPage';
+import ContextSettingsPage from './pages/projects/ContextSettingsPage';
 
 let styles = (theme:Theme) => createStyles({
     main: {
@@ -41,6 +43,12 @@ function App(props:AppProps) {
 
                     <Route exact path={`/projects/:id`}
                         component={(props:any) => <Redirect to={`/projects/${props.match.params.id}/entities`}/>}></Route>
+
+                    <Route exact path={`/projects/:id/settings`}
+                        component={(props:any) => <ProjectSettingsPage projectId={props.match.params.id}/>}></Route>
+
+                    <Route exact path={`/projects/:projectId/contexts/:contextName`}
+                        component={(props:any) => <ContextSettingsPage projectId={props.match.params.projectId} contextName={props.match.params.contextName} />}></Route>
 
                     <Route exact path={`/projects/:id/entities`}
                         component={(props:any) => <EntitiesPage projectId={props.match.params.id}/>}></Route>

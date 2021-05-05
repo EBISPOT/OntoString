@@ -4,7 +4,6 @@ import React, { Fragment } from "react";
 import { post } from "../api";
 import Context from "../dto/Context";
 import Project from "../dto/Project";
-import CreateContextDialog from "./CreateContextDialog";
 
 
 export interface Props {
@@ -48,20 +47,20 @@ export default class ContextSelector extends React.Component<Props, State> {
         //     </Tabs>
         // </Fragment>
 
-        const CreateComponent = ({ children, ...other }) => (
-            <Paper {...other}>
-              {children}
-              <span style={{display: 'block',padding:'8px'}}>
-                    <Button variant="outlined" color="primary" onMouseDown={this.newContext}>
-                        + Create Context</Button>
-                </span>
-            </Paper>
-          );
+        // const CreateComponent = ({ children, ...other }) => (
+        //     <Paper {...other}>
+        //       {children}
+        //       <span style={{display: 'block',padding:'8px'}}>
+        //             <Button variant="outlined" color="primary" onMouseDown={this.newContext}>
+        //                 + Create Context</Button>
+        //         </span>
+        //     </Paper>
+        //   );
 
 
         return <Fragment>
 
-            {showCreateContextDialog && <CreateContextDialog onCreate={this.createContext} onClose={this.closeCreateContext} />}
+            {/* {showCreateContextDialog && <CreateContextDialog onCreate={this.createContext} onClose={this.closeCreateContext} />} */}
             
             <Autocomplete
             value={context}
@@ -76,7 +75,7 @@ export default class ContextSelector extends React.Component<Props, State> {
             style={{ width: 300 }}
             getOptionLabel={(option:Context) => option.name}
             renderInput={(params) => <TextField {...params} />}
-            PaperComponent={CreateComponent as any}
+            // PaperComponent={CreateComponent as any}
             disableClearable
         />
 
@@ -88,22 +87,22 @@ export default class ContextSelector extends React.Component<Props, State> {
         this.setState(prevState => ({ ...prevState, showCreateContextDialog: true }))
     }
 
-    createContext = async (context:Context) => {
+    // createContext = async (context:Context) => {
 
-        let { project } = this.props
+    //     let { project } = this.props
 
-        await post<Context>(`/v1/projects/${project.id}/contexts`, context)
+    //     await post<Context>(`/v1/projects/${project.id}/contexts`, context)
 
-        await this.setState(prevState => ({ ...prevState, contexts: [...prevState.contexts, context] }))
+    //     await this.setState(prevState => ({ ...prevState, contexts: [...prevState.contexts, context] }))
 
-        this.props.onSwitchContext(context)
+    //     this.props.onSwitchContext(context)
 
-        this.setState(prevState => ({ ...prevState, showCreateContextDialog: false }))
-    }
+    //     this.setState(prevState => ({ ...prevState, showCreateContextDialog: false }))
+    // }
 
-    closeCreateContext = () => {
-        this.setState(prevState => ({ ...prevState, showCreateContextDialog: false }))
-    }
+    // closeCreateContext = () => {
+    //     this.setState(prevState => ({ ...prevState, showCreateContextDialog: false }))
+    // }
 
     setContext = (context:Context) => {
         this.props.onSwitchContext(context)

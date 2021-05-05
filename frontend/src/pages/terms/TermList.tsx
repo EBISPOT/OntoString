@@ -1,5 +1,5 @@
 
-import { Button, CircularProgress, createStyles, darken, Grid, Input, InputAdornment, lighten, makeStyles, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { Box, Button, CircularProgress, createStyles, darken, Grid, Input, InputAdornment, lighten, makeStyles, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
 import SearchIcon from '@material-ui/icons/Search';
 import React, { ChangeEvent, Fragment } from "react";
 import { useState, useEffect } from "react";
@@ -15,6 +15,10 @@ import ContextSelector from "../../components/ContextSelector";
 import TermListing from "../../dto/TermListing";
 import TermStatusBox from "../../components/TermStatusBox";
 import { OntologyTermStatus } from "../../dto/OntologyTerm";
+import { CloudDownload, DoneAll } from "@material-ui/icons";
+import { post } from "../../api";
+import ActionDialog from "./ActionDialog";
+import FileSaver from 'file-saver';
 
 const styles = (theme:Theme) => createStyles({
     tableRow: {
@@ -41,6 +45,8 @@ interface State {
     terms:Paginated<TermListing>|null
     goToTermListing:TermListing|null
     context:Context
+    tab:string
+    showActionDialog:boolean
 }
 
 class TermListingList extends React.Component<Props, State> {
@@ -58,7 +64,9 @@ class TermListingList extends React.Component<Props, State> {
             loading:true,
             terms: null,
             goToTermListing: null,
-            context: props.project.contexts.filter(c => c.name === 'DEFAULT')[0]!
+            context: props.project.contexts.filter(c => c.name === 'DEFAULT')[0]!,
+            tab: 'NEEDS_IMPORT',
+            showActionDialog: false
         }
 
         console.dir(this.state)
@@ -79,7 +87,7 @@ class TermListingList extends React.Component<Props, State> {
     render() {
 
         let { classes, project } = this.props
-        let { terms, goToTermListing, context } = this.state
+        let { terms, goToTermListing, context, showActionDialog } = this.state
 
     let columns: any[] = [
         {
@@ -110,16 +118,41 @@ class TermListingList extends React.Component<Props, State> {
             // return <Redirect to={`/projects/${project.id}/terms/${goToTermListing.id}`} />
         }
 
+        let actionable = this.state.tab === 'NEEDS_IMPORT'
+
         return <Fragment>
+
+            <ActionDialog open={showActionDialog} onSubmit={this.actionTerms} onCancel={this.cancelAction} />
+
+            <Grid container justify="space-between">
+                <Grid item>
+                    <h2>Terms</h2>
+                </Grid>
+                <Grid item>
+                    <Box
+      height="100%"
+      display="flex"
+      justifyContent="center"
+      flexDirection="row"
+    >
+                    <Button variant="outlined" color="primary" onClick={this.downloadCSV} disabled={!actionable}><CloudDownload/> &nbsp; Download CSV</Button>
+                    &nbsp;
+                    <Button variant="outlined" color="primary" onClick={this.markActioned} disabled={!actionable}><DoneAll /> &nbsp; Mark All As Actioned</Button>
+                    </Box>
+                </Grid>
+            </Grid>
+
 
              <Tabs
                 indicatorColor="primary"
                 textColor="primary"
+                value={this.state.tab}
+                onChange={this.changeTab}
             >
-                <Tab label={"Deleted"} />
-                <Tab label={"Obsolete"} />
-                <Tab label={"Needs Import"} />
-                <Tab label={"Current"} />
+                <Tab label={"Deleted"} value="DELETED" />
+                <Tab label={"Obsolete"} value="OBSOLETE" />
+                <Tab label={"Needs Import"} value="NEEDS_IMPORT" />
+                <Tab label={"Current"} value="CURRENT" />
             </Tabs>
 
 
@@ -167,7 +200,7 @@ class TermListingList extends React.Component<Props, State> {
                 context: context!.name!,
                 page: page.toString(),
                 size: size.toString(),
-                status: 'NEEDS_IMPORT',
+                status: this.state.tab,
                 ...(sortColumn ? { sort: sortColumn + ',' + sortDirection } : {}),
                 search: filter
             })
@@ -223,6 +256,54 @@ class TermListingList extends React.Component<Props, State> {
 
         await this.setState(prevState => ({ ...prevState, context }))
         this.fetchTermListings()
+    }
+
+    changeTab = async (e:any, tab:string) => {
+        await this.setState(prevState => ({ ...prevState, tab }))
+        this.fetchTermListings()
+
+    }
+
+    downloadCSV = async () => {
+
+        let { project } = this.props
+        let { tab, context } = this.state
+
+        let res = await fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${project.id}/ontology-terms/export`, {
+            method: 'POST',
+            body: JSON.stringify({
+                status: tab,
+                context: context.name
+            }),
+            headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+        })
+
+        let b = await res.arrayBuffer()
+
+        var blob = new Blob([b], { type: 'text/csv' })
+        FileSaver.saveAs(blob, `${project.name}_${context.name}.csv`)
+    }
+
+    markActioned = async () => {
+        await this.setState(prevState => ({ ...prevState, showActionDialog: true }))
+    }
+
+    actionTerms = async (comment:string) => {
+
+        let { project } = this.props
+        let { tab, context } = this.state
+
+        let res = await post<any>(`/v1/projects/${project.id}/ontology-terms/action`, {
+            status: tab,
+            context: context.name,
+            comment
+        })
+
+        this.fetchTermListings()
+    }
+
+    cancelAction = async () => {
+        await this.setState(prevState => ({ ...prevState, showActionDialog: false }))
     }
 }
 

@@ -5,12 +5,14 @@ import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { get } from '../../api';
-import { OlsSearchResult } from '../../dto/OlsSearchResult';
 import { Grid } from '@material-ui/core';
+import { OlsSearchResults, OlsSearchResult } from '../../dto/OlsSearchResults';
 
 interface Props {
     projectId:string
+    contextName:string
     onSelectTerm:(term:OlsSearchResult)=>void
+    mode:string
 }
 
 interface State {
@@ -41,16 +43,17 @@ export default class OntologyTermSearchBox extends React.Component<Props, State>
 
     async load() {
 
-        let { projectId } = this.props
+        let { projectId, contextName, mode } = this.props
         let { query } = this.state
 
         this.setState(prevState => ({ ...prevState, loading: true }))
 
-        const res: OlsSearchResult[] = await get(`/v1/projects/${projectId}/searchOLS?${new URLSearchParams({
-            query
+        const res: OlsSearchResults = await get(`/v1/projects/${projectId}/searchOLS?${new URLSearchParams({
+            query,
+            context: contextName
         })}`)
 
-        this.setState(prevState => ({ ...prevState, loading: false, options: res }))
+        this.setState(prevState => ({ ...prevState, loading: false, options: res.results[this.props.mode] || [] }))
 
     }
 

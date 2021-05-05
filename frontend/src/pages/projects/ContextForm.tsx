@@ -2,7 +2,7 @@
 import { Button, CircularProgress, createStyles, darken, FormGroup, Grid, lighten, makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
 import React, { ChangeEvent } from "react";
 import { useState, useEffect } from "react";
-import Context from "../dto/Context";
+import Context from "../../dto/Context";
 
 interface Props {
     context:Context

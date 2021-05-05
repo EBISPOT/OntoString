@@ -17,7 +17,6 @@ import MappingList from "./MappingList";
 import MappingTermList from "./MappingTermList";
 import { Link as RouterLink } from 'react-router-dom'
 import SearchOntologiesDialog from "./SearchOntologiesDialog";
-import { OlsSearchResult } from "../../dto/OlsSearchResult";
 import ReviewList from "./ReviewList";
 import CommentList from "./CommentList";
 import AddReviewDialog from "./AddReviewDialog";
@@ -25,6 +24,7 @@ import AddCommentDialog from "./AddCommentDialog";
 import Header from "../../components/Header";
 import Spinner from "../../components/Spinner";
 import { TabPanel } from "@material-ui/lab";
+import { OlsSearchResult } from "../../dto/OlsSearchResults";
 
 interface Props {
     projectId:string
@@ -94,7 +94,12 @@ export default class EntityPage extends React.Component<Props, State> {
                 </Breadcrumbs>
 
 
-                <SearchOntologiesDialog open={showSearchOntologiesDialog} onClose={this.closeSearchOntologies} onSelectTerm={this.onSelectOntologyTerm} project={project} />
+                <SearchOntologiesDialog 
+
+                // contextName={entity.context}
+                contextName='DEFAULT'
+
+                open={showSearchOntologiesDialog} onClose={this.closeSearchOntologies} onSelectTerm={this.onSelectOntologyTerm} project={project} />
                 <AddReviewDialog open={showAddReviewDialog} onCancel={this.closeAddReview} onSubmit={this.onAddReview} />
                 <AddCommentDialog open={showAddCommentDialog} onCancel={this.closeAddComment} onSubmit={this.onAddComment} />
 

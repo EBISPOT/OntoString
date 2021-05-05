@@ -26,12 +26,12 @@ class ProjectForm extends React.Component<Props, State> {
 
         return <form noValidate autoComplete='off'>
             <FormGroup>
-                <Grid container direction="column">
+                <Grid container direction="column" spacing={2}>
                     <Grid item>
-                        <TextField label="Name" fullWidth onChange={this.onChangeName} />
+                        <TextField label="Name" fullWidth variant="outlined" onChange={this.onChangeName} />
                     </Grid>
                     <Grid item>
-                        <TextField label="Description" fullWidth onChange={this.onChangeDescription} />
+                        <TextField fullWidth multiline rows={5} variant="outlined" label="Description" onChange={this.onChangeDescription} />
                     </Grid>
                 </Grid>
             </FormGroup>

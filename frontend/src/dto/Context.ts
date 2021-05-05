@@ -14,7 +14,13 @@ export default interface Context {
         mappingList:string[]
     }[]
     preferredMappingOntologies:string[]
-    created:Provenance
+    created:Provenance,
+    graphRestriction?: {
+        classes:string[],
+        relations:string[],
+        direct:boolean,
+        include_self:boolean
+    }
 }
 
 
