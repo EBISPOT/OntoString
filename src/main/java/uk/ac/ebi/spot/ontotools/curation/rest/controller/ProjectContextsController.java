@@ -82,7 +82,19 @@ public class ProjectContextsController {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to update project context [{}]: {}", user.getEmail(), projectId, projectContextDto.getName());
         projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
-        Project updated = projectService.updateProjectContext(ProjectContextDtoAssembler.disassemble(projectContextDto), projectId, user);
+        ProjectContextGraphRestrictionDto newGraphRestriction = projectContextDto.getGraphRestriction();
+        if (newGraphRestriction != null) {
+            newGraphRestriction = graphRestrictionUtil.enrichGraphRestriction(newGraphRestriction);
+        }
+
+        Project updated = projectService.updateProjectContext(ProjectContextDtoAssembler.disassemble(
+                new ProjectContextDto(projectContextDto.getName(),
+                        projectContextDto.getDescription(),
+                        projectContextDto.getDatasources(),
+                        projectContextDto.getOntologies(),
+                        projectContextDto.getPreferredMappingOntologies(),
+                        newGraphRestriction)
+        ), projectId, user);
         return ProjectDtoAssembler.assemble(updated);
     }
 
