@@ -47,6 +47,7 @@ interface State {
     context:Context
     tab:string
     showActionDialog:boolean
+    stats:any
 }
 
 class TermListingList extends React.Component<Props, State> {
@@ -66,7 +67,8 @@ class TermListingList extends React.Component<Props, State> {
             goToTermListing: null,
             context: props.project.contexts.filter(c => c.name === 'DEFAULT')[0]!,
             tab: 'NEEDS_IMPORT',
-            showActionDialog: false
+            showActionDialog: false,
+            stats:null
         }
 
         console.dir(this.state)
@@ -87,7 +89,7 @@ class TermListingList extends React.Component<Props, State> {
     render() {
 
         let { classes, project } = this.props
-        let { terms, goToTermListing, context, showActionDialog } = this.state
+        let { terms, goToTermListing, context, showActionDialog, stats } = this.state
 
     let columns: any[] = [
         {
@@ -149,10 +151,10 @@ class TermListingList extends React.Component<Props, State> {
                 value={this.state.tab}
                 onChange={this.changeTab}
             >
-                <Tab label={"Deleted"} value="DELETED" />
-                <Tab label={"Obsolete"} value="OBSOLETE" />
-                <Tab label={"Needs Import"} value="NEEDS_IMPORT" />
-                <Tab label={"Current"} value="CURRENT" />
+                <Tab label={`Deleted (${stats?.DELETED || '0'})`} value='DELETED' />
+                <Tab label={`Obsolete (${stats?.OBSOLETE || '0'})`} value='OBSOLETE' />
+                <Tab label={`Needs Import (${stats?.NEEDS_IMPORT || '0'})`} value='NEEDS_IMPORT' />
+                <Tab label={`Current (${stats?.CURRENT || '0'})`} value='CURRENT' />
             </Tabs>
 
 
@@ -195,22 +197,32 @@ class TermListingList extends React.Component<Props, State> {
 
         await this.setState(prevState => ({ ...prevState, loading: true }))
 
-        let res = await fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${project.id}/ontology-terms?${
-            new URLSearchParams({
-                context: context!.name!,
-                page: page.toString(),
-                size: size.toString(),
-                status: this.state.tab,
-                ...(sortColumn ? { sort: sortColumn + ',' + sortDirection } : {}),
-                search: filter
+        let [res,statsRes] = await Promise.all([
+            fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${project.id}/ontology-terms?${
+                new URLSearchParams({
+                    context: context!.name!,
+                    page: page.toString(),
+                    size: size.toString(),
+                    status: this.state.tab,
+                    ...(sortColumn ? { sort: sortColumn + ',' + sortDirection } : {}),
+                    search: filter
+                })
+            }`, {
+                headers: { ...getAuthHeaders() }
+            }),
+            fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${project.id}/ontology-terms-stats?${
+                new URLSearchParams({
+                    context: context!.name!
+                })
+            }`, {
+                headers: { ...getAuthHeaders() }
             })
-        }`, {
-            headers: { ...getAuthHeaders() }
-        })
+        ])
 
         let terms:Paginated<TermListing> = await res.json()
+        let stats:any = await statsRes.json()
 
-        this.setState(prevState => ({ ...prevState, terms, loading: false }))
+        this.setState(prevState => ({ ...prevState, terms, loading: false, stats }))
     }
 
     // onClickTermListing = async (term:TermListing) => {
@@ -293,10 +305,16 @@ class TermListingList extends React.Component<Props, State> {
         let { project } = this.props
         let { tab, context } = this.state
 
-        let res = await post<any>(`/v1/projects/${project.id}/ontology-terms/action`, {
-            status: tab,
-            context: context.name,
-            comment
+        await this.setState(prevState => ({ ...prevState, loading: true, showActionDialog: false }))
+
+        let res = await fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${project.id}/ontology-terms/action`, {
+            method: 'POST',
+            body: JSON.stringify({
+                status: tab,
+                context: context.name,
+                comment
+            }),
+            headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
         })
 
         this.fetchTermListings()
