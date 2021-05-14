@@ -141,7 +141,6 @@ class Login extends Component<Props> {
                 spacing={3}>
                 <Grid item xs={12} sm={6}>
                     <Typography>
-                        <Lock/>
                         Please sign in using ELIXIR to access this service.
                     </Typography>
                 </Grid>

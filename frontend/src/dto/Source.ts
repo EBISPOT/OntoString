@@ -20,6 +20,6 @@ export default interface Source {
     description:string
     uri:string
     type:'LOCAL'|'REMOTE'
-    created: Provenance
-    lastUpdated: Provenance
+    created?: Provenance
+    lastUpdated?: Provenance
 }
