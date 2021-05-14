@@ -132,14 +132,14 @@ class TermListingList extends React.Component<Props, State> {
                 </Grid>
                 <Grid item>
                     <Box
-      height="100%"
-      display="flex"
-      justifyContent="center"
-      flexDirection="row"
-    >
-                    <Button variant="outlined" color="primary" onClick={this.downloadCSV} disabled={!actionable}><CloudDownload/> &nbsp; Download CSV</Button>
-                    &nbsp;
-                    <Button variant="outlined" color="primary" onClick={this.markActioned} disabled={!actionable}><DoneAll /> &nbsp; Mark All As Actioned</Button>
+                        height="100%"
+                        display="flex"
+                        justifyContent="center"
+                        flexDirection="row"
+                    >
+                        <Button variant="outlined" color="primary" onClick={this.downloadCSV} disabled={!actionable}><CloudDownload /> &nbsp; Download CSV</Button>
+                        &nbsp;
+                        <Button variant="outlined" color="primary" onClick={this.markActioned} disabled={!actionable}><DoneAll /> &nbsp; Mark All As Actioned</Button>
                     </Box>
                 </Grid>
             </Grid>

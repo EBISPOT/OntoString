@@ -73,7 +73,6 @@ export default class EntitiesPage extends React.Component<Props, State> {
             <br/>
             {/* <AppBar position="static"> */}
                 {/* </AppBar> */}
-                        <h2>Entities</h2>
                         <EntityList project={project!} />
         </main>
         </Fragment>

@@ -7,7 +7,9 @@ export default function Header(props: { section:string, projectId?:string }) {
     let { section, projectId } = props
 
     return <header style={{ padding: '16px', backgroundColor: 'black', backgroundImage: 'url(\'' + process.env.PUBLIC_URL + '/embl-ebi-background-4.jpg\')', backgroundPosition: '100% 100%' }}>
-            <img style={{ height: '100px' }} src={process.env.PUBLIC_URL + "/curator.svg"} />
+            <a href={process.env.PUBLIC_URL}>
+                <img style={{ height: '100px' }} src={process.env.PUBLIC_URL + "/curator.svg"} />
+            </a>
             <nav>
                 <ul className="dropdown menu float-left" data-description="navigational" role="menubar" data-dropdown-menu="6mg2ht-dropdown-menu">
                     <li role="menuitem" className={section === 'projects' ? 'active' : ''}><Link to="/projects">Projects</Link></li>

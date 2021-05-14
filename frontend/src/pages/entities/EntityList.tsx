@@ -1,5 +1,5 @@
 
-import { Button, CircularProgress, createStyles, darken, Grid, Input, InputAdornment, lighten, makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { Box, Button, CircularProgress, createStyles, darken, Grid, Input, InputAdornment, lighten, makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
 import SearchIcon from '@material-ui/icons/Search';
 import React, { ChangeEvent, Fragment } from "react";
 import { useState, useEffect } from "react";
@@ -14,6 +14,8 @@ import Spinner from "../../components/Spinner";
 import Context from "../../dto/Context";
 import Project from "../../dto/Project";
 import ContextSelector from "../../components/ContextSelector";
+import { CloudUpload } from "@material-ui/icons";
+import UploadDialog from "./UploadDialog";
 
 const styles = (theme:Theme) => createStyles({
     tableRow: {
@@ -39,7 +41,8 @@ interface State {
     loading:boolean
     entities:Paginated<Entity>|null
     goToEntity:Entity|null
-    context:Context
+    context:Context,
+    showUploadDialog:boolean
 }
 
 class EntityList extends React.Component<Props, State> {
@@ -57,7 +60,8 @@ class EntityList extends React.Component<Props, State> {
             loading:true,
             entities: null,
             goToEntity: null,
-            context: props.project.contexts.filter(c => c.name === 'DEFAULT')[0]!
+            context: props.project.contexts.filter(c => c.name === 'DEFAULT')[0]!,
+            showUploadDialog: false
         }
 
         console.dir(this.state)
@@ -135,6 +139,24 @@ class EntityList extends React.Component<Props, State> {
         }
 
         return <Fragment>
+
+            <UploadDialog open={this.state.showUploadDialog} onCancel={this.closeUploadDialog} projectId={project.id!} />
+
+            <Grid container justify="space-between">
+                <Grid item>
+                    <h2>Entities</h2>
+                </Grid>
+                <Grid item>
+                    <Box
+                        display="flex"
+                        justifyContent="center"
+                        flexDirection="row"
+                    >
+                        <Button variant="outlined" color="primary" onClick={this.upload}><CloudUpload /> &nbsp; Upload CSV/JSON</Button>
+                    </Box>
+                </Grid>
+            </Grid>
+
             <Grid container>
                 <Grid item xs={6}>
             <Input startAdornment={<InputAdornment position="start"><SearchIcon /></InputAdornment>} onChange={this.onFilter} />
@@ -234,6 +256,15 @@ class EntityList extends React.Component<Props, State> {
 
         await this.setState(prevState => ({ ...prevState, context }))
         this.fetchEntities()
+    }
+
+    upload = () => {
+        this.setState(prevState => ({ ...prevState, showUploadDialog: true }))
+
+    }
+    closeUploadDialog = () => {
+        this.setState(prevState => ({ ...prevState, showUploadDialog: false }))
+
     }
 }
 

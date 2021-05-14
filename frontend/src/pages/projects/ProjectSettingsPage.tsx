@@ -13,6 +13,7 @@ import ContextSelector from "../../components/ContextSelector";
 import Header from "../../components/Header";
 import Spinner from "../../components/Spinner";
 import ContextList from "./ContextList";
+import SourceList from "./SourceList";
 
 interface Props {
     projectId:string
@@ -86,6 +87,9 @@ export default class ProjectSettingsPage extends React.Component<Props, State> {
 
             <h2>Contexts</h2>
             <ContextList project={project} onCreateContext={() => this.fetchProject()} />
+
+            <h2>Sources</h2>
+            <SourceList project={project} onCreateSource={() => this.fetchProject()} />
 
         </main>
         </Fragment>

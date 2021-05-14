@@ -22,14 +22,16 @@ class ContextForm extends React.Component<Props, State> {
 
     render() {
 
+        let { context } = this.props
+
         return <form noValidate autoComplete='off'>
             <FormGroup>
                 <Grid container direction="column">
                     <Grid item>
-                        <TextField label="Name" fullWidth onChange={this.onChangeName} />
+                        <TextField label="Name" fullWidth onChange={this.onChangeName} value={context.name} />
                     </Grid>
                     <Grid item>
-                        <TextField label="Description" fullWidth onChange={this.onChangeDescription} />
+                        <TextField label="Description" fullWidth onChange={this.onChangeDescription} value={context.description} />
                     </Grid>
                 </Grid>
             </FormGroup>
