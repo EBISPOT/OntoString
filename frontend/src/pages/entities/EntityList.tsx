@@ -157,6 +157,17 @@ class EntityList extends React.Component<Props, State> {
                 </Grid>
             </Grid>
 
+            <p>
+                This list displays the <b>entities</b> assigned to this project. An entity represents a string that needs a mapping, along with the ontology term to which it is mapped. 
+            </p>
+            <p>
+                New entities can be created by uploading a CSV or JSON file using the <i>Upload CSV/JSON</i> button.
+            </p>
+            <p>
+                Projects are also sub-divided into <b>contexts</b>, which can be used to distinguish entities of different types (e.g. phenotypes and diseases). All projects have a context named <code>DEFAULT</code>. Further contexts can be created if necessary in the <Link to={`/projects/${project.id}/settings`}>project settings</Link>.
+            </p>
+                
+
             <Grid container>
                 <Grid item xs={6}>
             <Input startAdornment={<InputAdornment position="start"><SearchIcon /></InputAdornment>} onChange={this.onFilter} />

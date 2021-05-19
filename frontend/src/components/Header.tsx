@@ -33,6 +33,7 @@ export default function Header(props: { section:string, projectId?:string }) {
                             </li>
                         </Fragment>
                     }
+                    <li role="menuitem" className={section === 'help' ? 'active' : ''}><Link to={`/help` + (projectId ? '?projectId=' + projectId : '')}>Help</Link></li>
                     <li role="menuitem" className={section === 'about' ? 'active' : ''}><Link to={`/about` + (projectId ? '?projectId=' + projectId : '')}>About</Link></li>
                 </ul>
             </nav>
