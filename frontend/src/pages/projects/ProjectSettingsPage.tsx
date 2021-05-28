@@ -13,6 +13,7 @@ import ContextSelector from "../../components/ContextSelector";
 import Header from "../../components/Header";
 import Spinner from "../../components/Spinner";
 import ContextList from "./ContextList";
+import SourceList from "./SourceList";
 
 interface Props {
     projectId:string
@@ -62,7 +63,10 @@ export default class ProjectSettingsPage extends React.Component<Props, State> {
                 <Link color="inherit" component={RouterLink} to="/">
                     Projects
                 </Link>
-                <Typography color="textPrimary">{project.name}</Typography>
+                <Link color="inherit" component={RouterLink} to={"/projects/" + project.id + '/entities'}>
+                    {project.name}
+                </Link>
+                <Typography color="textPrimary">Settings</Typography>
             </Breadcrumbs>
             <h1>{project.name}</h1>
             { project.created && <Provenance provenance={project.created} label="Created by" /> }
@@ -86,6 +90,9 @@ export default class ProjectSettingsPage extends React.Component<Props, State> {
 
             <h2>Contexts</h2>
             <ContextList project={project} onCreateContext={() => this.fetchProject()} />
+
+            <h2>Datasources</h2>
+            <SourceList project={project} onCreateSource={() => this.fetchProject()} />
 
         </main>
         </Fragment>

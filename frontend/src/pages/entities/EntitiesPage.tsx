@@ -61,10 +61,10 @@ export default class EntitiesPage extends React.Component<Props, State> {
                 <Link color="inherit" component={RouterLink} to="/">
                     Projects
                 </Link>
-                <Link color="inherit" component={RouterLink} to={`/projects/${project.id!}`}>
+                {/* <Link color="inherit" component={RouterLink} to={`/projects/${project.id!}`}>
                     {project.name}
-                </Link>
-                <Typography color="textPrimary">Entities</Typography>
+                </Link> */}
+                <Typography color="textPrimary">{project.name}</Typography>
             </Breadcrumbs>
             <h1>{project.name}</h1>
             <Typography variant='subtitle1'>{project.description}</Typography>
@@ -73,7 +73,6 @@ export default class EntitiesPage extends React.Component<Props, State> {
             <br/>
             {/* <AppBar position="static"> */}
                 {/* </AppBar> */}
-                        <h2>Entities</h2>
                         <EntityList project={project!} />
         </main>
         </Fragment>
