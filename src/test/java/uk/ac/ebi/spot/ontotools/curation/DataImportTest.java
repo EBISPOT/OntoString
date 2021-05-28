@@ -12,8 +12,8 @@ import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.repository.EntityRepository;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.service.MatchmakerService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
@@ -43,13 +43,13 @@ public class DataImportTest extends IntegrationTest {
     @Override
     public void setup() throws Exception {
         super.setup();
-        projectDto = super.createProject("New Project", user1, null, null, null, 0);
+        projectDto = super.createProject("New Project", user1, null, null, null, 0, null);
         sourceDto = super.createSource(projectDto.getId());
         doNothing().when(matchmakerService).runMatchmaking(eq(sourceDto.getId()), any());
     }
 
     @Test
-    public void shouldImportData() throws Exception {
+    public void shouldImportJSON() throws Exception {
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() +
                 CurationConstants.API_SOURCES + "/" + sourceDto.getId() + CurationConstants.API_UPLOAD;
 
@@ -63,6 +63,26 @@ public class DataImportTest extends IntegrationTest {
                 .andExpect(status().isCreated());
 
         assertEquals(12443, entityRepository.findAll().size());
+        for (Entity entity : entityRepository.findAll()) {
+            assertEquals(CurationConstants.CONTEXT_DEFAULT, entity.getContext());
+        }
+    }
+
+    @Test
+    public void shouldImportCSV() throws Exception {
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() +
+                CurationConstants.API_SOURCES + "/" + sourceDto.getId() + CurationConstants.API_UPLOAD;
+
+        InputStream fileAsStream = new ClassPathResource("import_test.csv").getInputStream();
+        MockMultipartFile testFile = new MockMultipartFile("file", "import_test.csv",
+                ContentType.APPLICATION_JSON.getMimeType(), fileAsStream);
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(endpoint)
+                .file(testFile)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isCreated());
+
+        assertEquals(3, entityRepository.findAll().size());
         for (Entity entity : entityRepository.findAll()) {
             assertEquals(CurationConstants.CONTEXT_DEFAULT, entity.getContext());
         }

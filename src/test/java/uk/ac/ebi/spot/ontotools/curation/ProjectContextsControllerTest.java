@@ -5,16 +5,16 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectContextDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectContextDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectContextGraphRestrictionDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,7 +27,7 @@ public class ProjectContextsControllerTest extends IntegrationTest {
         projectDto = super.createProject("New Project", user1,
                 Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"}),
                 Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"}),
-                "efo", 0);
+                "efo", 0, null);
     }
 
 
@@ -40,7 +40,14 @@ public class ProjectContextsControllerTest extends IntegrationTest {
         ProjectContextDto newProjectContextDto = new ProjectContextDto("species_mouse", "",
                 Arrays.asList(new String[]{"sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"}),
                 Arrays.asList(new String[]{"efo", "mondo", "mp"}),
-                Arrays.asList(new String[]{"efo"}));
+                Arrays.asList(new String[]{"efo"}),
+                new ProjectContextGraphRestrictionDto(
+                        Arrays.asList(new String[]{"EFO:0005802"}),
+                        null,
+                        Arrays.asList(new String[]{"rdfs:subClassOf"}),
+                        false,
+                        false
+                ));
 
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -66,6 +73,10 @@ public class ProjectContextsControllerTest extends IntegrationTest {
                 assertEquals(newProjectContextDto.getDatasources().size(), projectContextDto.getDatasources().size());
                 assertEquals(newProjectContextDto.getOntologies().size(), projectContextDto.getOntologies().size());
                 assertEquals(newProjectContextDto.getPreferredMappingOntologies().size(), projectContextDto.getPreferredMappingOntologies().size());
+                ProjectContextGraphRestrictionDto pcgr = newProjectContextDto.getGraphRestriction();
+                ProjectContextGraphRestrictionDto actual = projectContextDto.getGraphRestriction();
+                assertEquals(pcgr.getClasses(), actual.getClasses());
+                assertFalse(actual.getIris().isEmpty());
             }
         }
     }
@@ -80,7 +91,7 @@ public class ProjectContextsControllerTest extends IntegrationTest {
                 projectContextDto.getDescription(),
                 Arrays.asList(new String[]{"sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"}),
                 Arrays.asList(new String[]{"efo", "mondo", "mp"}),
-                Arrays.asList(new String[]{"efo"}));
+                Arrays.asList(new String[]{"efo"}), null);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_CONTEXTS;
         String response = mockMvc.perform(put(endpoint)
@@ -111,7 +122,7 @@ public class ProjectContextsControllerTest extends IntegrationTest {
         ProjectContextDto newProjectContextDto = new ProjectContextDto("species_mouse", "",
                 Arrays.asList(new String[]{"sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"}),
                 Arrays.asList(new String[]{"efo", "mondo", "mp"}),
-                Arrays.asList(new String[]{"efo"}));
+                Arrays.asList(new String[]{"efo"}), null);
 
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -169,7 +180,7 @@ public class ProjectContextsControllerTest extends IntegrationTest {
         ProjectContextDto newProjectContextDto = new ProjectContextDto("species_mouse", "",
                 Arrays.asList(new String[]{"sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"}),
                 Arrays.asList(new String[]{"efo", "mondo", "mp"}),
-                Arrays.asList(new String[]{"efo"}));
+                Arrays.asList(new String[]{"efo"}), null);
 
         mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -188,7 +199,7 @@ public class ProjectContextsControllerTest extends IntegrationTest {
                 projectContextDto.getDescription(),
                 Arrays.asList(new String[]{"sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"}),
                 Arrays.asList(new String[]{"efo", "mondo", "mp"}),
-                Arrays.asList(new String[]{"efo"}));
+                Arrays.asList(new String[]{"efo"}), null);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_CONTEXTS;
         mockMvc.perform(put(endpoint)
@@ -207,7 +218,7 @@ public class ProjectContextsControllerTest extends IntegrationTest {
         ProjectContextDto newProjectContextDto = new ProjectContextDto("species_mouse", "",
                 Arrays.asList(new String[]{"sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"}),
                 Arrays.asList(new String[]{"efo", "mondo", "mp"}),
-                Arrays.asList(new String[]{"efo"}));
+                Arrays.asList(new String[]{"efo"}), null);
 
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)

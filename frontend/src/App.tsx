@@ -1,14 +1,20 @@
 import React, { Fragment, useState } from 'react';
-import { BrowserRouter, Route, RouteComponentProps, Switch, withRouter } from "react-router-dom";
+import { BrowserRouter, Link, Redirect, Route, RouteComponentProps, Switch, withRouter } from "react-router-dom";
 import logo from './logo.svg';
 import './App.css';
-import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core';
+import { AppBar, createStyles, Tab, Tabs, Theme, WithStyles, withStyles } from '@material-ui/core';
 
 import Home from './pages/Home'
 import Login from './pages/Login'
-import ProjectPage from './pages/projects/ProjectPage'
 import { AuthProvider } from './auth-context';
 import EntityPage from './pages/entities/EntityPage';
+import ProjectsPage from './pages/projects/ProjectsPage';
+import EntitiesPage from './pages/entities/EntitiesPage';
+import TermsPage from './pages/terms/TermsPage';
+import About from './pages/About';
+import Help from './pages/Help';
+import ProjectSettingsPage from './pages/projects/ProjectSettingsPage';
+import ContextSettingsPage from './pages/projects/ContextSettingsPage';
 
 let styles = (theme:Theme) => createStyles({
     main: {
@@ -27,23 +33,40 @@ function App(props:AppProps) {
   let { classes } = props
 
   return (
-      <Fragment>
           <BrowserRouter basename={process.env.PUBLIC_URL}>
-              <main className={classes.main}>
+
                 <Switch>
                     <Route exact path={`/`} component={Home} />
 
                     <Route exact path={`/login`} component={Login}></Route>
 
+                    <Route exact path={`/projects`} component={ProjectsPage} />
+
                     <Route exact path={`/projects/:id`}
-                        component={(props:any) => <ProjectPage id={props.match.params.id}/>}></Route>
+                        component={(props:any) => <Redirect to={`/projects/${props.match.params.id}/entities`}/>}></Route>
+
+                    <Route exact path={`/projects/:id/settings`}
+                        component={(props:any) => <ProjectSettingsPage projectId={props.match.params.id}/>}></Route>
+
+                    <Route exact path={`/projects/:projectId/contexts/:contextName`}
+                        component={(props:any) => <ContextSettingsPage projectId={props.match.params.projectId} contextName={props.match.params.contextName} />}></Route>
+
+                    <Route exact path={`/projects/:id/entities`}
+                        component={(props:any) => <EntitiesPage projectId={props.match.params.id}/>}></Route>
+
+                    <Route exact path={`/projects/:id/terms`}
+                        component={(props:any) => <TermsPage projectId={props.match.params.id}/>}></Route>
 
                     <Route exact path={`/projects/:projectId/entities/:entityId`}
                         component={(props:any) => <EntityPage projectId={props.match.params.projectId} entityId={props.match.params.entityId} />}></Route>
+
+                    <Route exact path={`/help`}
+                        component={(props:any) => <Help projectId={ new URLSearchParams(props.location.search).get('projectId') || undefined} />}></Route>
+
+                    <Route exact path={`/about`}
+                        component={(props:any) => <About projectId={ new URLSearchParams(props.location.search).get('projectId') || undefined} />}></Route>
                 </Switch>
-              </main>
           </BrowserRouter>
-      </Fragment>
 
   );
 

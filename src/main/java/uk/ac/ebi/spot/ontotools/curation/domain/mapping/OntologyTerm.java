@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -30,11 +31,15 @@ public class OntologyTerm {
 
     private String label;
 
-    private List<OntologyTermContext> contexts;
-
     private String description;
 
     private String crossRefs;
+
+    @Indexed
+    private List<String> ontoTermContexts;
+
+    @Transient
+    private String status;
 
     @Override
     public String toString() {

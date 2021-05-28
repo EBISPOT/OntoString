@@ -1,6 +1,7 @@
 package uk.ac.ebi.spot.ontotools.curation;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -10,7 +11,11 @@ import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.ExtendedOntologyTermDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.OntologyTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
@@ -21,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,7 +47,7 @@ public class OntologyTermControllerTest extends IntegrationTest {
 
         List<String> datasources = Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"});
         List<String> ontologies = Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"});
-        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0);
+        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0, null);
         user1 = userService.findByEmail(user1.getEmail());
         project = projectService.retrieveProject(projectDto.getId(), user1);
     }
@@ -110,4 +116,5 @@ public class OntologyTermControllerTest extends IntegrationTest {
                 .header(IDPConstants.JWT_TOKEN, "token2"))
                 .andExpect(status().isNotFound());
     }
+
 }

@@ -1,5 +1,5 @@
 
-import { Button, CircularProgress, createStyles, darken, lighten, makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { Button, CircularProgress, createStyles, darken, IconButton, lighten, makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme, WithStyles, withStyles } from "@material-ui/core";
 import React from "react";
 import { useState, useEffect } from "react";
 import { getAuthHeaders, getToken, isLoggedIn } from "../../auth";
@@ -7,6 +7,8 @@ import Project from "../../dto/Project";
 import CreateProjectDialog from "./CreateProjectDialog";
 import { Link, Redirect } from 'react-router-dom'
 import formatDate from "../../formatDate";
+import Spinner from "../../components/Spinner";
+import { Settings } from "@material-ui/icons";
 
 const styles = (theme:Theme) => createStyles({
     tableRow: {
@@ -25,6 +27,7 @@ interface Props extends WithStyles<typeof styles> {
 interface State {
     projects:Project[]|null
     goToProject:Project|null
+    goToProjectSettings:Project|null
 }
 
 class ProjectList extends React.Component<Props, State> {
@@ -35,7 +38,8 @@ class ProjectList extends React.Component<Props, State> {
 
         this.state = {
             projects: null,
-            goToProject: null
+            goToProject: null,
+            goToProjectSettings: null
         }
 
 
@@ -47,15 +51,19 @@ class ProjectList extends React.Component<Props, State> {
 
     render() {
 
-        let { projects, goToProject } = this.state
+        let { projects, goToProject, goToProjectSettings } = this.state
         let { classes } = this.props
 
         if(projects === null) {
-            return <CircularProgress />
+            return <Spinner />
         }
 
         if(goToProject !== null) {
             return <Redirect to={`/projects/${goToProject.id}`} />
+        }
+
+        if(goToProjectSettings !== null) {
+            return <Redirect to={`/projects/${goToProjectSettings.id}/settings`} />
         }
 
         return <TableContainer component={Paper}>
@@ -66,6 +74,7 @@ class ProjectList extends React.Component<Props, State> {
               <TableCell align="left">Description</TableCell>
               <TableCell align="left">Created by</TableCell>
               <TableCell align="left">Created</TableCell>
+              <TableCell align="left"></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -83,10 +92,15 @@ class ProjectList extends React.Component<Props, State> {
                 <TableCell align="left">
                     {formatDate(project.created!.timestamp)}
                 </TableCell>
+                <TableCell align="left">
+                    <IconButton onClick={(e) => { e.preventDefault(); e.stopPropagation(); this.onClickProjectSettings(project) }}>
+                        <Settings />
+                    </IconButton>
+                </TableCell>
               </TableRow>
             ))}
             <TableRow>
-                <TableCell colSpan={4} align="right">
+                <TableCell colSpan={5} align="right">
                     <CreateProjectDialog onCreate={this.onCreateProject} />
                 </TableCell>
             </TableRow>
@@ -110,6 +124,10 @@ class ProjectList extends React.Component<Props, State> {
 
     onClickProject = async (project:Project) => {
         this.setState(prevState => ({ ...prevState, goToProject: project }))
+    }
+
+    onClickProjectSettings = async (project:Project) => {
+        this.setState(prevState => ({ ...prevState, goToProjectSettings: project }))
     }
 
     onCreateProject = async (project:Project) => {

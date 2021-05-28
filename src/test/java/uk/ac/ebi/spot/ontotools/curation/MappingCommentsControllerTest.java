@@ -10,8 +10,8 @@ import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.ProvenanceDtoAssembler;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.CommentDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 import uk.ac.ebi.spot.ontotools.curation.service.MappingService;
@@ -48,7 +48,7 @@ public class MappingCommentsControllerTest extends IntegrationTest {
         super.setup();
         List<String> datasources = Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"});
         List<String> ontologies = Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"});
-        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0);
+        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0, null);
         user1 = userService.findByEmail(user1.getEmail());
         project = projectService.retrieveProject(projectDto.getId(), user1);
         sourceDto = super.createSource(project.getId());
@@ -74,7 +74,7 @@ public class MappingCommentsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        CommentDto commentDto = mapper.readValue(response, new TypeReference<CommentDto>() {
+        CommentDto commentDto = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals("New comment", commentDto.getBody());
         Mapping mapping = mappingService.retrieveMappingById(mappingDto.getId());
@@ -100,7 +100,7 @@ public class MappingCommentsControllerTest extends IntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<CommentDto> commentDtos = mapper.readValue(response, new TypeReference<List<CommentDto>>() {
+        List<CommentDto> commentDtos = mapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(1, commentDtos.size());
         assertEquals("New comment", commentDtos.get(0).getBody());

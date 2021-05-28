@@ -152,6 +152,7 @@ public class ProjectServiceImpl implements ProjectService {
         existing.setDatasources(projectContext.getDatasources());
         existing.setOntologies(projectContext.getOntologies());
         existing.setPreferredMappingOntologies(projectContext.getPreferredMappingOntologies());
+        existing.setProjectContextGraphRestriction(projectContext.getProjectContextGraphRestriction());
         projectContextRepository.save(existing);
         List<ProjectContext> projectContexts = projectContextRepository.findByProjectId(project.getId());
         project.setContexts(projectContexts);

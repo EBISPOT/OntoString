@@ -12,20 +12,13 @@ import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.config.ExternalServiceConfig;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
-import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
+import uk.ac.ebi.spot.ontotools.curation.domain.mapping.*;
 import uk.ac.ebi.spot.ontotools.curation.repository.ExternalServiceConfigRepository;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.service.*;
-import uk.ac.ebi.spot.ontotools.curation.util.CurationUtil;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -53,9 +46,6 @@ public class MatchMakingTest extends IntegrationTest {
     @Autowired
     private MappingService mappingService;
 
-    @Autowired
-    private OntologyTermService ontologyTermService;
-
     private Project project;
 
     private SourceDto sourceDto;
@@ -71,7 +61,7 @@ public class MatchMakingTest extends IntegrationTest {
         List<String> datasources = Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"});
         List<String> ontologies = Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"});
 
-        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0);
+        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0, null);
         user1 = userService.findByEmail(user1.getEmail());
         project = projectService.retrieveProject(projectDto.getId(), user1);
         sourceDto = super.createSource(project.getId());
@@ -92,19 +82,23 @@ public class MatchMakingTest extends IntegrationTest {
         Entity updated = entityService.retrieveEntity(entity.getId());
         assertEquals(EntityStatus.AUTO_MAPPED, updated.getMappingStatus());
 
-        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveAllTerms();
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findAll();
         Map<String, OntologyTerm> ontoMap = new HashMap<>();
         for (OntologyTerm ontologyTerm : ontologyTerms) {
             ontoMap.put(ontologyTerm.getId(), ontologyTerm);
             if (ontologyTerm.getCurie().equalsIgnoreCase("Orphanet:15")) {
-                assertEquals(TermStatus.CURRENT.name(), CurationUtil.termStatusForContext(ontologyTerm, project.getId(), updated.getContext()));
+                Optional<OntologyTermContext> ontologyTermContextOp = ontologyTermContextRepository.findByOntologyTermIdAndProjectIdAndContext(ontologyTerm.getId(), project.getId(), updated.getContext());
+                assertTrue(ontologyTermContextOp.isPresent());
+                assertEquals(TermStatus.CURRENT.name(), ontologyTermContextOp.get().getStatus());
             }
             if (ontologyTerm.getCurie().equalsIgnoreCase("MONDO:0007037")) {
-                assertEquals(TermStatus.NEEDS_IMPORT.name(), CurationUtil.termStatusForContext(ontologyTerm, project.getId(), updated.getContext()));
+                Optional<OntologyTermContext> ontologyTermContextOp = ontologyTermContextRepository.findByOntologyTermIdAndProjectIdAndContext(ontologyTerm.getId(), project.getId(), updated.getContext());
+                assertTrue(ontologyTermContextOp.isPresent());
+                assertEquals(TermStatus.NEEDS_IMPORT.name(), ontologyTermContextOp.get().getStatus());
             }
         }
 
-        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}));
+        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}), project.getId(), updated.getContext());
         assertEquals(1, mappingSuggestionMap.size());
         List<MappingSuggestion> mappingSuggestions = mappingSuggestionMap.get(entity.getId());
         assertEquals(2, mappingSuggestions.size());

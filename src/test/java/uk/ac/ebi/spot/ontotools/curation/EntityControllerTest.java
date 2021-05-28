@@ -16,6 +16,9 @@ import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.*;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingSuggestionDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectContextDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
@@ -47,7 +50,7 @@ public class EntityControllerTest extends IntegrationTest {
         super.setup();
         List<String> datasources = Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"});
         List<String> ontologies = Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"});
-        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0);
+        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0, null);
         user1 = userService.findByEmail(user1.getEmail());
         project = projectService.retrieveProject(projectDto.getId(), user1);
         sourceDto = super.createSource(project.getId());
@@ -108,7 +111,7 @@ public class EntityControllerTest extends IntegrationTest {
 
         String prefix = "chon";
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_ENTITIES +
-                "?" + CurationConstants.PARAM_FILTER + "=" + prefix;
+                "?" + CurationConstants.PARAM_SEARCH + "=" + prefix;
         String response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token1"))
@@ -123,7 +126,7 @@ public class EntityControllerTest extends IntegrationTest {
 
         prefix = "achond";
         endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + project.getId() + CurationConstants.API_ENTITIES +
-                "?" + CurationConstants.PARAM_FILTER + "=" + prefix;
+                "?" + CurationConstants.PARAM_SEARCH + "=" + prefix;
         response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(IDPConstants.JWT_TOKEN, "token1"))
@@ -148,7 +151,7 @@ public class EntityControllerTest extends IntegrationTest {
         ProjectContextDto newProjectContextDto = new ProjectContextDto("species_mouse", "",
                 Arrays.asList(new String[]{"sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"}),
                 Arrays.asList(new String[]{"efo", "mondo", "mp"}),
-                Arrays.asList(new String[]{"efo"}));
+                Arrays.asList(new String[]{"efo"}), null);
 
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)

@@ -7,9 +7,9 @@ import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.UserDtoAssembler;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectUserDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.UserDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.ProjectUserDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.UserDto;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
 import java.util.Arrays;
@@ -26,7 +26,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetUsersForProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
         String response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -49,7 +49,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotGetUsersForProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
         mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -62,7 +62,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotGetUsersForProjectAsContributor() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
 
         userService.addUserToProject(super.user2, projectDto.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONTRIBUTOR}));
@@ -77,7 +77,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotGetUsersForProjectAsConsumer() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
 
         userService.addUserToProject(super.user2, projectDto.getId(), Arrays.asList(new ProjectRole[]{ProjectRole.CONSUMER}));
@@ -92,7 +92,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldAddUserToProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId();
         mockMvc.perform(get(endpoint)
@@ -158,7 +158,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotAddUserToProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
         ProjectUserDto projectUserDto = new ProjectUserDto(UserDtoAssembler.assemble(user2), Arrays.asList(new String[]{ProjectRole.CONTRIBUTOR.name()}));
         mockMvc.perform(post(endpoint)
@@ -173,7 +173,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotAddUserToProjectAsContributor() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
         ProjectUserDto projectUserDto = new ProjectUserDto(UserDtoAssembler.assemble(user2), Arrays.asList(new String[]{ProjectRole.CONTRIBUTOR.name()}));
 
@@ -191,7 +191,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotAddUserToProjectAsConsumer() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
         ProjectUserDto projectUserDto = new ProjectUserDto(UserDtoAssembler.assemble(user2), Arrays.asList(new String[]{ProjectRole.CONTRIBUTOR.name()}));
 
@@ -209,7 +209,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldUpdateUserToProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
         ProjectUserDto projectUserDto = new ProjectUserDto(UserDtoAssembler.assemble(user2), Arrays.asList(new String[]{ProjectRole.CONTRIBUTOR.name()}));
@@ -255,7 +255,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotUpdateUserToProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
         ProjectUserDto projectUserDto = new ProjectUserDto(UserDtoAssembler.assemble(user2), Arrays.asList(new String[]{ProjectRole.CONTRIBUTOR.name()}));
@@ -271,7 +271,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotUpdateUserToProjectAsContributor() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
         ProjectUserDto projectUserDto = new ProjectUserDto(UserDtoAssembler.assemble(user2), Arrays.asList(new String[]{ProjectRole.CONTRIBUTOR.name()}));
@@ -289,7 +289,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotUpdateUserToProjectAsConsumer() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
         ProjectUserDto projectUserDto = new ProjectUserDto(UserDtoAssembler.assemble(user2), Arrays.asList(new String[]{ProjectRole.CONTRIBUTOR.name()}));
@@ -308,7 +308,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldDeleteUserRolesInProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
         ProjectUserDto projectUserDto = new ProjectUserDto(UserDtoAssembler.assemble(user2), Arrays.asList(new String[]{ProjectRole.CONTRIBUTOR.name()}));
@@ -361,7 +361,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotDeleteUserRolesInProject() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
         ProjectUserDto projectUserDto = new ProjectUserDto(UserDtoAssembler.assemble(user2), Arrays.asList(new String[]{ProjectRole.CONTRIBUTOR.name()}));
@@ -377,7 +377,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotDeleteUserRolesInProjectAsContributor() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
         ProjectUserDto projectUserDto = new ProjectUserDto(UserDtoAssembler.assemble(user2), Arrays.asList(new String[]{ProjectRole.CONTRIBUTOR.name()}));
@@ -394,7 +394,7 @@ public class ProjectUsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotDeleteUserRolesInProjectAsConsumer() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, null, null, null, 0, null);
 
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS + "/" + projectDto.getId() + CurationConstants.API_USERS;
         ProjectUserDto projectUserDto = new ProjectUserDto(UserDtoAssembler.assemble(user2), Arrays.asList(new String[]{ProjectRole.CONTRIBUTOR.name()}));

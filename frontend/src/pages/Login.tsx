@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import elixir_login_button from '../elixir_logo.png';
 
 import Grid from '@material-ui/core/Grid';
@@ -12,6 +12,8 @@ import Link from '@material-ui/core/Link';
 
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import { Lock } from '@material-ui/icons';
+import Header from '../components/Header';
 
 
 const AAP_URL = process.env.REACT_APP_AAPURL;
@@ -130,7 +132,8 @@ class Login extends Component<Props> {
     render() {
         const { classes } = this.props;
 
-        return (
+        return <Fragment>
+            <Header section='none' />
             <Grid container
                 direction="column"
                 justify="space-evenly"
@@ -138,7 +141,7 @@ class Login extends Component<Props> {
                 spacing={3}>
                 <Grid item xs={12} sm={6}>
                     <Typography>
-                        Single Sign On using your ELIXIR identity!
+                        Please sign in using ELIXIR to access this service.
                     </Typography>
                 </Grid>
 
@@ -166,7 +169,7 @@ class Login extends Component<Props> {
                     </Typography>
                 </Grid>
             </Grid >
-        )
+        </Fragment>
     }
 }
 

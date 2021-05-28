@@ -52,4 +52,5 @@ public class ProjectContext {
 
     private List<String> preferredMappingOntologiesLower;
 
+    private ProjectContextGraphRestriction projectContextGraphRestriction;
 }

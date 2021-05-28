@@ -26,10 +26,7 @@ import uk.ac.ebi.spot.ontotools.curation.domain.auth.AuthToken;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.*;
 import uk.ac.ebi.spot.ontotools.curation.repository.*;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectCreationDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceCreationDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.*;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.mapping.MappingDto;
 import uk.ac.ebi.spot.ontotools.curation.service.MatchmakerService;
 import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
@@ -105,6 +102,9 @@ public abstract class IntegrationTest {
     protected OntologyTermRepository ontologyTermRepository;
 
     @Autowired
+    protected OntologyTermContextRepository ontologyTermContextRepository;
+
+    @Autowired
     protected MappingSuggestionRepository mappingSuggestionRepository;
 
     @Autowired
@@ -153,13 +153,15 @@ public abstract class IntegrationTest {
 
     protected ProjectDto createProject(String name, User adminUser,
                                        List<String> datasources, List<String> ontologies,
-                                       String preferredMappingOntology, int noReviewsRequired) throws Exception {
+                                       String preferredMappingOntology, int noReviewsRequired,
+                                       ProjectContextGraphRestrictionDto graphRestriction) throws Exception {
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_PROJECTS;
 
         ProjectCreationDto projectCreationDto = new ProjectCreationDto(name, "Description", noReviewsRequired,
                 datasources != null ? datasources : new ArrayList<>(),
                 ontologies != null ? ontologies : new ArrayList<>(),
-                preferredMappingOntology != null ? Arrays.asList(new String[]{preferredMappingOntology}) : new ArrayList<>());
+                preferredMappingOntology != null ? Arrays.asList(new String[]{preferredMappingOntology}) : new ArrayList<>(),
+                graphRestriction);
 
         String response = mockMvc.perform(post(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -227,16 +229,20 @@ public abstract class IntegrationTest {
                 CurationConstants.CONTEXT_DEFAULT, sourceId, projectId, null, provenance, EntityStatus.AUTO_MAPPED));
 
         OntologyTerm orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
-                DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia",
-                Arrays.asList(new OntologyTermContext[]{
-                        new OntologyTermContext(TermStatus.CURRENT.name(), entity.getProjectId(), entity.getContext())
-                }), null, null));
+                DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia", null, null, new ArrayList<>(), null));
+        OntologyTermContext ontologyTermContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                null, orphaTerm.getId(), entity.getProjectId(), entity.getContext(), TermStatus.CURRENT.name(), new ArrayList<>(), false
+        ));
+        orphaTerm.getOntoTermContexts().add(ontologyTermContext.getId());
+        orphaTerm = ontologyTermRepository.save(orphaTerm);
 
         OntologyTerm mondoTerm = ontologyTermRepository.insert(new OntologyTerm(null, "MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
-                DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia",
-                Arrays.asList(new OntologyTermContext[]{
-                        new OntologyTermContext(TermStatus.CURRENT.name(), entity.getProjectId(), entity.getContext())
-                }), null, null));
+                DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia", null, null, new ArrayList<>(), null));
+        ontologyTermContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                null, mondoTerm.getId(), entity.getProjectId(), entity.getContext(), TermStatus.CURRENT.name(), new ArrayList<>(), false
+        ));
+        mondoTerm.getOntoTermContexts().add(ontologyTermContext.getId());
+        mondoTerm = ontologyTermRepository.save(mondoTerm);
 
         mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), orphaTerm.getId(), projectId, provenance, null));
         mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), mondoTerm.getId(), projectId, provenance, null));

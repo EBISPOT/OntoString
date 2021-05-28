@@ -8,23 +8,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
-import uk.ac.ebi.spot.ontotools.curation.constants.ProjectRole;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.exception.AuthorizationException;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.ProjectDtoAssembler;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectCreationDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectContextGraphRestrictionDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectCreationDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
 import uk.ac.ebi.spot.ontotools.curation.service.JWTService;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
+import uk.ac.ebi.spot.ontotools.curation.util.GraphRestrictionUtil;
 import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +43,9 @@ public class ProjectsController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private GraphRestrictionUtil graphRestrictionUtil;
+
     /**
      * POST /v1/projects
      */
@@ -56,6 +59,17 @@ public class ProjectsController {
             throw new AuthorizationException("Attempt to create a project by a non-super user: " + user.getEmail());
         }
         log.info("[{}] Request to create project: {}", user.getEmail(), projectCreationDto.getName());
+        if (projectCreationDto.getGraphRestriction() != null) {
+            ProjectContextGraphRestrictionDto newGraphRestriction = graphRestrictionUtil.enrichGraphRestriction(projectCreationDto.getGraphRestriction());
+            projectCreationDto = new ProjectCreationDto(projectCreationDto.getName(),
+                    projectCreationDto.getDescription(),
+                    projectCreationDto.getNumberOfReviewsRequired(),
+                    projectCreationDto.getDatasources(),
+                    projectCreationDto.getOntologies(),
+                    projectCreationDto.getPreferredMappingOntologies(),
+                    newGraphRestriction);
+        }
+
         Project created = projectService.createProject(ProjectDtoAssembler.disassemble(projectCreationDto, new Provenance(user.getName(), user.getEmail(), DateTime.now())), user);
         return ProjectDtoAssembler.assemble(created);
     }

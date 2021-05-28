@@ -49,7 +49,7 @@ public class MongoConfig {
     @Configuration
     @EnableMongoRepositories(basePackages = {"uk.ac.ebi.spot.ontotools.curation.repository"})
     @EnableTransactionManagement
-    @Profile({"prod"})
+    @Profile({"prod", "fallback"})
     public static class MongoConfigProd extends AbstractMongoClientConfiguration {
 
         @Autowired

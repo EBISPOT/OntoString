@@ -2,7 +2,6 @@
 import { Button, CircularProgress, createStyles, darken, FormGroup, Grid, lighten, makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
 import React, { ChangeEvent } from "react";
 import { useState, useEffect } from "react";
-import { getAuthHeaders, getToken, isLoggedIn } from "../../auth";
 import Context from "../../dto/Context";
 
 interface Props {
@@ -23,14 +22,16 @@ class ContextForm extends React.Component<Props, State> {
 
     render() {
 
+        let { context } = this.props
+
         return <form noValidate autoComplete='off'>
             <FormGroup>
                 <Grid container direction="column">
                     <Grid item>
-                        <TextField label="Name" fullWidth onChange={this.onChangeName} />
+                        <TextField label="Name" fullWidth onChange={this.onChangeName} value={context.name} />
                     </Grid>
                     <Grid item>
-                        <TextField label="Description" fullWidth onChange={this.onChangeDescription} />
+                        <TextField label="Description" fullWidth onChange={this.onChangeDescription} value={context.description} />
                     </Grid>
                 </Grid>
             </FormGroup>

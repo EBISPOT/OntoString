@@ -5,13 +5,14 @@ import { useState, useEffect } from "react";
 import { getAuthHeaders, getToken, isLoggedIn } from "../../auth";
 import Context from "../../dto/Context";
 import ContextForm from "./ContextForm";
+import ContextList from "./ContextList";
 
 interface Props {
     onCreate:(context:Context)=>void
-    onClose:()=>void
 }
 
 interface State {
+    open:boolean
     context:Context
 }
 
@@ -22,6 +23,7 @@ class CreateContextDialog extends React.Component<Props, State> {
         super(props)
 
         this.state = {
+            open: false,
             context: emptyContext()
         }
 
@@ -29,11 +31,15 @@ class CreateContextDialog extends React.Component<Props, State> {
 
     render() {
 
-        let { context } = this.state
+        let { open, context } = this.state
 
         console.dir(context)
 
-        return <Dialog open={true} onClose={this.onClose}>
+        return <div>
+            <Button variant="outlined" color="primary" onClick={this.onOpen}>
+                + Create Context
+            </Button>
+            <Dialog open={open} onClose={this.onClose}>
                 <DialogTitle>Create Context</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
@@ -52,10 +58,15 @@ class CreateContextDialog extends React.Component<Props, State> {
                     </Button>
                 </DialogActions>
             </Dialog>
+        </div>
+    }
+
+    onOpen = () => {
+        this.setState(prevState => ({ ...prevState, open: true, context: emptyContext() }))
     }
 
     onClose = () => {
-        this.props.onClose()
+        this.setState(prevState => ({ ...prevState, open: false }))
     }
 
     onUpdateContext = (context:Context) => {

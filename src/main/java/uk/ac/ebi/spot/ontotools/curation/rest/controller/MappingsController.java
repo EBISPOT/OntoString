@@ -70,7 +70,7 @@ public class MappingsController {
         if (mapping == null) {
             return null;
         }
-        return MappingDtoAssembler.assemble(mapping, entity.getProjectId(), entity.getContext());
+        return MappingDtoAssembler.assemble(mapping);
     }
 
     /**
@@ -93,7 +93,7 @@ public class MappingsController {
         Mapping existingMapping = mappingService.retrieveMappingForEntity(entity.getId());
         if (existingMapping != null) {
             log.warn("Entity [{}] already has a mapping.", entity.getName());
-            return MappingDtoAssembler.assemble(existingMapping, entity.getProjectId(), entity.getContext());
+            return MappingDtoAssembler.assemble(existingMapping);
         }
 
         List<String> curies = mappingCreationDto.getOntologyTerms().stream().map(OntologyTermDto::getCurie).collect(Collectors.toList());
@@ -109,7 +109,7 @@ public class MappingsController {
          */
         entityService.updateMappingStatus(entity, EntityStatus.MANUALLY_MAPPED);
 
-        return MappingDtoAssembler.assemble(created, entity.getProjectId(), entity.getContext());
+        return MappingDtoAssembler.assemble(created);
     }
 
     /**
@@ -127,12 +127,10 @@ public class MappingsController {
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         Map<String, OntologyTerm> ontologyTermMap = new LinkedHashMap<>();
         List<OntologyTerm> newTerms = new ArrayList<>();
-        List<String> newTermIds = new ArrayList<>();
         for (OntologyTermDto ontologyTermDto : mappingDto.getOntologyTerms()) {
             OntologyTerm ontologyTerm = ontologyTermService.retrieveTermByCurie(ontologyTermDto.getCurie());
             ontologyTermMap.put(ontologyTerm.getId(), ontologyTerm);
             newTerms.add(ontologyTerm);
-            newTermIds.add(ontologyTerm.getId());
         }
         Mapping existing = mappingService.retrieveMappingById(mappingId);
         List<String> existingOntoIds = existing.getOntologyTermIds();
@@ -143,7 +141,7 @@ public class MappingsController {
             }
         }
 
-        Mapping updated = mappingService.updateMapping(mappingId, newTerms, newTermIds, oldTerms, provenance);
+        Mapping updated = mappingService.updateMapping(mappingId, newTerms, oldTerms, provenance);
 
         /**
          * Updating mapping status to MANUAL.
@@ -152,7 +150,7 @@ public class MappingsController {
         entityService.updateMappingStatus(entity, EntityStatus.MANUALLY_MAPPED);
 
         updated.setOntologyTerms(newTerms);
-        return MappingDtoAssembler.assemble(updated, entity.getProjectId(), entity.getContext());
+        return MappingDtoAssembler.assemble(updated);
     }
 
     /**

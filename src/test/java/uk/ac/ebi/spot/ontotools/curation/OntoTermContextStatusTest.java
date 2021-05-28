@@ -16,9 +16,9 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
 import uk.ac.ebi.spot.ontotools.curation.repository.ExternalServiceConfigRepository;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.zooma.ZoomaResponseDto;
 import uk.ac.ebi.spot.ontotools.curation.service.*;
 import uk.ac.ebi.spot.ontotools.curation.util.CurationUtil;
@@ -51,9 +51,6 @@ public class OntoTermContextStatusTest extends IntegrationTest {
     @Autowired
     private MatchmakerService matchmakerService;
 
-    @Autowired
-    private OntologyTermService ontologyTermService;
-
     private List<String> datasources;
 
     private List<String> ontologies;
@@ -81,7 +78,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
      */
     @Test
     public void testCase1() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, datasources, ontologies, "efo", 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, datasources, ontologies, "efo", 0, null);
 
         user1 = userService.findByEmail(user1.getEmail());
         Project project1 = projectService.retrieveProject(projectDto.getId(), user1);
@@ -90,7 +87,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
         Entity entity1 = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
                 CurationConstants.CONTEXT_DEFAULT, sourceDto1.getId(), project1.getId(), 10, provenance, EntityStatus.UNMAPPED));
 
-        projectDto = super.createProject("New Project 2", user1, datasources, ontologies, "efo", 0);
+        projectDto = super.createProject("New Project 2", user1, datasources, ontologies, "efo", 0, null);
         user1 = userService.findByEmail(user1.getEmail());
         Project project2 = projectService.retrieveProject(projectDto.getId(), user1);
         SourceDto sourceDto2 = super.createSource(project2.getId());
@@ -105,7 +102,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
         when(zoomaService.annotate(eq(entity2.getName()), any(), any())).thenReturn(zoomaResponseDtos);
 
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri1)), eq(iri1))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", false, true)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", "efo", false, true)})
         );
 
         matchmakerService.runMatchmaking(sourceDto1.getId(), project1);
@@ -117,20 +114,21 @@ public class OntoTermContextStatusTest extends IntegrationTest {
         updated = entityService.retrieveEntity(entity2.getId());
         assertEquals(EntityStatus.AUTO_MAPPED, updated.getMappingStatus());
 
-        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveAllTerms();
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findAll();
         assertEquals(1, ontologyTerms.size());
         OntologyTerm ontologyTerm = ontologyTerms.get(0);
-        assertEquals(2, ontologyTerm.getContexts().size());
+        List<OntologyTermContext> ontologyTermContexts = ontologyTermContextRepository.findByOntologyTermId(ontologyTerm.getId());
+        assertEquals(2, ontologyTermContexts.size());
 
         Map<String, String> projectMap = new HashMap<>();
-        for (OntologyTermContext ontologyTermContext : ontologyTerm.getContexts()) {
+        for (OntologyTermContext ontologyTermContext : ontologyTermContexts) {
             projectMap.put(ontologyTermContext.getProjectId(), "");
         }
 
         assertEquals(2, projectMap.size());
         assertTrue(projectMap.containsKey(project1.getId()));
         assertTrue(projectMap.containsKey(project2.getId()));
-        for (OntologyTermContext ontologyTermContext : ontologyTerm.getContexts()) {
+        for (OntologyTermContext ontologyTermContext : ontologyTermContexts) {
             if (ontologyTermContext.getProjectId().equalsIgnoreCase(project1.getId())) {
                 assertEquals(CurationConstants.CONTEXT_DEFAULT, ontologyTermContext.getContext());
                 assertEquals(TermStatus.NEEDS_IMPORT.name(), ontologyTermContext.getStatus());
@@ -149,7 +147,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
      */
     @Test
     public void testCase2() throws Exception {
-        ProjectDto projectDto = super.createProject("New Project 1", user1, datasources, ontologies, "efo", 0);
+        ProjectDto projectDto = super.createProject("New Project 1", user1, datasources, ontologies, "efo", 0, null);
         user1 = userService.findByEmail(user1.getEmail());
 
         Project project = projectService.retrieveProject(projectDto.getId(), user1);
@@ -157,7 +155,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
         SourceDto sourceDto2 = super.createSource(project.getId());
         Provenance provenance = new Provenance(user1.getName(), user1.getEmail(), DateTime.now());
         projectService.createProjectContext(new ProjectContext(null, "SECOND", project.getId(), "Description",
-                datasources, ontologies, Arrays.asList(new String[]{"Orphanet"}), Arrays.asList(new String[]{"orphanet"})), project.getId(), user1);
+                datasources, ontologies, Arrays.asList(new String[]{"Orphanet"}), Arrays.asList(new String[]{"orphanet"}), null), project.getId(), user1);
         project = projectService.retrieveProject(projectDto.getId(), user1);
 
         Entity entity1 = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
@@ -173,7 +171,7 @@ public class OntoTermContextStatusTest extends IntegrationTest {
         when(zoomaService.annotate(eq(entity2.getName()), any(), any())).thenReturn(zoomaResponseDtos);
 
         when(olsService.retrieveTerms(eq(CurationUtil.ontoFromIRI(iri1)), eq(iri1))).thenReturn(
-                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", false, true)})
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(iri1, "Orphanet:15", "Achondroplasia", "efo", false, true)})
         );
 
         matchmakerService.runMatchmaking(sourceDto1.getId(), project);
@@ -185,19 +183,20 @@ public class OntoTermContextStatusTest extends IntegrationTest {
         updated = entityService.retrieveEntity(entity2.getId());
         assertEquals(EntityStatus.AUTO_MAPPED, updated.getMappingStatus());
 
-        List<OntologyTerm> ontologyTerms = ontologyTermService.retrieveAllTerms();
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findAll();
         assertEquals(1, ontologyTerms.size());
         OntologyTerm ontologyTerm = ontologyTerms.get(0);
-        assertEquals(2, ontologyTerm.getContexts().size());
+        List<OntologyTermContext> ontologyTermContexts = ontologyTermContextRepository.findByOntologyTermId(ontologyTerm.getId());
+        assertEquals(2, ontologyTermContexts.size());
 
         Map<String, String> projectMap = new HashMap<>();
-        for (OntologyTermContext ontologyTermContext : ontologyTerm.getContexts()) {
+        for (OntologyTermContext ontologyTermContext : ontologyTermContexts) {
             projectMap.put(ontologyTermContext.getProjectId(), "");
         }
 
         assertEquals(1, projectMap.size());
         assertTrue(projectMap.containsKey(project.getId()));
-        for (OntologyTermContext ontologyTermContext : ontologyTerm.getContexts()) {
+        for (OntologyTermContext ontologyTermContext : ontologyTermContexts) {
             if (ontologyTermContext.getProjectId().equalsIgnoreCase(project.getId()) && ontologyTermContext.getContext().equals(CurationConstants.CONTEXT_DEFAULT)) {
                 assertEquals(TermStatus.NEEDS_IMPORT.name(), ontologyTermContext.getStatus());
             }

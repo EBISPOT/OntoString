@@ -7,8 +7,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
+import uk.ac.ebi.spot.ontotools.curation.constants.UpdateTaskType;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
+import uk.ac.ebi.spot.ontotools.curation.domain.UpdateTask;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.repository.EntityRepository;
@@ -46,9 +48,17 @@ public class MappingUpdateTask {
     @Autowired
     private MatchmakerService matchmakerService;
 
+    @Autowired
+    private UpdateTaskManager updateTaskManager;
+
     @Scheduled(cron = "${ontotools.zooma.update-schedule.pattern}")
     public void updateMappings() {
         log.info("Running mappings update ...");
+        UpdateTask updateTask = updateTaskManager.checkAndCreateIfNecessary(UpdateTaskType.MAPPING_UPDATE.name());
+        if (updateTask == null) {
+            return;
+        }
+
         double sTime = System.currentTimeMillis();
         User robotUser = userService.retrieveRobotUser();
 
@@ -71,6 +81,7 @@ public class MappingUpdateTask {
         double eTime = System.currentTimeMillis();
         double tTime = (eTime - sTime) / 1000;
         log.info("Mappings update finalized in {}s.", tTime);
+        updateTaskManager.removeUpdateTask(updateTask);
     }
 
 }

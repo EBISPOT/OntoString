@@ -6,8 +6,8 @@ import org.springframework.http.MediaType;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.UserCreationDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.UserDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.UserCreationDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.UserDto;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 
 import static org.junit.Assert.assertEquals;
@@ -22,7 +22,7 @@ public class UsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetUsers() throws Exception {
-        super.createProject("New Project", user1, null, null, null, 0);
+        super.createProject("New Project", user1, null, null, null, 0, null);
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_USERS;
         String response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -54,7 +54,7 @@ public class UsersControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldCreateUser() throws Exception {
-        super.createProject("New Project", user1, null, null, null, 0);
+        super.createProject("New Project", user1, null, null, null, 0, null);
         UserCreationDto userCreationDto = new UserCreationDto("Me", "me@me.com");
         String endpoint = GeneralCommon.API_V1 + CurationConstants.API_USERS;
         String response = mockMvc.perform(post(endpoint)

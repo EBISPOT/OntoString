@@ -19,9 +19,9 @@ import uk.ac.ebi.spot.ontotools.curation.domain.config.ExternalServiceConfig;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.repository.ExternalServiceConfigRepository;
 import uk.ac.ebi.spot.ontotools.curation.repository.ProjectExportRequestRepository;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ProjectExportStatusDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectExportStatusDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.service.EntityService;
 import uk.ac.ebi.spot.ontotools.curation.service.MatchmakerService;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectService;
@@ -76,7 +76,7 @@ public class PublicDataControllerTest extends IntegrationTest {
         List<String> datasources = Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"});
         List<String> ontologies = Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"});
 
-        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0);
+        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0, null);
         user1 = userService.findByEmail(user1.getEmail());
         project = projectService.retrieveProject(projectDto.getId(), user1);
         sourceDto = super.createSource(project.getId());

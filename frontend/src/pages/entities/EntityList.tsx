@@ -1,5 +1,5 @@
 
-import { Button, CircularProgress, createStyles, darken, Input, InputAdornment, lighten, makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { Box, Button, CircularProgress, createStyles, darken, Grid, Input, InputAdornment, lighten, makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
 import SearchIcon from '@material-ui/icons/Search';
 import React, { ChangeEvent, Fragment } from "react";
 import { useState, useEffect } from "react";
@@ -10,6 +10,12 @@ import DataTable from "react-data-table-component";
 import Paginated from "../../dto/Paginated";
 import MappingStatusBox from "../../components/MappingStatusBox";
 import EntityStatusBox from "../../components/EntityStatusBox";
+import Spinner from "../../components/Spinner";
+import Context from "../../dto/Context";
+import Project from "../../dto/Project";
+import ContextSelector from "../../components/ContextSelector";
+import { CloudUpload } from "@material-ui/icons";
+import UploadDialog from "./UploadDialog";
 
 const styles = (theme:Theme) => createStyles({
     tableRow: {
@@ -23,8 +29,7 @@ const styles = (theme:Theme) => createStyles({
 })
 
 interface Props extends WithStyles<typeof styles> {
-    projectId:string
-    contextId:string
+    project:Project
 }
 
 interface State {
@@ -36,6 +41,8 @@ interface State {
     loading:boolean
     entities:Paginated<Entity>|null
     goToEntity:Entity|null
+    context:Context,
+    showUploadDialog:boolean
 }
 
 class EntityList extends React.Component<Props, State> {
@@ -52,8 +59,12 @@ class EntityList extends React.Component<Props, State> {
             filter: '',
             loading:true,
             entities: null,
-            goToEntity: null
+            goToEntity: null,
+            context: props.project.contexts.filter(c => c.name === 'DEFAULT')[0]!,
+            showUploadDialog: false
         }
+
+        console.dir(this.state)
 
 
     }
@@ -61,6 +72,12 @@ class EntityList extends React.Component<Props, State> {
     componentDidMount() {
         this.fetchEntities()
     }
+
+    // componentDidUpdate(prevProps:Props){
+    //        this.props.projectId !== prevProps.projectId) {
+    //                 this.fetchEntities()
+    //     }
+    // }
 
     columns: any[] = [
         {
@@ -91,7 +108,7 @@ class EntityList extends React.Component<Props, State> {
             selector: 'source',
             sortable: true,
             ignoreRowClick: true,
-            cell: (entity:Entity) => <Link to={`/sources/${entity.source.id}`}>{entity.source.name}</Link>
+            cell: (entity:Entity) => { entity.source && <Link to={`/sources/${entity.source.id}`}>{entity.source.name}</Link> }
         },
         // {
         //     name: 'Mapping Suggestions',
@@ -110,19 +127,55 @@ class EntityList extends React.Component<Props, State> {
 
     render() {
 
-        let { entities, goToEntity } = this.state
-        let { classes, projectId } = this.props
+        let { classes, project } = this.props
+        let { entities, goToEntity, context } = this.state
 
         // if(entities === null) {
         //     return <CircularProgress />
         // }
 
         if(goToEntity !== null) {
-            return <Redirect to={`/projects/${projectId}/entities/${goToEntity.id}`} />
+            return <Redirect to={`/projects/${project.id}/entities/${goToEntity.id}`} />
         }
 
         return <Fragment>
+
+            <UploadDialog open={this.state.showUploadDialog} onCancel={this.closeUploadDialog} projectId={project.id!} />
+
+            <Grid container justify="space-between">
+                <Grid item>
+                    <h2>Entities</h2>
+                </Grid>
+                <Grid item>
+                    <Box
+                        display="flex"
+                        justifyContent="center"
+                        flexDirection="row"
+                    >
+                        <Button variant="outlined" color="primary" onClick={this.upload}><CloudUpload /> &nbsp; Upload CSV/JSON</Button>
+                    </Box>
+                </Grid>
+            </Grid>
+
+            <p>
+                This list displays the <b>entities</b> assigned to this project. An entity represents a string that needs a mapping, along with the ontology term to which it is mapped. 
+            </p>
+            <p>
+                New entities can be created by uploading a CSV or JSON file using the <i>Upload CSV/JSON</i> button.
+            </p>
+            <p>
+                Projects are also sub-divided into <b>contexts</b>, which can be used to distinguish entities of different types (e.g. phenotypes and diseases). All projects have a context named <code>DEFAULT</code>. Further contexts can be created if necessary in the <Link to={`/projects/${project.id}/settings`}>project settings</Link>.
+            </p>
+                
+
+            <Grid container>
+                <Grid item xs={6}>
             <Input startAdornment={<InputAdornment position="start"><SearchIcon /></InputAdornment>} onChange={this.onFilter} />
+            </Grid>
+                <Grid item xs={6} container justify="flex-end">
+                <ContextSelector project={project} context={context} onSwitchContext={this.onSwitchContext}  />
+            </Grid>
+            </Grid>
             <DataTable
                 columns={this.columns}
                 data={entities?.content || []}
@@ -140,26 +193,27 @@ class EntityList extends React.Component<Props, State> {
                 highlightOnHover
                 pointerOnHover
                 progressPending={this.state.loading}
-                progressComponent={<CircularProgress />}
+                progressComponent={<Spinner />}
             />
         </Fragment>
     }
 
     async fetchEntities() {
 
-        let { projectId, contextId } = this.props
+        let { project } = this.props
+        let { context } = this.state
 
         let { page, size, sortColumn, sortDirection, filter } = this.state
 
         await this.setState(prevState => ({ ...prevState, loading: true }))
 
-        let res = await fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${projectId}/entities?${
+        let res = await fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${project.id}/entities?${
             new URLSearchParams({
-                context: contextId,
+                context: context!.name!,
                 page: page.toString(),
                 size: size.toString(),
                 ...(sortColumn ? { sort: sortColumn + ',' + sortDirection } : {}),
-                filter: filter
+                search: filter
             })
         }`, {
             headers: { ...getAuthHeaders() }
@@ -208,6 +262,21 @@ class EntityList extends React.Component<Props, State> {
     //         console.log('Error creating entities: ' + res.statusText)
     //     }
     // }
+
+    onSwitchContext = async (context:Context) => {
+
+        await this.setState(prevState => ({ ...prevState, context }))
+        this.fetchEntities()
+    }
+
+    upload = () => {
+        this.setState(prevState => ({ ...prevState, showUploadDialog: true }))
+
+    }
+    closeUploadDialog = () => {
+        this.setState(prevState => ({ ...prevState, showUploadDialog: false }))
+
+    }
 }
 
 export default withStyles(styles)(EntityList)

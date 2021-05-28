@@ -14,8 +14,8 @@ import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.exception.AuthorizationException;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.UserDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.UserCreationDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.UserDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.UserCreationDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.users.UserDto;
 import uk.ac.ebi.spot.ontotools.curation.service.JWTService;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
@@ -43,7 +43,7 @@ public class UsersController {
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public RestResponsePage<UserDto> getUsers(@RequestParam(value = CurationConstants.PARAM_FILTER, required = false) String prefix,
+    public RestResponsePage<UserDto> getUsers(@RequestParam(value = CurationConstants.PARAM_SEARCH, required = false) String prefix,
                                               @PageableDefault(size = 20, page = 0) Pageable pageable,
                                               HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));

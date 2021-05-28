@@ -2,8 +2,8 @@ package uk.ac.ebi.spot.ontotools.curation.rest.assembler;
 
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.Source;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceCreationDto;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceCreationDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 
 public class SourceDtoAssembler {
 

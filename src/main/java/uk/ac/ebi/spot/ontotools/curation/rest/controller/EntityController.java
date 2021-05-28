@@ -20,7 +20,7 @@ import uk.ac.ebi.spot.ontotools.curation.rest.assembler.EntityDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.SourceDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.EntityDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.RestResponsePage;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.SourceDto;
+import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.SourceDto;
 import uk.ac.ebi.spot.ontotools.curation.service.*;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
@@ -63,7 +63,7 @@ public class EntityController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public RestResponsePage<EntityDto> getEntities(@PathVariable String projectId,
-                                                   @RequestParam(value = CurationConstants.PARAM_FILTER, required = false) String prefix,
+                                                   @RequestParam(value = CurationConstants.PARAM_SEARCH, required = false) String prefix,
                                                    @RequestParam(value = CurationConstants.PARAM_CONTEXT, required = false) String context,
                                                    @PageableDefault(size = 20, page = 0) Pageable pageable, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
@@ -77,8 +77,8 @@ public class EntityController {
 
         Page<Entity> entities = entityService.retrieveEntitiesForProject(projectId, prefix, context, pageable);
         List<String> entityIds = entities.get().map(Entity::getId).collect(Collectors.toList());
-        Map<String, Mapping> mappings = mappingService.retrieveMappingsForEntities(entityIds);
-        Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(entityIds);
+        Map<String, Mapping> mappings = mappingService.retrieveMappingsForEntities(entityIds, projectId, context);
+        Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(entityIds, projectId, context);
         log.info("Assembling results ...");
         List<EntityDto> entityDtos = new ArrayList<>();
         for (Entity entity : entities.getContent()) {
@@ -104,7 +104,7 @@ public class EntityController {
         Entity entity = entityService.retrieveEntity(entityId);
         Source source = sourceService.getSource(entity.getSourceId(), projectId);
         Mapping mapping = mappingService.retrieveMappingForEntity(entityId);
-        Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entityId}));
+        Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entityId}), projectId, entity.getContext());
         return EntityDtoAssembler.assemble(entity, SourceDtoAssembler.assemble(source),
                 mapping, mappingSuggestions.get(entityId),
                 auditEntryService.retrieveAuditEntries(entity.getId()));

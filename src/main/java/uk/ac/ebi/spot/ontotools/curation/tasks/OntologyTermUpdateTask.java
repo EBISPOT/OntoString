@@ -8,19 +8,23 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.spot.ontotools.curation.constants.TermStatus;
+import uk.ac.ebi.spot.ontotools.curation.constants.UpdateTaskType;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
+import uk.ac.ebi.spot.ontotools.curation.domain.UpdateTask;
 import uk.ac.ebi.spot.ontotools.curation.domain.log.OntologyTermUpdateLogBatch;
 import uk.ac.ebi.spot.ontotools.curation.domain.log.OntologyTermUpdateLogEntry;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTermContext;
+import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermContextRepository;
 import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermRepository;
 import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermUpdateLogBatchRepository;
 import uk.ac.ebi.spot.ontotools.curation.repository.OntologyTermUpdateLogEntryRepository;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.*;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @Component
@@ -44,7 +48,7 @@ public class OntologyTermUpdateTask {
     private OntologyTermUpdateLogEntryRepository ontologyTermUpdateLogEntryRepository;
 
     @Autowired
-    private OLSService olsService;
+    private OntologyTermContextRepository ontologyTermContextRepository;
 
     @Autowired
     private MappingService mappingService;
@@ -58,9 +62,17 @@ public class OntologyTermUpdateTask {
     @Autowired
     private OntologyTermService ontologyTermService;
 
+    @Autowired
+    private UpdateTaskManager updateTaskManager;
+
     @Scheduled(cron = "${ontotools.ols.update-schedule.pattern}")
     public void updateOntologyTerms() {
         log.info("Running ontology terms update ...");
+        UpdateTask updateTask = updateTaskManager.checkAndCreateIfNecessary(UpdateTaskType.TERM_UPDATE.name());
+        if (updateTask == null) {
+            return;
+        }
+
         double sTime = System.currentTimeMillis();
         OntologyTermUpdateLogBatch ontologyTermUpdateLogBatch = ontologyTermUpdateLogBatchRepository.insert(new OntologyTermUpdateLogBatch(null, DateTime.now(), 0));
 
@@ -76,6 +88,7 @@ public class OntologyTermUpdateTask {
         ontologyTermUpdateLogBatch.setTotalTime((int) tTime);
         ontologyTermUpdateLogBatchRepository.save(ontologyTermUpdateLogBatch);
         log.info("Ontology terms update finalized in {}s.", tTime);
+        updateTaskManager.removeUpdateTask(updateTask);
     }
 
     private Map<String, Map<String, ProjectContext>> prepareProjectConfig(List<Project> projects) {
@@ -93,46 +106,24 @@ public class OntologyTermUpdateTask {
     }
 
     private void updateTerm(OntologyTerm ontologyTerm, Map<String, Map<String, ProjectContext>> projectConfig, String batchId) {
-        Map<String, String> deletedTerms = new LinkedHashMap<>();
-        Map<String, String> toUpdate = new LinkedHashMap<>();
+        List<OntologyTermContext> ontologyTermContexts = ontologyTermContextRepository.findByOntologyTermId(ontologyTerm.getId());
 
-        for (OntologyTermContext ontologyTermContext : ontologyTerm.getContexts()) {
+        for (OntologyTermContext ontologyTermContext : ontologyTermContexts) {
             String currentStatus = ontologyTermContext.getStatus();
             String newStatus = ontologyTermService.retrieveStatusUpdate(ontologyTerm.getIri(),
                     projectConfig.get(ontologyTermContext.getProjectId()).get(ontologyTermContext.getContext()), currentStatus);
 
             if (!newStatus.equalsIgnoreCase(currentStatus)) {
-                toUpdate.put(ontologyTermContext.getProjectId() + "::" + ontologyTermContext.getContext(), newStatus);
+                ontologyTermUpdateLogEntryRepository.insert(new OntologyTermUpdateLogEntry(null, batchId, ontologyTerm.getId(),
+                        ontologyTerm.getCurie(), ontologyTerm.getLabel(), ontologyTermContext.getProjectId(),
+                        ontologyTermContext.getContext(), ontologyTermContext.getStatus(), newStatus));
+
+                ontologyTermContext.setStatus(newStatus);
+                ontologyTermContextRepository.save(ontologyTermContext);
 
                 if (newStatus.equalsIgnoreCase(TermStatus.DELETED.name())) {
-                    deletedTerms.put(ontologyTermContext.getProjectId(), ontologyTermContext.getContext());
+                    mappingService.updateStatusForObsoleteMappings(ontologyTerm.getId(), ontologyTermContext.getProjectId(), ontologyTermContext.getContext());
                 }
-            }
-        }
-
-        if (!toUpdate.isEmpty()) {
-            List<OntologyTermContext> newContexts = new ArrayList<>();
-            for (OntologyTermContext ontologyTermContext : ontologyTerm.getContexts()) {
-                if (toUpdate.containsKey(ontologyTermContext.getProjectId() + "::" + ontologyTermContext.getContext())) {
-                    String newStatus = toUpdate.get(ontologyTermContext.getProjectId() + "::" + ontologyTermContext.getContext());
-                    newContexts.add(new OntologyTermContext(ontologyTermContext.getProjectId(),
-                            ontologyTermContext.getContext(), newStatus));
-
-                    ontologyTermUpdateLogEntryRepository.insert(new OntologyTermUpdateLogEntry(null, batchId, ontologyTerm.getId(),
-                            ontologyTerm.getCurie(), ontologyTerm.getLabel(), ontologyTermContext.getProjectId(),
-                            ontologyTermContext.getContext(), ontologyTermContext.getStatus(), newStatus));
-                } else {
-                    newContexts.add(ontologyTermContext);
-                }
-            }
-
-            ontologyTerm.setContexts(newContexts);
-            ontologyTermRepository.save(ontologyTerm);
-        }
-
-        if (!deletedTerms.isEmpty()) {
-            for (String projectId : deletedTerms.keySet()) {
-                mappingService.updateStatusForObsoleteMappings(ontologyTerm.getId(), projectId, deletedTerms.get(projectId));
             }
         }
     }

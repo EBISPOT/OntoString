@@ -14,9 +14,9 @@ public interface MappingSuggestionsService {
 
     void deleteMappingSuggestionsExcluding(Entity entity, List<OntologyTerm> ontologyTerms, Provenance provenance);
 
-    Map<String, List<MappingSuggestion>> retrieveMappingSuggestionsForEntities(List<String> entityIds);
+    Map<String, List<MappingSuggestion>> retrieveMappingSuggestionsForEntities(List<String> entityIds, String projectId, String context);
 
-    List<MappingSuggestion> retrieveMappingSuggestionsForEntity(String entityId);
+    List<MappingSuggestion> retrieveMappingSuggestionsForEntity(Entity entity);
 
     void deleteMappingSuggestions(String entityId, OntologyTerm ontologyTerm, Provenance provenance);
 }
