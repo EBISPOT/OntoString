@@ -1,4 +1,6 @@
-# Onto-tools Curation App
+# OntoString
+
+OntoString is a tool for curating mappings from free text to ontology terms.
 
 ## Requirements to build and run locally
 
@@ -26,3 +28,4 @@
 
 ### Run locally
 * `java -jar -Dspring.profiles.active=dev target/ontotools-curation-service-*.jar`
+

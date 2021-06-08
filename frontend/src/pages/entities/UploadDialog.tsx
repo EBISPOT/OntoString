@@ -52,6 +52,12 @@ class UploadDialog extends React.Component<Props, State> {
         return <Dialog open={open} onClose={this.onCancel}>
                 <DialogTitle>Upload CSV/JSON</DialogTitle>
                 <DialogContent>
+                    <p>
+                        Uploads to OntoString are organised into <b>datasources</b> to help keep track of where entities came from.
+                    </p>
+                    <p>
+                        To distinguish this upload with its own name and description, select the <b>New Datasource</b> option. To add more to a datasource that was created previously, select the <b>Existing Datasource</b> option.
+                    </p>
                     <Tabs value={this.state.tab} onChange={this.changeTab}>
                         <Tab label="New Datasource" value={'NEW'} />
                         <Tab label="Existing Datasource" value='EXISTING' />
@@ -82,6 +88,31 @@ class UploadDialog extends React.Component<Props, State> {
                         </Box>
                     }
                     <Box m={2}>
+                    <p>
+                        Each row of your uploaded file <b>must</b> have the following fields, though they may be blank if marked as Optional:
+                        <Table>
+                            <TableRow>
+                                <TableCell><code>upstreamId</code></TableCell>
+                                <TableCell><b><i>Optional</i></b></TableCell>
+                                <TableCell>An identifier of your choosing to link the entity back to your own dataset. OntoString will keep track of this identifier, but will otherwise ignore it.</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell><code>priority</code></TableCell>
+                                <TableCell><b><i>Optional</i></b></TableCell>
+                                <TableCell>A user-defined numeric indicator of the priority of mapping this entity. This can be used to sort the table of entities, but is otherwise ignored by OntoString.</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell><code>text</code></TableCell>
+                                <TableCell><b><i>Required</i></b></TableCell>
+                                <TableCell>The text string that needs to be mapped.</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell><code>context</code></TableCell>
+                                <TableCell><b><i>Optional</i></b></TableCell>
+                                <TableCell>The name of a context to which this entity should be assigned. Contexts can be used to sub-divide projects into different types, such as phenotypes and diseases. If blank, the <code>DEFAULT</code> context will be used.</TableCell>
+                            </TableRow>
+                        </Table>
+                    </p>
                         {
                             file ?
                             <Fragment>
@@ -90,7 +121,7 @@ class UploadDialog extends React.Component<Props, State> {
                             </Fragment>
                             :
                         <Button onClick={this.onClickSelectFile} color="primary" variant="outlined">
-                            Select File
+                            Select CSV/JSON File
                         </Button>
                         }
                     </Box>
@@ -102,7 +133,7 @@ class UploadDialog extends React.Component<Props, State> {
                     <Button onClick={this.onSubmit} color="primary" variant="outlined" disabled={!canSubmit}>
                         Submit
                     </Button>
-                </DialogActions>
+               </DialogActions>
             </Dialog>
     }
 
@@ -130,6 +161,9 @@ class UploadDialog extends React.Component<Props, State> {
 
         let { projectId } = this.props
 
+        let type = this.state.file.name.endsWith('.json')
+            ? 'application/json': 'text/csv'
+
         if(this.state.tab === 'NEW') {
 
             let source:Source = {
@@ -142,14 +176,16 @@ class UploadDialog extends React.Component<Props, State> {
             let res = await post<Source>(`/v1/projects/${projectId}/sources`, source)
 
             let uploadRes = await fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${projectId}/sources/${res.id}/upload`, {
-                headers: { ...getAuthHeaders() },
+                method: 'POST',
+                headers: { ...getAuthHeaders(), 'content-type': type },
                 body: this.state.file
             })
 
         } else {
 
             let uploadRes = await fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${projectId}/sources/${this.state.sourceId}/upload`, {
-                headers: { ...getAuthHeaders() },
+                method: 'POST',
+                headers: { ...getAuthHeaders(), 'content-type': type },
                 body: this.state.file
             })
 

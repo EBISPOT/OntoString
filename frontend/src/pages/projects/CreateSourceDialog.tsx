@@ -35,10 +35,17 @@ class CreateSourceDialog extends React.Component<Props, State> {
 
         return <div>
             <Button variant="outlined" color="primary" onClick={this.onOpen}>
+<<<<<<< HEAD
                 + Create Source
             </Button>
             <Dialog open={open} onClose={this.onClose}>
                 <DialogTitle>Create Source</DialogTitle>
+=======
+                + Add Datasource
+            </Button>
+            <Dialog open={open} onClose={this.onClose}>
+                <DialogTitle>Add Datasource</DialogTitle>
+>>>>>>> 56b430299b6decb668f997be7d79f6351affebe7
                 <DialogContent>
                     <Box m={2}>
                         <SourceForm source={source} onUpdateSource={this.onUpdateSource} />
@@ -49,7 +56,11 @@ class CreateSourceDialog extends React.Component<Props, State> {
                         Cancel
                     </Button>
                     <Button onClick={this.onCreate} color="primary" variant="outlined" disabled={!source.name || !source.description}>
+<<<<<<< HEAD
                         Create
+=======
+                        Add
+>>>>>>> 56b430299b6decb668f997be7d79f6351affebe7
                     </Button>
                 </DialogActions>
             </Dialog>

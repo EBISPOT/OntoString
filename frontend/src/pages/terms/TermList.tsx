@@ -145,6 +145,20 @@ class TermListingList extends React.Component<Props, State> {
             </Grid>
 
 
+            <p>
+                This list displays all of the ontology terms to which entities have been mapped in this project. Where the term status is <b>Needs Import</b>, it does not exist in any of the preferred ontologies, and therefore needs to be added.
+            </p>
+            <p>
+                OntoString allows all of the terms marked as <b>Needs Import</b> to be downloaded as a CSV file. This file can be used to inform the manual process of requesting that the terms are added to the correct ontology.
+            </p>
+            <p>
+                When the terms no longer require attention (i.e., issues have been opened with the relevant ontology issue tracker), they can be marked as <b>actioned</b>, at which point they will no longer be displayed in the <b>Needs Import</b> list.
+            </p>
+            <p>
+                Finally, OntoString will pick up the terms when they are added to the ontology, and display them in the <b>Current</b> list, which is the end of the curation workflow.
+            </p>
+
+
              <Tabs
                 indicatorColor="primary"
                 textColor="primary"

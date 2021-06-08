@@ -12,6 +12,7 @@ import ProjectsPage from './pages/projects/ProjectsPage';
 import EntitiesPage from './pages/entities/EntitiesPage';
 import TermsPage from './pages/terms/TermsPage';
 import About from './pages/About';
+import Help from './pages/Help';
 import ProjectSettingsPage from './pages/projects/ProjectSettingsPage';
 import ContextSettingsPage from './pages/projects/ContextSettingsPage';
 
@@ -58,6 +59,9 @@ function App(props:AppProps) {
 
                     <Route exact path={`/projects/:projectId/entities/:entityId`}
                         component={(props:any) => <EntityPage projectId={props.match.params.projectId} entityId={props.match.params.entityId} />}></Route>
+
+                    <Route exact path={`/help`}
+                        component={(props:any) => <Help projectId={ new URLSearchParams(props.location.search).get('projectId') || undefined} />}></Route>
 
                     <Route exact path={`/about`}
                         component={(props:any) => <About projectId={ new URLSearchParams(props.location.search).get('projectId') || undefined} />}></Route>
