@@ -12,7 +12,7 @@ spec:
   - host:
     http:
       paths:
-      - path: /curator(/|$)(.*)
+      - path: /spot/ontostring(/|$)(.*)
         backend:
           serviceName: ontotools-curation-service
           servicePort: 8080
