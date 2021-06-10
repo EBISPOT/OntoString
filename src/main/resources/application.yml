@@ -2,7 +2,7 @@ server:
   name: ontotools-curation
   port: 8080
   servlet:
-	context-path: /spot/ontostring
+    context-path: /spot/ontostring
 
 spring:
   web:
