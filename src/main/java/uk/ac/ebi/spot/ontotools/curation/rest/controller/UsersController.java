@@ -27,7 +27,7 @@ import javax.validation.Valid;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = GeneralCommon.API_V1 + CurationConstants.API_USERS)
+@RequestMapping(value = GeneralCommon.API_V1)
 public class UsersController {
 
     private static final Logger log = LoggerFactory.getLogger(UsersController.class);
@@ -39,9 +39,23 @@ public class UsersController {
     private UserService userService;
 
     /**
+     * GET /v1/me
+     */
+    @GetMapping(value = CurationConstants.API_ME,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public UserDto getMe(HttpServletRequest request) {
+        User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        log.info("[{}] Request to retrieve ME.", user.getEmail());
+        User actualUser = userService.findByEmail(user.getEmail());
+        return UserDtoAssembler.assemble(actualUser);
+    }
+
+    /**
      * GET /v1/users?search=<search>
      */
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = CurationConstants.API_USERS,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public RestResponsePage<UserDto> getUsers(@RequestParam(value = CurationConstants.PARAM_SEARCH, required = false) String prefix,
                                               @PageableDefault(size = 20, page = 0) Pageable pageable,
@@ -59,7 +73,8 @@ public class UsersController {
     /**
      * POST /v1/users
      */
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
+    @PostMapping(value = CurationConstants.API_USERS,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto createUser(@RequestBody @Valid UserCreationDto userCreationDto, HttpServletRequest request) {

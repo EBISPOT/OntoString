@@ -28,6 +28,8 @@ public class CurationConstants {
 
     public static final String API_AUDIT_TRAIL = "/audit-trail";
 
+    public static final String API_ME = "/me";
+
     public static final String API_USERS = "/users";
 
     public static final String API_REVIEWS = "/reviews";
