@@ -9,13 +9,14 @@ import java.util.stream.Collectors;
 public class UserDtoAssembler {
 
     public static UserDto assemble(String name, String email) {
-        return new UserDto(null, name, email, null);
+        return new UserDto(null, name, email, null, false);
     }
 
     public static UserDto assemble(User user) {
         return new UserDto(user.getId(), user.getName(), user.getEmail(),
                 user.getRoles() == null ? new ArrayList<>() :
-                        user.getRoles().stream().map(RoleDtoAssembler::assemble).collect(Collectors.toList()));
+                        user.getRoles().stream().map(RoleDtoAssembler::assemble).collect(Collectors.toList()),
+                user.isSuperUser());
     }
 
     public static User disassemble(UserDto userDto) {

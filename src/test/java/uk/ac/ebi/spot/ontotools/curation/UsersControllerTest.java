@@ -17,6 +17,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class UsersControllerTest extends IntegrationTest {
 
+
+    /**
+     * GET /v1/me
+     */
+    @Test
+    public void shouldGetMe() throws Exception {
+        super.createProject("New Project", user1, null, null, null, 0, null);
+        String endpoint = GeneralCommon.API_V1 + CurationConstants.API_ME;
+        String response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(IDPConstants.JWT_TOKEN, "token1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        UserDto actualUser = mapper.readValue(response, new TypeReference<>() {
+        });
+
+        assertEquals(user1.getEmail(), actualUser.getEmail());
+    }
+
     /**
      * GET /v1/users
      */
