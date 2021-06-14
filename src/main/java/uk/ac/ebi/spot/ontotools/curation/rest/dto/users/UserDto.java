@@ -30,15 +30,20 @@ public final class UserDto implements Serializable {
     @JsonProperty("roles")
     private final List<RoleDto> roles;
 
+    @JsonProperty("superUser")
+    private final Boolean superUser;
+
     @JsonCreator
     public UserDto(@JsonProperty("id") String id,
                    @JsonProperty("name") String name,
                    @JsonProperty("email") String email,
-                   @JsonProperty("roles") List<RoleDto> roles) {
+                   @JsonProperty("roles") List<RoleDto> roles,
+                   @JsonProperty("superUser") Boolean superUser) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.roles = roles;
+        this.superUser = superUser;
     }
 
     public String getId() {
@@ -55,5 +60,9 @@ public final class UserDto implements Serializable {
 
     public List<RoleDto> getRoles() {
         return roles;
+    }
+
+    public Boolean getSuperUser() {
+        return superUser;
     }
 }
