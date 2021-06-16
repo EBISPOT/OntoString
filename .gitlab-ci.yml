@@ -10,6 +10,7 @@ stages:
   - build-container
   - build-container-release
   - deploy-sandbox
+  - deploy-fallback
   - deploy-live
 
 variables:
