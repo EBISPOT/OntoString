@@ -15,6 +15,11 @@ import About from './pages/About';
 import Help from './pages/Help';
 import ProjectSettingsPage from './pages/projects/ProjectSettingsPage';
 import ContextSettingsPage from './pages/projects/ContextSettingsPage';
+import UserContext from './UserContext';
+import User from './dto/User';
+import { get } from './api';
+import { isLoggedIn } from './auth';
+import Admin from './pages/admin/AdminPage'
 
 let styles = (theme:Theme) => createStyles({
     main: {
@@ -25,51 +30,89 @@ let styles = (theme:Theme) => createStyles({
     },
   });
 
-interface AppProps extends WithStyles<typeof styles> {
+interface Props extends WithStyles<typeof styles> {
+}
+
+interface State {
+	userLoaded:boolean
+	user:User|null
 }
   
-function App(props:AppProps) {
+class App extends React.Component<Props, State> {
 
-  let { classes } = props
+	constructor(props:Props) {
+		super(props)
 
-  return (
-          <BrowserRouter basename={process.env.PUBLIC_URL}>
+		this.state = {
+			userLoaded:false,
+			user: null
+		}
+	}
 
-                <Switch>
-                    <Route exact path={`/`} component={Home} />
+	componentDidMount() {
 
-                    <Route exact path={`/login`} component={Login}></Route>
+		this.setState(prevState => ({ ...prevState, userLoaded: true }))
+		this.fetchUser()
+	}
 
-                    <Route exact path={`/projects`} component={ProjectsPage} />
+	async fetchUser() {
 
-                    <Route exact path={`/projects/:id`}
-                        component={(props:any) => <Redirect to={`/projects/${props.match.params.id}/entities`}/>}></Route>
+		if(!isLoggedIn()) {
+			return
+		}
 
-                    <Route exact path={`/projects/:id/settings`}
-                        component={(props:any) => <ProjectSettingsPage projectId={props.match.params.id}/>}></Route>
+		let user = await get<User>(`/v1/me`)
 
-                    <Route exact path={`/projects/:projectId/contexts/:contextName`}
-                        component={(props:any) => <ContextSettingsPage projectId={props.match.params.projectId} contextName={props.match.params.contextName} />}></Route>
+		this.setState(prevState => ({ ...prevState, user }))
+	}
 
-                    <Route exact path={`/projects/:id/entities`}
-                        component={(props:any) => <EntitiesPage projectId={props.match.params.id}/>}></Route>
+	render() {
 
-                    <Route exact path={`/projects/:id/terms`}
-                        component={(props:any) => <TermsPage projectId={props.match.params.id}/>}></Route>
+		let { classes } = this.props
 
-                    <Route exact path={`/projects/:projectId/entities/:entityId`}
-                        component={(props:any) => <EntityPage projectId={props.match.params.projectId} entityId={props.match.params.entityId} />}></Route>
+		return (
+			<BrowserRouter basename={process.env.PUBLIC_URL}>
+				<UserContext.Provider value={this.state.user}>
+					<Switch>
+					<Route exact path={`/`} component={Home} />
 
-                    <Route exact path={`/help`}
-                        component={(props:any) => <Help projectId={ new URLSearchParams(props.location.search).get('projectId') || undefined} />}></Route>
+					<Route exact path={`/login`} component={Login}></Route>
 
-                    <Route exact path={`/about`}
-                        component={(props:any) => <About projectId={ new URLSearchParams(props.location.search).get('projectId') || undefined} />}></Route>
-                </Switch>
-          </BrowserRouter>
+					<Route exact path={`/projects`} component={ProjectsPage} />
 
-  );
+					<Route exact path={`/projects/:id`}
+						component={(props:any) => <Redirect to={`/projects/${props.match.params.id}/entities`}/>}></Route>
 
+					<Route exact path={`/projects/:id/settings`}
+						component={(props:any) => <ProjectSettingsPage projectId={props.match.params.id}/>}></Route>
+
+					<Route exact path={`/projects/:projectId/contexts/:contextName`}
+						component={(props:any) => <ContextSettingsPage projectId={props.match.params.projectId} contextName={props.match.params.contextName} />}></Route>
+
+					<Route exact path={`/projects/:id/entities`}
+						component={(props:any) => <EntitiesPage projectId={props.match.params.id}/>}></Route>
+
+					<Route exact path={`/projects/:id/terms`}
+						component={(props:any) => <TermsPage projectId={props.match.params.id}/>}></Route>
+
+					<Route exact path={`/projects/:projectId/entities/:entityId`}
+						component={(props:any) => <EntityPage projectId={props.match.params.projectId} entityId={props.match.params.entityId} />}></Route>
+
+					<Route exact path={`/help`}
+						component={(props:any) => <Help projectId={ new URLSearchParams(props.location.search).get('projectId') || undefined} />}></Route>
+
+					<Route exact path={`/about`}
+						component={(props:any) => <About projectId={ new URLSearchParams(props.location.search).get('projectId') || undefined} />}></Route>
+						
+					<Route exact path={`/admin`}
+						component={(props:any) => <Admin projectId={ new URLSearchParams(props.location.search).get('projectId') || undefined} />}></Route>
+					</Switch>
+				</UserContext.Provider>
+			</BrowserRouter>
+
+		);
+
+	}
 }
 
 export default withStyles(styles)(App)
