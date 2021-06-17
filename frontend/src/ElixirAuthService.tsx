@@ -9,7 +9,6 @@ export default class ElixirAuthService {
         this._domain = encodeURIComponent(window.location.origin) || 'http://localhost:8080';
         this._appURL = process.env.REACT_APP_AAPURL!.replace(/\/$/, '');
 
-        this.getProfile = this.getProfile.bind(this);
         this.login = this.login.bind(this);
     }
 
@@ -82,13 +81,6 @@ export default class ElixirAuthService {
             .map(([key, value]) => `${key}=${value}`).join('&');
     }
 
-
-    loggedIn() {
-        // Checks if there is a saved token and it's still valid
-        const token = this.getToken() // GEtting token from localstorage
-        return !!token && !this.isTokenExpired(token) // handwaiving here
-    }
-
     isTokenExpired(token:string) {
         try {
             const decoded:any = jwt_decode(token);
@@ -119,9 +111,5 @@ export default class ElixirAuthService {
         localStorage.removeItem('id_token');
     }
 
-    getProfile() {
-        // Using jwt-decode npm package to decode the token
-        return jwt_decode(this.getToken()!);
-    }
 }
 

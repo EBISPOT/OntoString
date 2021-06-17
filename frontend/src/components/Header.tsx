@@ -1,6 +1,7 @@
 import { Tooltip } from "@material-ui/core"
 import React, { Fragment } from "react"
 import { Link } from "react-router-dom"
+import UserContext from "../UserContext"
 
 export default function Header(props: { section:string, projectId?:string }) {
 
@@ -35,6 +36,11 @@ export default function Header(props: { section:string, projectId?:string }) {
                     }
                     <li role="menuitem" className={section === 'help' ? 'active' : ''}><Link to={`/help` + (projectId ? '?projectId=' + projectId : '')}>Help</Link></li>
                     <li role="menuitem" className={section === 'about' ? 'active' : ''}><Link to={`/about` + (projectId ? '?projectId=' + projectId : '')}>About</Link></li>
+		    <UserContext.Consumer>
+			    { user => 
+					    <li role="menuitem">{JSON.stringify(user)}</li>
+				    }
+		    </UserContext.Consumer>
                 </ul>
             </nav>
         </header>
