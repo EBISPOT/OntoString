@@ -5,14 +5,8 @@ export default interface Context {
     id?:string
     name:string
     description:string
-    datasources:{
-        field:string
-        mappingList:string[]
-    }[]
-    ontologies:{
-        field:string
-        mappingList:string[]
-    }[]
+    datasources:string[]
+    ontologies:string[]
     preferredMappingOntologies:string[]
     created:Provenance,
     graphRestriction?: {

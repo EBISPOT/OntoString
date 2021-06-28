@@ -15,6 +15,8 @@ import Spinner from "../../components/Spinner";
 import ContextList from "./ContextList";
 import GraphRestrictionClassDialog from "./GraphRestrictionClassDialog";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import AddOntologyDialog from "./AddOntologyDialog";
+import AddDatasourceDialog from "./AddDatasourceDialog";
 
 interface Props {
     projectId:string
@@ -26,6 +28,9 @@ interface State {
     context:Context|null,
     saving:boolean
     showAddGraphRestrictionClassDialog: boolean
+    showAddOntologyDialog: boolean
+    showAddPreferredOntologyDialog: boolean
+    showAddDatasourceDialog: boolean
 }
 
 export default class ContextSettingsPage extends React.Component<Props, State> {
@@ -37,7 +42,10 @@ export default class ContextSettingsPage extends React.Component<Props, State> {
             project: null,
             context: null,
             saving: false,
-            showAddGraphRestrictionClassDialog: false
+            showAddGraphRestrictionClassDialog: false,
+            showAddOntologyDialog: false,
+            showAddPreferredOntologyDialog: false,
+	    showAddDatasourceDialog: false
         }
     }
 
@@ -47,7 +55,7 @@ export default class ContextSettingsPage extends React.Component<Props, State> {
 
     render() {
 
-        let { project, context, showAddGraphRestrictionClassDialog, saving } = this.state
+        let { project, context, showAddGraphRestrictionClassDialog, showAddOntologyDialog, showAddPreferredOntologyDialog, showAddDatasourceDialog, saving } = this.state
 
         if (!isLoggedIn()) {
             return <Redirect to='/login' />
@@ -81,6 +89,9 @@ export default class ContextSettingsPage extends React.Component<Props, State> {
             <LoadingOverlay active={saving}>
 
             <GraphRestrictionClassDialog open={showAddGraphRestrictionClassDialog} onSubmit={this.addGraphRestrictionClass} onCancel={this.closeAddGraphRestrictionClass} />
+            <AddOntologyDialog open={showAddOntologyDialog} onSubmit={this.addOntology} onCancel={this.closeAddOntology} />
+            <AddOntologyDialog open={showAddPreferredOntologyDialog} onSubmit={this.addPreferredOntology} onCancel={this.closeAddPreferredOntology} />
+            <AddDatasourceDialog open={showAddDatasourceDialog} onSubmit={this.addDatasource} onCancel={this.closeAddDatasource} />
 
             <br/>
 
@@ -99,6 +110,82 @@ export default class ContextSettingsPage extends React.Component<Props, State> {
 
             <br/>
 
+	    <hr/>
+
+	    <h2>Datasources</h2>
+
+	    <p>OntoString attempts to automatically map strings to terms using <a target="_blank" href="https://www.ebi.ac.uk/spot/zooma">ZOOMA</a>. The specific datasources to use from ZOOMA to inform these automatic mappings can be configured here.</p>
+                <p>
+                    {context.datasources && context.datasources.map((source) => {
+                        return (
+                                <Chip
+                                    label={source}
+                                    onDelete={() => { this.removeDatasource(source) }}
+                                    color="primary"
+                                    variant="outlined"
+                                />
+                        );
+                    })}
+                    &nbsp;
+                    <Chip
+                        label={<b>+ Add Datasource</b>}
+                        color="primary"
+                        variant="outlined"
+                        onClick={this.clickAddDatasource}
+                    />
+                    </p>
+
+
+
+	    <hr/>
+
+	    <h2>Ontologies</h2>
+		<p>OntoString will attempt to automatically map strings to terms in these ontologies.</p>
+                <p>
+                    {context.ontologies && context.ontologies.map((ontology) => {
+                        return (
+                                <Chip
+                                    label={ontology}
+                                    onDelete={() => { this.removeOntology(ontology) }}
+                                    color="primary"
+                                    variant="outlined"
+                                />
+                        );
+                    })}
+                    &nbsp;
+                    <Chip
+                        label={<b>+ Add Ontology</b>}
+                        color="primary"
+                        variant="outlined"
+                        onClick={this.clickAddOntology}
+                    />
+                    </p>
+
+	    <hr/>
+
+	    <h2>Preferred Ontologies</h2>
+		<p>The preferred ontologies take priority over any of the above ontologies for automatic mappings. If strings are mapped to terms in ontologies other than the preferred ontologies, the status for these terms will be set to <code>NEEDS_IMPORT</code> to flag them for eventual inclusion into the preferred ontologies.</p>
+                <p>
+                    {context.preferredMappingOntologies && context.preferredMappingOntologies.map((ontology) => {
+                        return (
+                                <Chip
+                                    label={ontology}
+                                    onDelete={() => { this.removePreferredOntology(ontology) }}
+                                    color="primary"
+                                    variant="outlined"
+                                />
+                        );
+                    })}
+                    &nbsp;
+                    <Chip
+                        label={<b>+ Add Ontology</b>}
+                        color="primary"
+                        variant="outlined"
+                        onClick={this.clickAddPreferredOntology}
+                    />
+                    </p>
+
+	    <hr/>
 
             {/* <Paper>
                 <Box m={2}> */}
@@ -264,7 +351,7 @@ export default class ContextSettingsPage extends React.Component<Props, State> {
 
         console.log(newContext.graphRestriction.classes)
 
-        await this.setState(prevState => ({ ...prevState, context: newContext }))
+        await this.setState(prevState => ({ ...prevState, context: newContext, showAddGraphRestrictionClassDialog: false }))
         await this.save()
     }
 
@@ -301,6 +388,139 @@ export default class ContextSettingsPage extends React.Component<Props, State> {
         await this.setState(prevState => ({ ...prevState, context: newContext }))
         await this.save()
     }
+
+
+
+
+    clickAddOntology = () => {
+        this.setState(prevState => ({ ...prevState, showAddOntologyDialog: true }))
+    }
+
+    addOntology = async (ontologyId:string) => {
+
+        let context = this.state.context!
+	let ontologies = context.ontologies
+
+	if(ontologies.indexOf(ontologyId) !== -1)
+		return
+
+	ontologies.push(ontologyId)
+
+        let newContext = {
+            ...context,
+	    ontologies
+        }
+
+        await this.setState(prevState => ({ ...prevState, context: newContext, showAddOntologyDialog: false }))
+        await this.save()
+    }
+
+    removeOntology = async (ontologyId:string) => {
+
+        let context = this.state.context!
+
+	let ontologies = context.ontologies.filter(o => o !== ontologyId)
+
+        let newContext = {
+            ...context,
+	    ontologies
+        }
+
+        await this.setState(prevState => ({ ...prevState, context: newContext }))
+        await this.save()
+    }
+
+    closeAddOntology = () => {
+        this.setState(prevState => ({ ...prevState, showAddOntologyDialog: false }))
+    }
+
+
+
+    clickAddPreferredOntology = () => {
+        this.setState(prevState => ({ ...prevState, showAddPreferredOntologyDialog: true }))
+    }
+
+    addPreferredOntology = async (ontologyId:string) => {
+        let context = this.state.context!
+	let ontologies = context.preferredMappingOntologies
+
+	if(ontologies.indexOf(ontologyId) !== -1)
+		return
+
+	ontologies.push(ontologyId)
+
+        let newContext = {
+            ...context,
+	    preferredMappingOntologies: ontologies
+        }
+
+        await this.setState(prevState => ({ ...prevState, context: newContext, showAddPreferredOntologyDialog: false }))
+        await this.save()
+    }
+
+    removePreferredOntology = async (ontologyId:string) => {
+        let context = this.state.context!
+
+	let ontologies = context.preferredMappingOntologies.filter(o => o !== ontologyId)
+
+        let newContext = {
+            ...context,
+	    preferredMappingOntologies: ontologies
+        }
+
+        await this.setState(prevState => ({ ...prevState, context: newContext }))
+        await this.save()
+    }
+
+    closeAddPreferredOntology = () => {
+        this.setState(prevState => ({ ...prevState, showAddPreferredOntologyDialog: false }))
+    }
+
+
+
+
+    clickAddDatasource = () => {
+        this.setState(prevState => ({ ...prevState, showAddDatasourceDialog: true }))
+    }
+
+    addDatasource = async (datasourceId:string) => {
+
+        let context = this.state.context!
+	let datasources = context.datasources
+
+	if(datasources.indexOf(datasourceId) !== -1)
+		return
+
+	datasources.push(datasourceId)
+
+        let newContext = {
+            ...context,
+	    datasources
+        }
+
+        await this.setState(prevState => ({ ...prevState, context: newContext, showAddDatasourceDialog: false }))
+        await this.save()
+    }
+
+    removeDatasource = async (datasourceId:string) => {
+
+        let context = this.state.context!
+
+	let datasources = context.datasources.filter(o => o !== datasourceId)
+
+        let newContext = {
+            ...context,
+	    datasources
+        }
+
+        await this.setState(prevState => ({ ...prevState, context: newContext }))
+        await this.save()
+    }
+
+    closeAddDatasource = () => {
+        this.setState(prevState => ({ ...prevState, showAddDatasourceDialog: false }))
+    }
+
 
 }
 
