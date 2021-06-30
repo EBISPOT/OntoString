@@ -140,7 +140,7 @@ class EntityList extends React.Component<Props, State> {
 
         return <Fragment>
 
-            <UploadDialog open={this.state.showUploadDialog} onCancel={this.closeUploadDialog} projectId={project.id!} />
+            <UploadDialog open={this.state.showUploadDialog} onCancel={this.closeUploadDialog} projectId={project.id!} onUpload={this.onUpload} />
 
             <Grid container justify="space-between">
                 <Grid item>
@@ -273,9 +273,14 @@ class EntityList extends React.Component<Props, State> {
         this.setState(prevState => ({ ...prevState, showUploadDialog: true }))
 
     }
+
     closeUploadDialog = () => {
         this.setState(prevState => ({ ...prevState, showUploadDialog: false }))
+    }
 
+    onUpload = () => {
+        this.setState(prevState => ({ ...prevState, showUploadDialog: false }))
+	this.fetchEntities()
     }
 }
 
