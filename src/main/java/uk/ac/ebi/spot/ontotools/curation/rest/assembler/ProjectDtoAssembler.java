@@ -5,10 +5,8 @@ import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
-import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectContextGraphRestrictionDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectCreationDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.project.ProjectDto;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

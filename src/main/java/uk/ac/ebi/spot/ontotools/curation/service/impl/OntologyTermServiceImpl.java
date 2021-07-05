@@ -21,8 +21,12 @@ import uk.ac.ebi.spot.ontotools.curation.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontotools.curation.service.OLSService;
 import uk.ac.ebi.spot.ontotools.curation.service.OntologyTermService;
 import uk.ac.ebi.spot.ontotools.curation.util.CurationUtil;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class OntologyTermServiceImpl implements OntologyTermService {
@@ -172,18 +176,8 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     }
 
     private boolean isGraphRestrictionValid(String curie, List<OLSTermDto> ancestors, List<String> classes, Boolean includeSelf) {
-        for (OLSTermDto ancestor : ancestors) {
-            if (classes.contains(ancestor.getCurie())) {
-                if (!includeSelf) {
-                    if (!ancestor.getCurie().equals(curie)) {
-                        return true;
-                    }
-                } else {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return ancestors.stream().anyMatch(ancestor -> classes.contains(ancestor.getCurie())
+                && (includeSelf || !ancestor.getCurie().equals(curie)));
     }
 
     @Override
@@ -206,8 +200,7 @@ public class OntologyTermServiceImpl implements OntologyTermService {
     @Override
     public Page<OntologyTermContext> retrieveMappedTermsByStatus(String projectId, String context, String status, Pageable pageable) {
         log.info("Retrieving terms by status: {} | {} | {}", projectId, context, status);
-        Page<OntologyTermContext> ontologyTermContextPage = ontologyTermContextRepository.findByHasMappingAndProjectIdAndContextAndStatus(true, projectId, context, status, pageable);
-        return ontologyTermContextPage;
+        return ontologyTermContextRepository.findByHasMappingAndProjectIdAndContextAndStatus(true, projectId, context, status, pageable);
     }
 
     @Override
@@ -239,9 +232,7 @@ public class OntologyTermServiceImpl implements OntologyTermService {
             }
             ontologyTermContext.setHasMapping(true);
         } else {
-            if (ontologyTermContext.getMappings().contains(mapping.getId())) {
-                ontologyTermContext.getMappings().remove(mapping.getId());
-            }
+            ontologyTermContext.getMappings().remove(mapping.getId());
             if (ontologyTermContext.getMappings().isEmpty()) {
                 ontologyTermContext.setHasMapping(false);
             }
@@ -259,9 +250,7 @@ public class OntologyTermServiceImpl implements OntologyTermService {
         for (OntologyTerm ontologyTerm : ontologyTerms) {
             Optional<OntologyTermContext> ontologyTermContextOp = ontologyTermContextRepository.findByOntologyTermIdAndProjectIdAndContext(ontologyTerm.getId(),
                     projectId, context);
-            if (ontologyTermContextOp.isPresent()) {
-                ontologyTerm.setStatus(ontologyTermContextOp.get().getStatus());
-            }
+            ontologyTermContextOp.ifPresent(ontologyTermContext -> ontologyTerm.setStatus(ontologyTermContext.getStatus()));
             result.put(ontologyTerm.getId(), ontologyTerm);
         }
         return result;

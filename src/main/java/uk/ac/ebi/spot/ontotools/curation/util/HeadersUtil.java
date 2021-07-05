@@ -1,9 +1,9 @@
 package uk.ac.ebi.spot.ontotools.curation.util;
 
 import uk.ac.ebi.spot.ontotools.curation.constants.IDPConstants;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 
 public class HeadersUtil {
 
@@ -12,29 +12,20 @@ public class HeadersUtil {
         if (authHeader == null) {
             String jwt = httpServletRequest.getHeader(IDPConstants.JWT_TOKEN);
             if (jwt == null && httpServletRequest.getCookies() != null) {
-                for (Cookie cookie : httpServletRequest.getCookies()) {
-                    if (cookie.getName().equalsIgnoreCase(IDPConstants.COOKIE_ACCESSTOKEN)) {
-                        jwt = cookie.getValue();
-                        break;
-                    }
-                    if (cookie.getName().equalsIgnoreCase(IDPConstants.JWT_TOKEN)) {
-                        jwt = cookie.getValue();
-                        break;
-                    }
-                }
+                jwt = Arrays.stream(httpServletRequest.getCookies())
+                        .filter(cookie -> IDPConstants.COOKIE_ACCESSTOKEN.equalsIgnoreCase(cookie.getName())
+                                || IDPConstants.JWT_TOKEN.equalsIgnoreCase(cookie.getName())).findFirst()
+                        .map(Cookie::getValue).orElse(null);
             }
             return jwt;
-        } else {
-            String[] parts = authHeader.split(" ");
-            if (parts.length == 2) {
-                if (parts[0].equalsIgnoreCase(IDPConstants.AUTH_BEARER)) {
-                    if ((parts[1] == null) || parts[1].equalsIgnoreCase("null")) {
-                        return null;
-                    }
-
-                    return parts[1];
-                }
+        }
+        String[] parts = authHeader.split(" ");
+        if (parts.length == 2 && parts[0].equalsIgnoreCase(IDPConstants.AUTH_BEARER)) {
+            if (parts[1] == null || parts[1].equalsIgnoreCase("null")) {
+                return null;
             }
+
+            return parts[1];
         }
 
         return null;

@@ -13,7 +13,6 @@ import uk.ac.ebi.spot.ontotools.curation.repository.ProjectRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.ExportExecutorService;
 import uk.ac.ebi.spot.ontotools.curation.service.ExportFileStorageService;
 import uk.ac.ebi.spot.ontotools.curation.service.ProjectExportService;
-
 import java.util.Optional;
 import java.util.UUID;
 

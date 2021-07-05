@@ -11,8 +11,11 @@ import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.MappingSuggestion;
 import uk.ac.ebi.spot.ontotools.curation.repository.ProjectExportRequestRepository;
-import uk.ac.ebi.spot.ontotools.curation.service.*;
-
+import uk.ac.ebi.spot.ontotools.curation.service.EntityService;
+import uk.ac.ebi.spot.ontotools.curation.service.ExportExecutorService;
+import uk.ac.ebi.spot.ontotools.curation.service.ExportFileStorageService;
+import uk.ac.ebi.spot.ontotools.curation.service.MappingService;
+import uk.ac.ebi.spot.ontotools.curation.service.MappingSuggestionsService;
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.SynchronousQueue;
 import java.util.stream.Stream;
 
 @Service
@@ -81,7 +83,6 @@ public class ExportExecutorServiceImpl implements ExportExecutorService {
         Optional<ProjectExportRequest> projectExportRequestOptional = projectExportRequestRepository.findById(projectRequestId);
         if (!projectExportRequestOptional.isPresent()) {
             log.error("Project export request [{}] not found!", projectRequestId);
-            this.execute();
         } else {
             currentRequest = projectRequestId;
             ProjectExportRequest projectExportRequest = projectExportRequestOptional.get();
@@ -89,8 +90,8 @@ public class ExportExecutorServiceImpl implements ExportExecutorService {
             projectExportRequest = projectExportRequestRepository.save(projectExportRequest);
             this.processRequest(projectExportRequest);
             currentRequest = null;
-            this.execute();
         }
+        this.execute();
     }
 
     private void processRequest(ProjectExportRequest projectExportRequest) {

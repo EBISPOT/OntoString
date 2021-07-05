@@ -44,7 +44,7 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
 
         MappingSuggestion created = mappingSuggestionRepository.insert(new MappingSuggestion(null, entity.getId(), ontologyTerm.getId(), entity.getProjectId(), provenance, null));
         auditEntryService.addEntry(AuditEntryConstants.ADDED_SUGGESTION.name(), entity.getId(), provenance,
-                Arrays.asList(new MetadataEntry[]{new MetadataEntry(ontologyTerm.getIri(), ontologyTerm.getLabel(), AuditEntryConstants.ADDED.name())}));
+                Arrays.asList(new MetadataEntry(ontologyTerm.getIri(), ontologyTerm.getLabel(), AuditEntryConstants.ADDED.name())));
         log.info("[{} | {}] Mapping suggestion created: {}", entity.getName(), ontologyTerm.getCurie(), created.getId());
         return created;
     }
@@ -116,6 +116,6 @@ public class MappingSuggestionsServiceImpl implements MappingSuggestionsService 
             }
         }
         auditEntryService.addEntry(AuditEntryConstants.REMOVED_SUGGESTION.name(), entityId, provenance,
-                Arrays.asList(new MetadataEntry[]{new MetadataEntry(ontologyTerm.getIri(), ontologyTerm.getLabel(), AuditEntryConstants.REMOVED.name())}));
+                Arrays.asList(new MetadataEntry(ontologyTerm.getIri(), ontologyTerm.getLabel(), AuditEntryConstants.REMOVED.name())));
     }
 }

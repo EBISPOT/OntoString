@@ -64,7 +64,7 @@ public class MappingsController {
     public MappingDto getMapping(@PathVariable String projectId, @RequestParam(value = CurationConstants.PARAM_ENTITY_ID) String entityId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve mappings: {} | {}", user.getEmail(), projectId, entityId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER));
         Entity entity = entityService.retrieveEntity(entityId);
         Mapping mapping = mappingService.retrieveMappingForEntity(entity.getId());
         if (mapping == null) {
@@ -83,7 +83,7 @@ public class MappingsController {
     public MappingDto createMapping(@PathVariable String projectId, @RequestBody @Valid MappingCreationDto mappingCreationDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to create mapping: {} | {} | {}", user.getEmail(), projectId, mappingCreationDto.getEntityId(), mappingCreationDto.getOntologyTerms());
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR));
 
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         Entity entity = entityService.retrieveEntity(mappingCreationDto.getEntityId());
@@ -122,7 +122,7 @@ public class MappingsController {
     public MappingDto updateMapping(@PathVariable String projectId, @PathVariable String mappingId, @RequestBody @NotEmpty @Valid MappingDto mappingDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to update mapping [{} | {}]: {}", user.getEmail(), projectId, mappingId, mappingDto.getOntologyTerms());
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR));
 
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         Map<String, OntologyTerm> ontologyTermMap = new LinkedHashMap<>();
@@ -162,7 +162,7 @@ public class MappingsController {
                               HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to delete mapping [{}]: {}", user.getEmail(), projectId, mappingId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR));
 
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         Mapping mapping = mappingService.retrieveMappingById(mappingId);

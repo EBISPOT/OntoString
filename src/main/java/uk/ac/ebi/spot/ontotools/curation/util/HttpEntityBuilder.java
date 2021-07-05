@@ -3,7 +3,6 @@ package uk.ac.ebi.spot.ontotools.curation.util;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-
 import java.util.Map;
 
 public class HttpEntityBuilder {
@@ -19,9 +18,7 @@ public class HttpEntityBuilder {
     }
 
     public HttpEntityBuilder withHeaders(Map<String, String> headerMap) {
-
-        headerMap.entrySet().stream()
-                .forEach(entry -> headers.set(entry.getKey(), entry.getValue()));
+        headers.setAll(headerMap);
         return this;
     }
 

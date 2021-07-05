@@ -52,7 +52,7 @@ public class MappingReviewsController {
                                   @RequestBody String comment, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to create review on mapping: {} | {}", user.getEmail(), projectId, mappingId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR));
 
         Project project = projectService.retrieveProject(projectId, user);
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
@@ -70,7 +70,7 @@ public class MappingReviewsController {
     public List<ReviewDto> retrieveReviews(@PathVariable String projectId, @PathVariable String mappingId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve reviews for mapping: {} | {}", user.getEmail(), projectId, mappingId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR));
 
         Mapping mapping = mappingService.retrieveMappingById(mappingId);
         return mapping.getReviews() != null ? mapping.getReviews().stream().map(ReviewDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>();

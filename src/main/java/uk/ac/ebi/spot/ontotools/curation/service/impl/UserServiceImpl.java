@@ -13,7 +13,6 @@ import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.ontotools.curation.repository.UserRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.UserService;
 import uk.ac.ebi.spot.ontotools.curation.system.SystemConfigProperties;
-
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
@@ -134,8 +133,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<User> retrieveUsers(String prefix, Pageable page) {
         log.info("Retrieving users: {}", prefix);
-        Page<User> userPage = prefix == null ? userRepository.findAll(page) : userRepository.findByNameLikeIgnoreCase(prefix, page);
-        return userPage;
+        return prefix == null ? userRepository.findAll(page) : userRepository.findByNameLikeIgnoreCase(prefix, page);
     }
 
     @Override

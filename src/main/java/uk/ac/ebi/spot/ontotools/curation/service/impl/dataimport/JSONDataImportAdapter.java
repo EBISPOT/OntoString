@@ -16,6 +16,7 @@ import uk.ac.ebi.spot.ontotools.curation.service.DataImportService;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 @Component(DataImportFileType.JSON)
 public class JSONDataImportAdapter implements DataImportAdapter {
@@ -36,7 +37,7 @@ public class JSONDataImportAdapter implements DataImportAdapter {
     public String importData(InputStream fileInputStream, String projectId, Source source, User user) {
 
         try {
-            String fileData = IOUtils.toString(fileInputStream, "UTF-8");
+            String fileData = IOUtils.toString(fileInputStream, StandardCharsets.UTF_8);
             ImportDataPackageDto importDataPackageDto = this.objectMapper.readValue(fileData, new TypeReference<>() {
             });
             dataImportService.importData(importDataPackageDto, projectId, source, user);

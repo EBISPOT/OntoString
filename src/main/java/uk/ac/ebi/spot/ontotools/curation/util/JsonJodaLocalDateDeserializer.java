@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
-
 import java.io.IOException;
 
 public class JsonJodaLocalDateDeserializer extends JsonDeserializer<LocalDate> {
@@ -14,7 +13,6 @@ public class JsonJodaLocalDateDeserializer extends JsonDeserializer<LocalDate> {
     public LocalDate deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         DateTimeFormatter isoDateTimeFormatter = DateTimeCommon.getIsoDateFormatter();
         String dateValueAsString = jsonParser.getValueAsString();
-        LocalDate localDate = isoDateTimeFormatter.parseLocalDate(dateValueAsString);
-        return localDate;
+        return isoDateTimeFormatter.parseLocalDate(dateValueAsString);
     }
 }

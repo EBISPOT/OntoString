@@ -54,10 +54,10 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectContext projectContext = projectCreationPair.getRight();
         projectContext.setProjectId(created.getId());
         projectContext = projectContextRepository.insert(projectContext);
-        created.setContextIds(Arrays.asList(new String[]{projectContext.getId()}));
+        created.setContextIds(Arrays.asList(projectContext.getId()));
         created = projectRepository.save(created);
         log.info("[{}] Project created: {}", created.getName(), created.getId());
-        created.setContexts(Arrays.asList(new ProjectContext[]{projectContext}));
+        created.setContexts(Arrays.asList(projectContext));
         return created;
     }
 
@@ -69,7 +69,7 @@ public class ProjectServiceImpl implements ProjectService {
             log.error("[{}] Unable to find project: {}", user.getEmail(), projectId);
             throw new EntityNotFoundException("[" + user.getEmail() + "] Unable to find project: " + projectId);
         }
-        if (hasAccess(user, projectId, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}))) {
+        if (hasAccess(user, projectId, Arrays.asList(ProjectRole.ADMIN))) {
             Project existing = exitingOp.get();
             existing.setName(project.getName());
             existing.setDescription(project.getDescription());
@@ -93,7 +93,7 @@ public class ProjectServiceImpl implements ProjectService {
             log.error("[{}] Unable to find project: {}", user.getEmail(), projectId);
             throw new EntityNotFoundException("[" + user.getEmail() + "] Unable to find project: " + projectId);
         }
-        if (hasAccess(user, projectId, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}))) {
+        if (hasAccess(user, projectId, Arrays.asList(ProjectRole.ADMIN))) {
             Project existing = exitingOp.get();
             projectRepository.delete(existing);
 
@@ -109,7 +109,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project retrieveProject(String projectId, User user) {
         log.info("[{}] Retrieving project: {}", user.getEmail(), projectId);
-        if (!hasAccess(user, projectId, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONSUMER, ProjectRole.CONTRIBUTOR}))) {
+        if (!hasAccess(user, projectId, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONSUMER, ProjectRole.CONTRIBUTOR))) {
             log.error("[{}] User does not have access project: {}", user.getEmail(), projectId);
             throw new EntityNotFoundException("[" + user.getEmail() + "] Unable to find project: " + projectId);
         }

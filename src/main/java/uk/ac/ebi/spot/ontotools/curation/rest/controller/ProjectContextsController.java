@@ -56,7 +56,7 @@ public class ProjectContextsController {
                                            @RequestBody @Valid ProjectContextDto projectContextDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to create project context [{}]: {}", user.getEmail(), projectId, projectContextDto.getName());
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN));
         if (projectContextDto.getGraphRestriction() != null) {
             ProjectContextGraphRestrictionDto newGraphRestriction = graphRestrictionUtil.enrichGraphRestriction(projectContextDto.getGraphRestriction());
             projectContextDto = new ProjectContextDto(projectContextDto.getName(),
@@ -81,7 +81,7 @@ public class ProjectContextsController {
     public ProjectDto updateProjectContext(@RequestBody @Valid ProjectContextDto projectContextDto, @PathVariable String projectId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to update project context [{}]: {}", user.getEmail(), projectId, projectContextDto.getName());
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN));
         ProjectContextGraphRestrictionDto newGraphRestriction = projectContextDto.getGraphRestriction();
         if (newGraphRestriction != null) {
             newGraphRestriction = graphRestrictionUtil.enrichGraphRestriction(newGraphRestriction);
@@ -107,7 +107,7 @@ public class ProjectContextsController {
     public void deleteProjectContext(@PathVariable String projectId, @PathVariable String contextName, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to delete project context [{}]: {}", user.getEmail(), projectId, contextName);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN));
         if (contextName.equalsIgnoreCase(CurationConstants.CONTEXT_DEFAULT)) {
             log.error("Cannot delete DEFAULT context for any project.");
             throw new BadRequestException("Cannot delete DEFAULT context for any project.");

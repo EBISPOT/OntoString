@@ -52,7 +52,7 @@ public class MappingCommentsController {
                                     @RequestBody @NotEmpty String body, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to create comment on mapping: {} | {}", user.getEmail(), projectId, mappingId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER));
 
         Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
         Mapping mapping = mappingService.addCommentToMapping(mappingId, body, provenance);
@@ -68,7 +68,7 @@ public class MappingCommentsController {
     public List<CommentDto> retrieveReviews(@PathVariable String projectId, @PathVariable String mappingId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve comments for mapping: {} | {}", user.getEmail(), projectId, mappingId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER));
 
         Mapping mapping = mappingService.retrieveMappingById(mappingId);
         return mapping.getReviews() != null ? mapping.getComments().stream().map(CommentDtoAssembler::assemble).collect(Collectors.toList()) : new ArrayList<>();

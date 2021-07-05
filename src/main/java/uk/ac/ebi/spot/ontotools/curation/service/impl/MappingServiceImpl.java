@@ -19,8 +19,13 @@ import uk.ac.ebi.spot.ontotools.curation.repository.MappingRepository;
 import uk.ac.ebi.spot.ontotools.curation.service.AuditEntryService;
 import uk.ac.ebi.spot.ontotools.curation.service.MappingService;
 import uk.ac.ebi.spot.ontotools.curation.service.OntologyTermService;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,7 +52,7 @@ public class MappingServiceImpl implements MappingService {
         List<OntologyTerm> newTerms = new ArrayList<>();
         for (OntologyTerm ontologyTerm : ontologyTerms) {
             auditEntryService.addEntry(AuditEntryConstants.ADDED_MAPPING.name(), entity.getId(), provenance,
-                    Arrays.asList(new MetadataEntry[]{new MetadataEntry(ontologyTerm.getIri(), ontologyTerm.getLabel(), AuditEntryConstants.ADDED.name())}));
+                    Arrays.asList(new MetadataEntry(ontologyTerm.getIri(), ontologyTerm.getLabel(), AuditEntryConstants.ADDED.name())));
             newTerms.add(ontologyTermService.mapTerm(ontologyTerm, created, true));
         }
         created.setOntologyTerms(newTerms);
@@ -80,17 +85,12 @@ public class MappingServiceImpl implements MappingService {
         }
 
         mapping.setOntologyTermIds(newTermIds);
-        List<MetadataEntry> metadata = new ArrayList<>();
-        for (String oldIRI : oldIRIs.keySet()) {
-            if (!newIRIs.containsKey(oldIRI)) {
-                metadata.add(new MetadataEntry(oldIRI, oldIRIs.get(oldIRI), AuditEntryConstants.REMOVED.name()));
-            }
-        }
-        for (String newIRI : newIRIs.keySet()) {
-            if (!oldIRIs.containsKey(newIRI)) {
-                metadata.add(new MetadataEntry(newIRI, oldIRIs.get(newIRI), AuditEntryConstants.ADDED.name()));
-            }
-        }
+        List<MetadataEntry> metadata = oldIRIs.entrySet().stream().filter(entry -> !newIRIs.containsKey(entry.getKey()))
+                .map(entry -> new MetadataEntry(entry.getKey(), entry.getValue(), AuditEntryConstants.REMOVED.name()))
+                .collect(Collectors.toList());
+        newIRIs.entrySet().stream().filter(entry -> !oldIRIs.containsKey(entry.getKey()))
+                .map(entry -> new MetadataEntry(entry.getKey(), entry.getValue(), AuditEntryConstants.ADDED.name()))
+                .forEach(metadata::add);
 
         auditEntryService.addEntry(AuditEntryConstants.UPDATED_MAPPING.name(), mappingOp.get().getEntityId(), provenance, metadata);
         mapping = mappingRepository.save(mapping);
@@ -140,7 +140,6 @@ public class MappingServiceImpl implements MappingService {
             for (String oId : mapping.getOntologyTermIds()) {
                 if (!ontologyTermMap.containsKey(oId)) {
                     log.warn("Unable to find ontology term [{}] for mapping suggestion: {}", oId, mapping.getId());
-                    continue;
                 } else {
                     ontologyTerms.add(ontologyTermMap.get(oId));
                 }
@@ -164,7 +163,6 @@ public class MappingServiceImpl implements MappingService {
             for (String oId : mapping.getOntologyTermIds()) {
                 if (!ontologyTermMap.containsKey(oId)) {
                     log.warn("Unable to find ontology term [{}] for mapping suggestion: {}", oId, mapping.getId());
-                    continue;
                 } else {
                     ontologyTerms.add(ontologyTermMap.get(oId));
                 }
@@ -191,7 +189,7 @@ public class MappingServiceImpl implements MappingService {
         mapping = mappingRepository.save(mapping);
         auditEntryService.addEntry(AuditEntryConstants.REVIEWED.name(), mappingOp.get().getEntityId(), provenance,
                 comment != null ?
-                        Arrays.asList(new MetadataEntry[]{new MetadataEntry("COMMENT", comment, AuditEntryConstants.ADDED.name())}) :
+                        Arrays.asList(new MetadataEntry("COMMENT", comment, AuditEntryConstants.ADDED.name())) :
                         new ArrayList<>());
         return mapping;
     }

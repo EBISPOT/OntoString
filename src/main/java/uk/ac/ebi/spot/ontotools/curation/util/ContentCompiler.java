@@ -2,7 +2,6 @@ package uk.ac.ebi.spot.ontotools.curation.util;
 
 import org.apache.commons.lang3.StringUtils;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,15 +23,14 @@ public class ContentCompiler {
     }
 
     public void addOntologyTerm(OntologyTerm ontologyTerm, String entityNames) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(ontologyTerm.getIri())
-                .append(",")
-                .append("\"" + ontologyTerm.getLabel() + "\"")
-                .append(",");
-        if (ontologyTerm.getCrossRefs() != null && !ontologyTerm.getCrossRefs().equalsIgnoreCase("")) {
+                .append(',').append('"').append(ontologyTerm.getLabel()).append('"')
+                .append(',');
+        if (StringUtils.isNotBlank(ontologyTerm.getCrossRefs())) {
             sb.append(ontologyTerm.getCrossRefs());
         }
-        sb.append(",").append(entityNames);
+        sb.append(',').append(entityNames);
         lines.add(sb.toString());
     }
 

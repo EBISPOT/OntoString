@@ -52,7 +52,7 @@ public class ProjectsUtilController {
                                         HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to query OLS [{}]: {} | {}", user.getEmail(), projectId, query, context);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER));
         Project project = projectService.retrieveProject(projectId, user);
         Map<String, List<OLSQueryDocDto>> resultsMap = new LinkedHashMap<>();
         resultsMap.put(OLSQueryResultsType.ALL.name(), olsService.query(query, project, context, false, false));

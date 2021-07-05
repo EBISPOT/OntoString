@@ -72,7 +72,7 @@ public class MappingUpdateTask {
             project.setContexts(projectContexts);
 
             Stream<Entity> entityStream = entityRepository.readByProjectIdAndMappingStatusIn(project.getId(),
-                    Arrays.asList(new EntityStatus[]{EntityStatus.SUGGESTIONS_PROVIDED, EntityStatus.UNMAPPED}));
+                    Arrays.asList(EntityStatus.SUGGESTIONS_PROVIDED, EntityStatus.UNMAPPED));
             entityStream.forEach(entity -> matchmakerService.autoMap(entity, project, robotUser, batchId));
             entityStream.close();
             count++;

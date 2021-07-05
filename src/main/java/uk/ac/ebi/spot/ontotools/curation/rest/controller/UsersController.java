@@ -58,7 +58,7 @@ public class UsersController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public RestResponsePage<UserDto> getUsers(@RequestParam(value = CurationConstants.PARAM_SEARCH, required = false) String prefix,
-                                              @PageableDefault(size = 20, page = 0) Pageable pageable,
+                                              @PageableDefault(size = 20) Pageable pageable,
                                               HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve users: {}", user.getEmail(), prefix);

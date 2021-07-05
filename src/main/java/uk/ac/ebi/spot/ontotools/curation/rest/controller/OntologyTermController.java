@@ -65,7 +65,7 @@ public class OntologyTermController {
     public OntologyTermDto createOntologyTerm(@PathVariable String projectId, @RequestBody @Valid OntologyTermCreationDto ontologyTermCreationDto, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to create ontology term: {} | {}", user.getEmail(), projectId, ontologyTermCreationDto.getOntologyTerm().getCurie());
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR));
         OntologyTerm created = ontologyTermService.createTerm(OntologyTermDtoAssembler.disassemble(ontologyTermCreationDto.getOntologyTerm()), projectId,
                 ontologyTermCreationDto.getContext(), ontologyTermCreationDto.getOntologyTerm().getStatus());
         return OntologyTermDtoAssembler.assemble(created);
@@ -84,7 +84,7 @@ public class OntologyTermController {
                                                                       HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to get ontology terms: {} | {} | {}", user.getEmail(), projectId, status, context);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER));
         Page<OntologyTermContext> ontologyTermContextsPage = ontologyTermService.retrieveMappedTermsByStatus(projectId, context, status, pageable);
 
         List<String> ontoTermIds = ontologyTermContextsPage.getContent().stream().map(OntologyTermContext::getOntologyTermId).collect(Collectors.toList());
@@ -108,7 +108,7 @@ public class OntologyTermController {
                                                      HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to get ontology term stats: {} | {}", user.getEmail(), projectId, context);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER));
         Map<String, Integer> stats = ontologyTermService.retrieveTermStats(projectId, context);
         return new OntologyTermStatsDto(stats);
     }
@@ -123,7 +123,7 @@ public class OntologyTermController {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to action ontology terms: {} | {} | {}", user.getEmail(), projectId,
                 actionOntologyTermsDto.getStatus(), actionOntologyTermsDto.getContext());
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR));
         ontologyTermUtilService.actionTerms(projectId, actionOntologyTermsDto.getContext(),
                 actionOntologyTermsDto.getStatus(), actionOntologyTermsDto.getComment(), user);
     }
@@ -139,7 +139,7 @@ public class OntologyTermController {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to export ontology terms: {} | {} | {}", user.getEmail(), projectId,
                 exportOntologyTermsDto.getStatus(), exportOntologyTermsDto.getContext());
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER));
 
         String csvContent = ontologyTermUtilService.exportOntologyTerms(projectId, exportOntologyTermsDto.getContext(),
                 exportOntologyTermsDto.getStatus());

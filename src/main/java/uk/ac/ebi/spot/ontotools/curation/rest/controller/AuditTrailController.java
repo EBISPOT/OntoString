@@ -54,7 +54,7 @@ public class AuditTrailController {
                                            HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve audit trail for entity: {} | {}", user.getEmail(), projectId, entityId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER));
         Entity entity = entityService.retrieveEntity(entityId);
         List<AuditEntry> auditTrail = auditEntryService.retrieveAuditEntries(entity.getId());
         return auditTrail.stream().map(AuditEntryDtoAssembler::assemble).collect(Collectors.toList());

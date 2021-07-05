@@ -12,11 +12,9 @@ import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.dataimport.ImportDataPackageDto;
 import uk.ac.ebi.spot.ontotools.curation.service.DataImportService;
 import uk.ac.ebi.spot.ontotools.curation.util.CSVDataTransform;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +34,7 @@ public class CSVDataImportAdapter implements DataImportAdapter {
             CSVReader csvReader = new CSVReader(new BufferedReader(new InputStreamReader(fileInputStream)));
             List<String[]> data = csvReader.readAll();
             csvReader.close();
-            if (data.size() > 0) {
+            if (!data.isEmpty()) {
                 String[] headerLine = data.get(0);
                 if (headerLine.length > 0) {
                     Map<String, Integer> headerIndex = new LinkedHashMap<>();

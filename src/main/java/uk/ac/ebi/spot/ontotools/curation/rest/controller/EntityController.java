@@ -65,10 +65,10 @@ public class EntityController {
     public RestResponsePage<EntityDto> getEntities(@PathVariable String projectId,
                                                    @RequestParam(value = CurationConstants.PARAM_SEARCH, required = false) String prefix,
                                                    @RequestParam(value = CurationConstants.PARAM_CONTEXT, required = false) String context,
-                                                   @PageableDefault(size = 20, page = 0) Pageable pageable, HttpServletRequest request) {
+                                                   @PageableDefault(size = 20) Pageable pageable, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve entities: {} | {} | {}", user.getEmail(), projectId, prefix, context);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER));
         List<Source> sources = sourceService.getSources(projectId);
         Map<String, SourceDto> sourceMap = new HashMap<>();
         for (Source source : sources) {
@@ -100,11 +100,11 @@ public class EntityController {
     public EntityDto getEntity(@PathVariable String projectId, @PathVariable String entityId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve entity: {} | {}", user.getEmail(), projectId, entityId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER));
         Entity entity = entityService.retrieveEntity(entityId);
         Source source = sourceService.getSource(entity.getSourceId(), projectId);
         Mapping mapping = mappingService.retrieveMappingForEntity(entityId);
-        Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entityId}), projectId, entity.getContext());
+        Map<String, List<MappingSuggestion>> mappingSuggestions = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(entityId), projectId, entity.getContext());
         return EntityDtoAssembler.assemble(entity, SourceDtoAssembler.assemble(source),
                 mapping, mappingSuggestions.get(entityId),
                 auditEntryService.retrieveAuditEntries(entity.getId()));

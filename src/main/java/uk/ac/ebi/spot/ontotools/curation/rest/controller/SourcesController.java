@@ -71,7 +71,7 @@ public class SourcesController {
     public SourceDto createSource(@RequestBody @Valid SourceCreationDto sourceCreationDto, @PathVariable String projectId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{} | {}] Request to create source: {}", user.getEmail(), projectId, sourceCreationDto.getName());
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR));
         Source created = sourceService.createSource(SourceDtoAssembler.disassemble(sourceCreationDto, new Provenance(user.getName(), user.getEmail(), DateTime.now())), projectId);
         return SourceDtoAssembler.assemble(created);
     }
@@ -85,7 +85,7 @@ public class SourcesController {
     public List<SourceDto> getSources(@PathVariable String projectId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve sources: {}", user.getEmail(), projectId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER));
         List<Source> sources = sourceService.getSources(projectId);
         log.info("Found {} sources in project: {}", sources.size(), projectId);
         return sources.stream().map(SourceDtoAssembler::assemble).collect(Collectors.toList());
@@ -100,7 +100,7 @@ public class SourcesController {
     public SourceDto getSource(@PathVariable String projectId, @PathVariable String sourceId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve source: {} | {}", user.getEmail(), projectId, sourceId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER));
         Source source = sourceService.getSource(sourceId, projectId);
         return SourceDtoAssembler.assemble(source);
     }
@@ -114,7 +114,7 @@ public class SourcesController {
     public void addDataToSource(@RequestBody List<String> entities, @PathVariable String projectId, @PathVariable String sourceId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to add data to source: {} | {} | {}", user.getEmail(), projectId, sourceId, entities);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR));
         Source source = sourceService.getSource(sourceId, projectId);
         for (String entity : entities) {
             entityService.createEntity(new Entity(null, entity, null, null, source.getId(),
@@ -132,7 +132,7 @@ public class SourcesController {
     public void importDataFromFile(@RequestParam MultipartFile file, @PathVariable String projectId, @PathVariable String sourceId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to import data from file [{} - {}] to source: {} | {}", user.getEmail(), file.getOriginalFilename(), file.getSize(), projectId, sourceId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR));
         Source source = sourceService.getSource(sourceId, projectId);
 
         try {

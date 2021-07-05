@@ -113,14 +113,10 @@ public class MatchmakerServiceImpl implements MatchmakerService {
              */
             if (projectOntologies != null) {
                 if (projectOntologies.contains(CurationUtil.ontoFromIRI(suggestedTermIRI).toLowerCase())) {
-                    if (!finalIRIs.contains(suggestedTermIRI)) {
-                        finalIRIs.add(suggestedTermIRI);
-                    }
-                }
-            } else {
-                if (!finalIRIs.contains(suggestedTermIRI)) {
                     finalIRIs.add(suggestedTermIRI);
                 }
+            } else {
+                finalIRIs.add(suggestedTermIRI);
             }
         }
 
@@ -139,12 +135,12 @@ public class MatchmakerServiceImpl implements MatchmakerService {
                 }
 
                 if (highConfidenceIRIs.contains(ontologyTerm.getIri())) {
-                    mappingService.createMapping(entity, Arrays.asList(new OntologyTerm[]{ontologyTerm}), provenance);
+                    mappingService.createMapping(entity, Arrays.asList(ontologyTerm), provenance);
                     entity = entityService.updateMappingStatus(entity, EntityStatus.AUTO_MAPPED);
                     log.info("Found high confidence mapping for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
                 } else {
                     if (entity.getName().equalsIgnoreCase(ontologyTerm.getLabel())) {
-                        mappingService.createMapping(entity, Arrays.asList(new OntologyTerm[]{ontologyTerm}), provenance);
+                        mappingService.createMapping(entity, Arrays.asList(ontologyTerm), provenance);
                         entity = entityService.updateMappingStatus(entity, EntityStatus.AUTO_MAPPED);
                         log.info("Found exact text matching for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
                     }

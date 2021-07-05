@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import uk.ac.ebi.spot.ontotools.curation.constants.UpdateTaskType;
 import uk.ac.ebi.spot.ontotools.curation.domain.UpdateTask;
 import uk.ac.ebi.spot.ontotools.curation.repository.UpdateTaskRepository;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -32,8 +31,7 @@ public class UpdateTaskManager {
             }
             return null;
         }
-        UpdateTask updateTask = updateTaskRepository.insert(new UpdateTask(null, UpdateTaskType.MAPPING_UPDATE.name(), DateTime.now()));
-        return updateTask;
+        return updateTaskRepository.insert(new UpdateTask(null, UpdateTaskType.MAPPING_UPDATE.name(), DateTime.now()));
     }
 
     public void removeUpdateTask(UpdateTask updateTask) {

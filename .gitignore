@@ -4,3 +4,4 @@
 frontend/curator/static/
 frontend/.env
 
+*.iml

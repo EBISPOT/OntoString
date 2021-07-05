@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.ebi.spot.ontotools.curation.constants.CSVImportHeader;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.dataimport.ImportDataElementDto;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.dataimport.ImportDataPackageDto;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,7 @@ public class CSVDataTransform {
     private void transformLine(int lineNo, String[] lineEntries) {
         int index = this.headerIndex.get(CSVImportHeader.TEXT.name());
         if (lineEntries.length <= index) {
-            log.warn("Line [" + lineNo + "]: Invalid line. TEXT component index out of range.");
+            log.warn("Line [{}]: Invalid line. TEXT component index out of range.", lineNo);
             return;
         }
         String textValue = lineEntries[index];

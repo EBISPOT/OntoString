@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.ontotools.curation.exception.FileProcessingException;
 import uk.ac.ebi.spot.ontotools.curation.service.ExportFileStorageService;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -73,10 +72,10 @@ public class ExportFileStorageServiceImpl implements ExportFileStorageService {
     }
 
     private InputStream getFileDownloadStream(ObjectId objectId) {
-        log.info("Retrieving file for download: {}", objectId.toString());
+        log.info("Retrieving file for download: {}", objectId);
         GridFSDownloadStream stream = GridFSBuckets.create(mongoTemplate.getDb())
                 .openDownloadStream(objectId);
-        log.info("Retrieved download stream {}", objectId.toString());
+        log.info("Retrieved download stream {}", objectId);
         return stream;
 
     }

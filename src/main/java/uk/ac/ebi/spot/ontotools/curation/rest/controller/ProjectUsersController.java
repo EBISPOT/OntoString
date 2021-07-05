@@ -49,7 +49,7 @@ public class ProjectUsersController {
     public List<UserDto> getProjectUsers(@PathVariable String projectId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to retrieve users for project: {}", user.getEmail(), projectId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN));
         List<User> users = userService.findByProjectId(projectId);
         return users.stream().map(UserDtoAssembler::assemble).collect(Collectors.toList());
     }
@@ -64,7 +64,7 @@ public class ProjectUsersController {
     public UserDto addUserToProject(@RequestBody @Valid ProjectUserDto projectUserDto, @PathVariable String projectId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to add user to project [{}]", user.getEmail(), projectId, projectUserDto.getUser().getEmail());
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN));
         User targetUser = UserDtoAssembler.disassemble(projectUserDto.getUser());
 
         List<ProjectRole> projectRoles = CurationUtil.rolesFromStringList(projectUserDto.getRoles());
@@ -82,7 +82,7 @@ public class ProjectUsersController {
     public UserDto updateUserToProject(@RequestBody @Valid ProjectUserDto projectUserDto, @PathVariable String projectId, @PathVariable String userId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to update user roles [{}] in project [{}]", user.getEmail(), userId, projectId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN));
         User targetUser = UserDtoAssembler.disassemble(projectUserDto.getUser());
         List<ProjectRole> projectRoles = CurationUtil.rolesFromStringList(projectUserDto.getRoles());
         targetUser = userService.updateUserRoles(targetUser, projectId, projectRoles);
@@ -97,7 +97,7 @@ public class ProjectUsersController {
     public void removeUserFromProject(@PathVariable String projectId, @PathVariable String userId, HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
         log.info("[{}] Request to remove user roles [{}] in project [{}]", user.getEmail(), userId, projectId);
-        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN}));
+        projectService.verifyAccess(projectId, user, Arrays.asList(ProjectRole.ADMIN));
         User targetUser = userService.findById(userId);
         userService.removeProjectFromUser(targetUser, projectId);
     }
