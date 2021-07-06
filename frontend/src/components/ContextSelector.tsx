@@ -8,8 +8,8 @@ import Project from "../dto/Project";
 
 export interface Props {
     project:Project
-    context:Context
-    onSwitchContext: (context:Context) => void
+    context:Context|null
+    onSwitchContext: (context:Context|null) => void
 }
 
 export interface State {
@@ -67,16 +67,15 @@ export default class ContextSelector extends React.Component<Props, State> {
             onChange={(event:any, newValue:Context|null) => {
                 console.log('onchange' + newValue)
                 console.dir(newValue)
-                if(newValue)
-                    this.setContext(newValue);
+		this.setContext(newValue);
             }}
             id="controllable-states-demo"
             options={this.state.contexts}
             style={{ width: 300 }}
             getOptionLabel={(option:Context) => option.name}
-            renderInput={(params) => <TextField {...params} />}
+            renderInput={(params) => <TextField  placeholder="Select context..." {...params} />}
+	    clearOnEscape
             // PaperComponent={CreateComponent as any}
-            disableClearable
         />
 
         </Fragment>
@@ -104,7 +103,7 @@ export default class ContextSelector extends React.Component<Props, State> {
     //     this.setState(prevState => ({ ...prevState, showCreateContextDialog: false }))
     // }
 
-    setContext = (context:Context) => {
+    setContext = (context:Context|null) => {
         this.props.onSwitchContext(context)
     }
 

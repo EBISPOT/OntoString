@@ -28,4 +28,6 @@ public interface MappingService {
     void deleteMapping(String mappingId, Provenance provenance, List<MetadataEntry> metadata);
 
     void updateStatusForObsoleteMappings(String ontologyTermId, String projectId, String context);
+
+    void addMapping(Entity entity, OntologyTerm ontologyTerm, Provenance provenance);
 }

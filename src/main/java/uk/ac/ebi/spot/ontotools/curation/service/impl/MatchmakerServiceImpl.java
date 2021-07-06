@@ -8,11 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontotools.curation.constants.EntityStatus;
-import uk.ac.ebi.spot.ontotools.curation.domain.log.MatchmakingLogEntry;
 import uk.ac.ebi.spot.ontotools.curation.domain.Project;
 import uk.ac.ebi.spot.ontotools.curation.domain.ProjectContext;
 import uk.ac.ebi.spot.ontotools.curation.domain.Provenance;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
+import uk.ac.ebi.spot.ontotools.curation.domain.log.MatchmakingLogEntry;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontotools.curation.domain.mapping.OntologyTerm;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.zooma.ZoomaResponseDto;
@@ -134,7 +134,19 @@ public class MatchmakerServiceImpl implements MatchmakerService {
                 termsCreated.add(ontologyTerm);
                 mappingSuggestionsService.createMappingSuggestion(entity, ontologyTerm, provenance);
 
-                if (entity.getMappingStatus().equals(EntityStatus.MANUALLY_MAPPED) || entity.getMappingStatus().equals(EntityStatus.AUTO_MAPPED)) {
+                if (entity.getMappingStatus().equals(EntityStatus.MANUALLY_MAPPED)) {
+                    continue;
+                }
+                if (entity.getMappingStatus().equals(EntityStatus.AUTO_MAPPED)) {
+                    if (highConfidenceIRIs.contains(ontologyTerm.getIri())) {
+                        mappingService.addMapping(entity, ontologyTerm, provenance);
+                        log.info("Found high confidence mapping for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
+                    } else {
+                        if (entity.getName().equalsIgnoreCase(ontologyTerm.getLabel())) {
+                            mappingService.addMapping(entity, ontologyTerm, provenance);
+                            log.info("Found high confidence mapping for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
+                        }
+                    }
                     continue;
                 }
 
