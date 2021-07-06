@@ -41,7 +41,7 @@ interface State {
     loading:boolean
     entities:Paginated<Entity>|null
     goToEntity:Entity|null
-    context:Context,
+    context:Context|null,
     showUploadDialog:boolean
 }
 
@@ -60,7 +60,7 @@ class EntityList extends React.Component<Props, State> {
             loading:true,
             entities: null,
             goToEntity: null,
-            context: props.project.contexts.filter(c => c.name === 'DEFAULT')[0]!,
+            context: null,
             showUploadDialog: false
         }
 
@@ -209,7 +209,7 @@ class EntityList extends React.Component<Props, State> {
 
         let res = await fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${project.id}/entities?${
             new URLSearchParams({
-                context: context!.name!,
+		    ...(context ? { context: context.name! } : {}),
                 page: page.toString(),
                 size: size.toString(),
                 ...(sortColumn ? { sort: sortColumn + ',' + sortDirection } : {}),
@@ -263,7 +263,7 @@ class EntityList extends React.Component<Props, State> {
     //     }
     // }
 
-    onSwitchContext = async (context:Context) => {
+    onSwitchContext = async (context:Context|null) => {
 
         await this.setState(prevState => ({ ...prevState, context }))
         this.fetchEntities()
