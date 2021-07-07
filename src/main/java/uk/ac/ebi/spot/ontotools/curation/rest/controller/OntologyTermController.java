@@ -79,7 +79,7 @@ public class OntologyTermController {
     @ResponseStatus(HttpStatus.OK)
     public RestResponsePage<ExtendedOntologyTermDto> getOntologyTerms(@PathVariable String projectId,
                                                                       @RequestParam(value = CurationConstants.PARAM_STATUS) String status,
-                                                                      @RequestParam(value = CurationConstants.PARAM_CONTEXT) String context,
+                                                                      @RequestParam(value = CurationConstants.PARAM_CONTEXT, required = false) String context,
                                                                       @PageableDefault(size = 20) Pageable pageable,
                                                                       HttpServletRequest request) {
         User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
