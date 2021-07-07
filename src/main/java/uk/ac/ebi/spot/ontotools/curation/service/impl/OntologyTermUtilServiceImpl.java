@@ -80,7 +80,8 @@ public class OntologyTermUtilServiceImpl implements OntologyTermUtilService {
 
     @Override
     public Map<OntologyTerm, Map<String, String>> retrieveEntityData(List<String> ontoTermIds, List<OntologyTermContext> ontologyTermContexts, String projectId, String context) {
-        List<Entity> entities = entityRepository.findByProjectIdAndContext(projectId, context);
+        List<Entity> entities = context == null ? entityRepository.findByProjectId(projectId) :
+                entityRepository.findByProjectIdAndContext(projectId, context);
         Map<String, String> entityMap = new LinkedHashMap<>();
         for (Entity entity : entities) {
             entityMap.put(entity.getId(), entity.getName());
