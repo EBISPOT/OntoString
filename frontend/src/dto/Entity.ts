@@ -15,6 +15,7 @@ export default interface Entity {
     mapping:Mapping
     created:Provenance
     auditTrail:AuditEntry[]
+    context: string
 }
 
 export enum EntityStatus {
