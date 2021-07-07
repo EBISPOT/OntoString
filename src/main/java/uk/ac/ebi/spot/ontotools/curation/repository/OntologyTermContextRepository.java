@@ -14,6 +14,8 @@ public interface OntologyTermContextRepository extends MongoRepository<OntologyT
 
     Page<OntologyTermContext> findByHasMappingAndProjectIdAndContextAndStatus(boolean hasMapping, String projectId, String context, String status, Pageable pageable);
 
+    Page<OntologyTermContext> findByHasMappingAndProjectIdAndStatus(boolean hasMapping, String projectId, String status, Pageable pageable);
+
     List<OntologyTermContext> findByHasMappingAndProjectIdAndContextAndStatus(boolean hasMapping, String projectId, String context, String status);
 
     Stream<OntologyTermContext> readByHasMappingAndProjectIdAndContextAndStatus(boolean hasMapping, String projectId, String context, String status);
