@@ -38,7 +38,8 @@ export default function Header(props: { section:string, projectId?:string }) {
                     <li role="menuitem" className={section === 'about' ? 'active' : ''}><Link to={`/about` + (projectId ? '?projectId=' + projectId : '')}>About</Link></li>
 		    <UserContext.Consumer>
 			    { user => 
-					    <li role="menuitem">{JSON.stringify(user)}</li>
+					user && user.superUser === true &&
+                    <li role="menuitem" className={section === 'admin' ? 'active' : ''}><Link to={`/admin` + (projectId ? '?projectId=' + projectId : '')}>Admin</Link></li>
 				    }
 		    </UserContext.Consumer>
                 </ul>
