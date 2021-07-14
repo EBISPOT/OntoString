@@ -7,13 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.ontotools.curation.constants.CurationConstants;
-import uk.ac.ebi.spot.ontotools.curation.domain.config.ExternalServiceConfig;
 import uk.ac.ebi.spot.ontotools.curation.domain.auth.User;
+import uk.ac.ebi.spot.ontotools.curation.domain.config.ExternalServiceConfig;
 import uk.ac.ebi.spot.ontotools.curation.exception.AuthorizationException;
 import uk.ac.ebi.spot.ontotools.curation.rest.assembler.ExternalServiceConfigDtoAssembler;
 import uk.ac.ebi.spot.ontotools.curation.rest.dto.config.ExternalServiceConfigDto;
 import uk.ac.ebi.spot.ontotools.curation.service.ExternalServiceConfigService;
 import uk.ac.ebi.spot.ontotools.curation.service.JWTService;
+import uk.ac.ebi.spot.ontotools.curation.service.ProjectAdminService;
 import uk.ac.ebi.spot.ontotools.curation.system.GeneralCommon;
 import uk.ac.ebi.spot.ontotools.curation.util.HeadersUtil;
 
@@ -33,6 +34,9 @@ public class PlatformAdminController {
 
     @Autowired
     private ExternalServiceConfigService externalServiceConfigService;
+
+    @Autowired(required = false)
+    private ProjectAdminService projectAdminService;
 
     /**
      * PUT /v1/platform-admin
@@ -67,5 +71,25 @@ public class PlatformAdminController {
 
         List<ExternalServiceConfig> configs = externalServiceConfigService.retrieveConfigs();
         return configs.stream().map(ExternalServiceConfigDtoAssembler::assemble).collect(Collectors.toList());
+    }
+
+    /**
+     * GET /v1/platform-admin/run-matchmaking
+     */
+    @GetMapping(value = CurationConstants.API_RUN_MATCHMAKING)
+    @ResponseStatus(HttpStatus.OK)
+    public void runMatchmaking(HttpServletRequest request) {
+        User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        log.info("[{}] Request to retrieve platform config.", user.getEmail());
+        if (!user.isSuperUser()) {
+            log.error("Invalid access control for user: {}", user.getEmail());
+            throw new AuthorizationException("Invalid access control for user: " + user.getEmail());
+        }
+
+        if (projectAdminService != null) {
+            projectAdminService.runMatchmaking();
+        } else {
+            log.error("Unable to rerun matchmaking. Update schedule for Zooma is disabled.");
+        }
     }
 }
