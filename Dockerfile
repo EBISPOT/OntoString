@@ -14,4 +14,4 @@ ADD target/ontotools-curation-service-*.war /home/ontotools-curation-service/
 USER ontotools-curation-service
 
 # Launch application server
-ENTRYPOINT exec $JAVA_HOME/bin/java $XMX $XMS -jar -Dspring.profiles.active=$ENVIRONMENT /home/ontotools-curation-service/ontotools-curation-service-*.war
+ENTRYPOINT exec $JAVA_HOME/bin/java $XMX $XMS -jar -Dspring.profiles.active=$ENVIRONMENT /home/ontotools-curation-service/ontotools-curation-service-*.war -Dhttp.proxyHost=http://hh-wwwcache.ebi.ac.uk:3128 -Dhttp.proxyPort=8080
