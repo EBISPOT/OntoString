@@ -1,0 +1,32 @@
+package uk.ac.ebi.spot.ontostring.rest.assembler;
+
+import uk.ac.ebi.spot.ontostring.domain.Provenance;
+import uk.ac.ebi.spot.ontostring.domain.Source;
+import uk.ac.ebi.spot.ontostring.rest.dto.project.SourceCreationDto;
+import uk.ac.ebi.spot.ontostring.rest.dto.project.SourceDto;
+
+public class SourceDtoAssembler {
+
+    public static SourceDto assemble(Source source) {
+        return new SourceDto(source.getId(),
+                source.getName(),
+                source.getDescription(),
+                source.getUri(),
+                source.getType(),
+                ProvenanceDtoAssembler.assemble(source.getCreated()),
+                ProvenanceDtoAssembler.assemble(source.getLastUpdated()));
+    }
+
+    public static Source disassemble(SourceCreationDto source, Provenance provenance) {
+        return new Source(null,
+                source.getName(),
+                source.getDescription(),
+                source.getUri(),
+                source.getType(),
+                provenance,
+                provenance,
+                null,
+                null,
+                false);
+    }
+}

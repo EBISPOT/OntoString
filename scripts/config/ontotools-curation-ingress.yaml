@@ -14,5 +14,5 @@ spec:
       paths:
       - path: /ontotools/curation/api(/|$)(.*)
         backend:
-          serviceName: ontotools-curation-service
+          serviceName: ontostring
           servicePort: 8080

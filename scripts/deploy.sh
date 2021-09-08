@@ -1,4 +1,4 @@
 #!/bin/bash
 
-kubectl delete deploy ontotools-curation-service -n ontotools
-kubectl apply -f config/ontotools-curation-service-deployment.yaml
+kubectl delete deploy ontostring -n ontotools
+kubectl apply -f config/ontostring-deployment.yaml

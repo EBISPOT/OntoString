@@ -20,7 +20,7 @@
             </encoder>
         </appender>
 
-        <logger name="uk.ac.ebi.spot.ontotools" level="INFO">
+        <logger name="uk.ac.ebi.spot" level="INFO">
             <appender-ref ref="ROLLING"/>
         </logger>
 <!--
@@ -51,7 +51,7 @@
             </encoder>
         </appender>
 
-        <logger name="uk.ac.ebi.spot.ontotools" level="INFO">
+        <logger name="uk.ac.ebi.spot" level="INFO">
             <appender-ref ref="ROLLING"/>
         </logger>
         <!--
@@ -81,7 +81,7 @@
             </encoder>
         </appender>
 
-        <logger name="uk.ac.ebi.spot.ontotools" level="INFO">
+        <logger name="uk.ac.ebi.spot" level="INFO">
             <appender-ref ref="ROLLING"/>
         </logger>
         <!--
@@ -111,7 +111,7 @@
             </encoder>
         </appender>
 
-        <logger name="uk.ac.ebi.spot.ontotools" level="INFO">
+        <logger name="uk.ac.ebi.spot" level="INFO">
             <appender-ref ref="ROLLING"/>
         </logger>
         <root level="OFF">
@@ -136,7 +136,7 @@
             </encoder>
         </appender>
 
-        <logger name="uk.ac.ebi.spot.ontotools" level="INFO">
+        <logger name="uk.ac.ebi.spot" level="INFO">
             <appender-ref ref="ROLLING"/>
         </logger>
         <!--
