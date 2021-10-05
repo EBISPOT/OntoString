@@ -9,19 +9,19 @@ import java.util.List;
 @Component
 public class CurationConfig {
 
-    @Value("${ontotools-curation.auth.enabled}")
+    @Value("${ontostring.auth.enabled}")
     private boolean authEnabled;
 
-    @Value("${ontotools-curation.auth.cert:#{NULL}}")
+    @Value("${ontostring.auth.cert:#{NULL}}")
     private String certPath;
 
-    @Value("${ontotools-curation.auth.curators.auth-mechanism:JWT_DOMAIN}")
+    @Value("${ontostring.auth.curators.auth-mechanism:JWT_DOMAIN}")
     private String curatorAuthMechanism;
 
-    @Value("${ontotools-curation.auth.curators.jwt-domains:#{NULL}}")
+    @Value("${ontostring.auth.curators.jwt-domains:#{NULL}}")
     private String curatorDomains;
 
-    @Value("${ontotools-curation.db:#{NULL}}")
+    @Value("${ontostring.db:#{NULL}}")
     private String dbName;
 
     public String getDbName() {

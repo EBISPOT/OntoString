@@ -50,7 +50,7 @@ spec:
       volumes:
       - name: log
         persistentVolumeClaim:
-           claimName: ontotools-curation-logs
+           claimName: ontostring-logs
 ---
 kind: Service
 apiVersion: v1
