@@ -44,7 +44,7 @@ interface State {
     loading:boolean
     terms:Paginated<TermListing>|null
     goToTermListing:TermListing|null
-    context:Context
+    context:Context|null,
     tab:string
     showActionDialog:boolean
     stats:any
@@ -65,7 +65,7 @@ class TermListingList extends React.Component<Props, State> {
             loading:true,
             terms: null,
             goToTermListing: null,
-            context: props.project.contexts.filter(c => c.name === 'DEFAULT')[0]!,
+            context: null,
             tab: 'NEEDS_IMPORT',
             showActionDialog: false,
             stats:null
@@ -105,10 +105,15 @@ class TermListingList extends React.Component<Props, State> {
             cell: (t:TermListing) => <TermStatusBox status={t.ontologyTerm.status} />
         },
         {
-            name: 'Entity',
+            name: 'Entities',
             selector: 'entity',
             sortable: true,
-            cell: (t:TermListing) => t.entities.map(e => <Link to={`/projects/${project.id}/entities/${e.id}`}>{e.name}</Link>)
+            cell: (t:TermListing) =>  <Box> {t.entities.map(e => <Fragment>
+		    <Link to={`/projects/${project.id}/entities/${e.id}`}>{e.name}</Link>
+		    <br/>
+	</Fragment>
+	)}
+		    </Box>
         },
     ]
 
@@ -158,6 +163,18 @@ class TermListingList extends React.Component<Props, State> {
                 Finally, OntoString will pick up the terms when they are added to the ontology, and display them in the <b>Current</b> list, which is the end of the curation workflow.
             </p>
 
+		<Grid container>
+			<Grid item xs={6}>
+				<Input startAdornment={<InputAdornment position="start"><SearchIcon /></InputAdornment>} onChange={this.onFilter} />
+			</Grid>
+			<Grid item xs={6} container justify="flex-end">
+				<ContextSelector project={project} context={context} onSwitchContext={this.onSwitchContext} />
+			</Grid>
+            </Grid>
+
+	
+	    {context &&
+	    <Fragment>
 
              <Tabs
                 indicatorColor="primary"
@@ -168,18 +185,11 @@ class TermListingList extends React.Component<Props, State> {
                 <Tab label={`Deleted (${stats?.DELETED || '0'})`} value='DELETED' />
                 <Tab label={`Obsolete (${stats?.OBSOLETE || '0'})`} value='OBSOLETE' />
                 <Tab label={`Needs Import (${stats?.NEEDS_IMPORT || '0'})`} value='NEEDS_IMPORT' />
-                <Tab label={`Current (${stats?.CURRENT || '0'})`} value='CURRENT' />
+                {/* <Tab label={`Current (${stats?.CURRENT || '0'})`} value='CURRENT' /> */}
+                <Tab label={`Current`} value='CURRENT' />
             </Tabs>
 
 
-            <Grid container>
-                <Grid item xs={6}>
-            <Input startAdornment={<InputAdornment position="start"><SearchIcon /></InputAdornment>} onChange={this.onFilter} />
-            </Grid>
-                <Grid item xs={6} container justify="flex-end">
-                <ContextSelector project={project} context={context} onSwitchContext={this.onSwitchContext}  />
-            </Grid>
-            </Grid>
             <DataTable
                 columns={columns}
                 data={terms?.content || []}
@@ -199,6 +209,11 @@ class TermListingList extends React.Component<Props, State> {
                 progressPending={this.state.loading}
                 progressComponent={<Spinner />}
             />
+
+
+	    </Fragment>}
+
+
         </Fragment>
     }
 
@@ -209,12 +224,19 @@ class TermListingList extends React.Component<Props, State> {
 
         let { page, size, sortColumn, sortDirection, filter } = this.state
 
+
+
+	/// TODO: remove when backend fixed
+	if(!context)
+		return
+
+
         await this.setState(prevState => ({ ...prevState, loading: true }))
 
         let [res,statsRes] = await Promise.all([
             fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${project.id}/ontology-terms?${
                 new URLSearchParams({
-                    context: context!.name!,
+		    ...(context ? { context: context.name! } : {}),
                     page: page.toString(),
                     size: size.toString(),
                     status: this.state.tab,
@@ -226,7 +248,7 @@ class TermListingList extends React.Component<Props, State> {
             }),
             fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${project.id}/ontology-terms-stats?${
                 new URLSearchParams({
-                    context: context!.name!
+		    ...(context ? { context: context.name! } : {}),
                 })
             }`, {
                 headers: { ...getAuthHeaders() }
@@ -278,7 +300,7 @@ class TermListingList extends React.Component<Props, State> {
     //     }
     // }
 
-    onSwitchContext = async (context:Context) => {
+    onSwitchContext = async (context:Context|null) => {
 
         await this.setState(prevState => ({ ...prevState, context }))
         this.fetchTermListings()
@@ -299,7 +321,7 @@ class TermListingList extends React.Component<Props, State> {
             method: 'POST',
             body: JSON.stringify({
                 status: tab,
-                context: context.name
+		    ...(context ? { context: context.name! } : {}),
             }),
             headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
         })
@@ -307,7 +329,12 @@ class TermListingList extends React.Component<Props, State> {
         let b = await res.arrayBuffer()
 
         var blob = new Blob([b], { type: 'text/csv' })
-        FileSaver.saveAs(blob, `${project.name}_${context.name}.csv`)
+
+	let filename = context ? 
+		`${project.name}_${context.name}.csv` :
+		`${project.name}.csv`
+
+        FileSaver.saveAs(blob, filename)
     }
 
     markActioned = async () => {
@@ -325,7 +352,7 @@ class TermListingList extends React.Component<Props, State> {
             method: 'POST',
             body: JSON.stringify({
                 status: tab,
-                context: context.name,
+		    ...(context ? { context: context.name! } : {}),
                 comment
             }),
             headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }

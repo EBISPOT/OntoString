@@ -8,6 +8,7 @@ import Source from "../../dto/Source";
 
 interface Props {
     onCancel:()=>void
+    onUpload:()=>void
     projectId:string
     open:boolean
 }
@@ -45,7 +46,7 @@ class UploadDialog extends React.Component<Props, State> {
         let { open } = this.props
         let { tab, name, description, file, sources, sourceId } = this.state
 
-        let canSubmit = tab === 'new' ?
+        let canSubmit = tab === 'NEW' ?
             ( name && description && file ) :
             ( file && sourceId )
 
@@ -161,8 +162,11 @@ class UploadDialog extends React.Component<Props, State> {
 
         let { projectId } = this.props
 
-        let type = this.state.file.name.endsWith('.json')
-            ? 'application/json': 'text/csv'
+        // let type = this.state.file.name.endsWith('.json')
+        //     ? 'application/json': 'text/csv'
+
+	let formData = new FormData()
+	formData.append('file', this.state.file)
 
         if(this.state.tab === 'NEW') {
 
@@ -177,19 +181,21 @@ class UploadDialog extends React.Component<Props, State> {
 
             let uploadRes = await fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${projectId}/sources/${res.id}/upload`, {
                 method: 'POST',
-                headers: { ...getAuthHeaders(), 'content-type': type },
-                body: this.state.file
+                headers: { ...getAuthHeaders()},
+                body: formData
             })
 
         } else {
 
             let uploadRes = await fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${projectId}/sources/${this.state.sourceId}/upload`, {
                 method: 'POST',
-                headers: { ...getAuthHeaders(), 'content-type': type },
-                body: this.state.file
+                headers: { ...getAuthHeaders()},
+                body: formData
             })
 
         }
+
+	this.props.onUpload()
 
     }
 

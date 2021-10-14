@@ -96,8 +96,8 @@ export default class EntityPage extends React.Component<Props, State> {
 
                 <SearchOntologiesDialog 
 
-                // contextName={entity.context}
-                contextName='DEFAULT'
+                contextName={entity.context}
+                // contextName='DEFAULT'
 
                 open={showSearchOntologiesDialog} onClose={this.closeSearchOntologies} onSelectTerm={this.onSelectOntologyTerm} project={project} />
                 <AddReviewDialog open={showAddReviewDialog} onCancel={this.closeAddReview} onSubmit={this.onAddReview} />
