@@ -56,6 +56,27 @@ public class MappingServiceImpl implements MappingService {
     }
 
     @Override
+    public void addMapping(Entity entity, OntologyTerm ontologyTerm, Provenance provenance) {
+        log.info("Adding term to mapping for entity [{}]: {}", entity.getName(), ontologyTerm);
+        Optional<Mapping> mappingOp = mappingRepository.findByEntityId(entity.getId());
+        if (!mappingOp.isPresent()) {
+            log.error("Mapping not found for entity: {}", entity.getId());
+            throw new EntityNotFoundException("Mapping not found for entity: " + entity.getId());
+        }
+        Mapping mapping = mappingOp.get();
+        if (mapping.getOntologyTermIds().contains(ontologyTerm.getId())) {
+            return;
+        }
+        ontologyTermService.mapTerm(ontologyTerm, mapping, true);
+        mapping.getOntologyTermIds().add(ontologyTerm.getId());
+        auditEntryService.addEntry(AuditEntryConstants.UPDATED_MAPPING.name(), mappingOp.get().getEntityId(), provenance,
+                Arrays.asList(new MetadataEntry[]{
+                        new MetadataEntry(ontologyTerm.getIri(), ontologyTerm.getLabel(), AuditEntryConstants.ADDED.name())
+                }));
+        mappingRepository.save(mapping);
+    }
+
+    @Override
     public Mapping updateMapping(String mappingId, List<OntologyTerm> newTerms, List<OntologyTerm> oldTerms, Provenance provenance) {
         log.info("Updating mapping [{}]: {}", mappingId, newTerms);
         Optional<Mapping> mappingOp = mappingRepository.findById(mappingId);
@@ -88,7 +109,7 @@ public class MappingServiceImpl implements MappingService {
         }
         for (String newIRI : newIRIs.keySet()) {
             if (!oldIRIs.containsKey(newIRI)) {
-                metadata.add(new MetadataEntry(newIRI, oldIRIs.get(newIRI), AuditEntryConstants.ADDED.name()));
+                metadata.add(new MetadataEntry(newIRI, newIRIs.get(newIRI), AuditEntryConstants.ADDED.name()));
             }
         }
 

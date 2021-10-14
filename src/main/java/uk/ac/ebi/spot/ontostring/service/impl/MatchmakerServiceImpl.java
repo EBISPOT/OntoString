@@ -135,7 +135,19 @@ public class MatchmakerServiceImpl implements MatchmakerService {
                 termsCreated.add(ontologyTerm);
                 mappingSuggestionsService.createMappingSuggestion(entity, ontologyTerm, provenance);
 
-                if (entity.getMappingStatus().equals(EntityStatus.MANUALLY_MAPPED) || entity.getMappingStatus().equals(EntityStatus.AUTO_MAPPED)) {
+                if (entity.getMappingStatus().equals(EntityStatus.MANUALLY_MAPPED)) {
+                    continue;
+                }
+                if (entity.getMappingStatus().equals(EntityStatus.AUTO_MAPPED)) {
+                    if (highConfidenceIRIs.contains(ontologyTerm.getIri())) {
+                        mappingService.addMapping(entity, ontologyTerm, provenance);
+                        log.info("Found high confidence mapping for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
+                    } else {
+                        if (entity.getName().equalsIgnoreCase(ontologyTerm.getLabel())) {
+                            mappingService.addMapping(entity, ontologyTerm, provenance);
+                            log.info("Found high confidence mapping for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
+                        }
+                    }
                     continue;
                 }
 

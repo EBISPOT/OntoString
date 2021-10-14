@@ -34,6 +34,9 @@ public class PlatformAdminController {
     @Autowired
     private ExternalServiceConfigService externalServiceConfigService;
 
+    @Autowired(required = false)
+    private ProjectAdminService projectAdminService;
+
     /**
      * PUT /v1/platform-admin
      */
@@ -67,5 +70,25 @@ public class PlatformAdminController {
 
         List<ExternalServiceConfig> configs = externalServiceConfigService.retrieveConfigs();
         return configs.stream().map(ExternalServiceConfigDtoAssembler::assemble).collect(Collectors.toList());
+    }
+
+    /**
+     * GET /v1/platform-admin/run-matchmaking
+     */
+    @GetMapping(value = CurationConstants.API_RUN_MATCHMAKING)
+    @ResponseStatus(HttpStatus.OK)
+    public void runMatchmaking(HttpServletRequest request) {
+        User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        log.info("[{}] Request to retrieve platform config.", user.getEmail());
+        if (!user.isSuperUser()) {
+            log.error("Invalid access control for user: {}", user.getEmail());
+            throw new AuthorizationException("Invalid access control for user: " + user.getEmail());
+        }
+
+        if (projectAdminService != null) {
+            projectAdminService.runMatchmaking();
+        } else {
+            log.error("Unable to rerun matchmaking. Update schedule for Zooma is disabled.");
+        }
     }
 }

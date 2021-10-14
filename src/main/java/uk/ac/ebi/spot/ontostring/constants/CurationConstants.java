@@ -12,6 +12,8 @@ public class CurationConstants {
 
     public static final String API_PLATFORM_ADMIN = "/platform-admin";
 
+    public static final String API_RUN_MATCHMAKING = "/run-matchmaking";
+
     public static final String API_MAPPINGS = "/mappings";
 
     public static final String API_EXPORT = "/export";
