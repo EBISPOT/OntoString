@@ -12,7 +12,8 @@ OntoString is a tool for curating mappings from free text to ontology terms.
   {
     "name": "Super user",
     "email": "ontostring@ebi.ac.uk",
-    "superUser": true
+    "superUser": true,
+    "roles": []
   }
   ```
   * Set `ontostring.auth.enabled` to `false` in the `dev` profile in `application.yml`
