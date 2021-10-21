@@ -29,7 +29,7 @@ public class ExceptionHandlerAdvice {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String> handleAuthorizationException(EntityNotFoundException e) {
+    public ResponseEntity<String> handleNotFoundException(EntityNotFoundException e) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_PLAIN);
         return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.NOT_FOUND);

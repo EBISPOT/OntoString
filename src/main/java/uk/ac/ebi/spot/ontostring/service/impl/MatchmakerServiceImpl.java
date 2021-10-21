@@ -102,6 +102,11 @@ public class MatchmakerServiceImpl implements MatchmakerService {
             }
 
             String suggestedTermIRI = zoomaResponseDto.getSemanticTags().get(0);
+
+
+
+            log.warn("Processing suggestion: {}", suggestedTermIRI);
+
             /**
              * Retain high confidence terms to attempt exact mapping.
              */
@@ -114,11 +119,18 @@ public class MatchmakerServiceImpl implements MatchmakerService {
              */
             if (projectOntologies != null) {
                 if (projectOntologies.contains(CurationUtil.ontoFromIRI(suggestedTermIRI).toLowerCase())) {
+                    log.warn("Entity {}: Term {} was found in ontology {} which is in the list of project ontologies; this suggestion will be kept",
+                            entity.getName(), suggestedTermIRI, CurationUtil.ontoFromIRI(suggestedTermIRI).toLowerCase());
                     if (!finalIRIs.contains(suggestedTermIRI)) {
                         finalIRIs.add(suggestedTermIRI);
                     }
+                } else {
+                    log.warn("Entity {}: Term {} was found in ontology {} which is not in the list of project ontologies; this suggestion will be discarded",
+                            entity.getName(), suggestedTermIRI, CurationUtil.ontoFromIRI(suggestedTermIRI).toLowerCase());
                 }
             } else {
+                log.warn("Project has no ontologies configured; term {} from ontology {} kept by default",
+                        suggestedTermIRI, CurationUtil.ontoFromIRI(suggestedTermIRI).toLowerCase());
                 if (!finalIRIs.contains(suggestedTermIRI)) {
                     finalIRIs.add(suggestedTermIRI);
                 }

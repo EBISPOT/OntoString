@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property scope="context" name="serviceName" value="curation-service"/>
+    <property scope="context" name="serviceName" value="ontostring"/>
 
     <springProfile name="dev">
         <property resource="logging-dev.properties"/>
@@ -19,9 +19,15 @@
                 <pattern>${log.pattern}</pattern>
             </encoder>
         </appender>
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${log.pattern}</pattern>
+            </encoder>
+        </appender>
 
-        <logger name="uk.ac.ebi.spot" level="INFO">
+        <logger name="uk.ac.ebi.spot" level="ALL">
             <appender-ref ref="ROLLING"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
 <!--
         <logger name="org.springframework" level="DEBUG">

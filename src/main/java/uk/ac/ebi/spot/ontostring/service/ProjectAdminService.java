@@ -1,4 +1,4 @@
-package uk.ac.ebi.spot.ontotools.curation.service;
+package uk.ac.ebi.spot.ontostring.service;
 
 public interface ProjectAdminService {
     void runMatchmaking();

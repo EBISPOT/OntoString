@@ -56,6 +56,7 @@ public class MappingUpdateTask {
         log.info("Running mappings update ...");
         UpdateTask updateTask = updateTaskManager.checkAndCreateIfNecessary(UpdateTaskType.MAPPING_UPDATE.name());
         if (updateTask == null) {
+            log.info("The updateTask was null; leaving updateMappings");
             return;
         }
 

@@ -42,10 +42,23 @@ public class ZoomaServiceImpl implements ZoomaService {
             log.error("Unable to encode string: {} - {}", entityValue, e.getMessage(), e);
             return new ArrayList<>();
         }
+
+
+        String filter =  RestInteractionConstants.zoomaFilterValueFromList(datasources, ontologies);
+        String encodedFilter;
+        try {
+            encodedFilter = URLEncoder.encode(filter, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            log.error("Unable to encode string: {} - {}", filter, e.getMessage(), e);
+            return new ArrayList<>();
+        }
+
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(restInteractionConfig.getZoomaAnnotateEndpoint())
                 .queryParam(RestInteractionConstants.ZOOMA_PROPERTY_VALUE, encodedString)
-                .queryParam(RestInteractionConstants.ZOOMA_FILTER, RestInteractionConstants.zoomaFilterValueFromList(datasources, ontologies));
+                .queryParam(RestInteractionConstants.ZOOMA_FILTER, encodedFilter);
         String endpoint = uriBuilder.build().toUriString();
+
+        log.info("Calling Zooma endpoint: {}", endpoint);
 
         try {
             HttpEntity httpEntity = restInteractionConfig.httpEntity().build();

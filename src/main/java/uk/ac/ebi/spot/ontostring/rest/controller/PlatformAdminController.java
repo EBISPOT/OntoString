@@ -10,6 +10,7 @@ import uk.ac.ebi.spot.ontostring.domain.auth.User;
 import uk.ac.ebi.spot.ontostring.domain.config.ExternalServiceConfig;
 import uk.ac.ebi.spot.ontostring.service.ExternalServiceConfigService;
 import uk.ac.ebi.spot.ontostring.service.JWTService;
+import uk.ac.ebi.spot.ontostring.service.ProjectAdminService;
 import uk.ac.ebi.spot.ontostring.system.GeneralCommon;
 import uk.ac.ebi.spot.ontostring.util.HeadersUtil;
 import uk.ac.ebi.spot.ontostring.constants.CurationConstants;

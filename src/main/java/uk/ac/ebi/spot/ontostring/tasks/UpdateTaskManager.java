@@ -23,7 +23,7 @@ public class UpdateTaskManager {
     public UpdateTask checkAndCreateIfNecessary(String updateTaskType) {
         List<UpdateTask> updateTasks = updateTaskRepository.findByTaskType(updateTaskType);
         if (!updateTasks.isEmpty()) {
-            log.info("[{}] Some other node executes the update.", updateTaskType);
+            log.info("[{}] There is already an update task in the repository, which means some other node is in the process of executing the update", updateTaskType);
             if (updateTasks.size() > 1) {
                 log.warn("There are more than 1 update tasks active for [{}]: {}", updateTaskType, updateTasks.size());
                 for (UpdateTask updateTask : updateTasks) {
