@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: ontotools-curation-service
+  name: ontostring
   namespace: ontotools
   labels:
     version: latest
@@ -15,11 +15,11 @@ spec:
   template:
     metadata:
       labels:
-        app: ontotools-curation-service
+        app: ontostring
     spec:
       containers:
-      - name: ontotools-curation-service
-        image: "ebispot/ontotools-curation-service:latest-sandbox"
+      - name: ontostring
+        image: "ebispot/ontostring:latest-sandbox"
         imagePullPolicy: Always
         resources:
           requests:
@@ -42,7 +42,7 @@ spec:
         - name: XMX
           value: "-Xms256m"
         - name: LOG_FILE_NAME
-          value: "ontotools-curation-service"
+          value: "ontostring"
         - name: DB_USER
           value: ""
         - name: DB_PASSWORD
@@ -50,15 +50,15 @@ spec:
       volumes:
       - name: log
         persistentVolumeClaim:
-           claimName: ontotools-curation-logs
+           claimName: ontostring-logs
 ---
 kind: Service
 apiVersion: v1
 metadata:
   labels:
-    app: ontotools-curation-service
+    app: ontostring
     version: latest
-  name: ontotools-curation-service
+  name: ontostring
   namespace: ontotools
 spec:
   type: NodePort
@@ -66,4 +66,4 @@ spec:
   - name: "application"
     port: 8080
   selector:
-    app: ontotools-curation-service
+    app: ontostring

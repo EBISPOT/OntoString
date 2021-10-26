@@ -1,5 +1,5 @@
 server:
-  name: ontotools-curation
+  name: ontostring
   port: 8080
   servlet:
     context-path: /spot/ontostring
@@ -15,7 +15,7 @@ logging:
     org:
       springframework: DEBUG
 
-ontotools-curation:
+ontostring:
   auth:
     enabled: true
     cert: aap.der
@@ -54,8 +54,8 @@ spring:
     mongodb:
       uri: localhost:27017
 
-ontotools-curation:
-  db: ontotools-curation-dev
+ontostring:
+  db: ontostring-dev
 
 ontotools:
   ols:
@@ -75,8 +75,8 @@ spring:
     mongodb:
       uri: snoopy.ebi.ac.uk:27017
 
-ontotools-curation:
-  db: ontotools-curation-test
+ontostring:
+  db: ontostring-test
 
 ---
 
@@ -88,8 +88,8 @@ spring:
     mongodb:
       uri: mongo-0.mongo.default.svc.cluster.local,mongo-1.mongo.default.svc.cluster.local,mongo-2.mongo.default.svc.cluster.local:27017
 
-ontotools-curation:
-  db: ontotools-curation-sandbox
+ontostring:
+  db: ontostring-sandbox
 
 ---
 
@@ -101,7 +101,7 @@ spring:
     mongodb:
       uri: mongos-hx-ontotoolscuratorprors071-01.ebi.ac.uk:27017,mongos-hl-ontotoolscuratorprors071-02.ebi.ac.uk:27017/admin
 
-ontotools-curation:
+ontostring:
   db: ontotoolscurator
 
 ontotools:
@@ -124,7 +124,7 @@ spring:
     mongodb:
       uri: mongos-hx-ontotoolscuratorprors071-01.ebi.ac.uk:27017,mongos-hl-ontotoolscuratorprors071-02.ebi.ac.uk:27017/admin
 
-ontotools-curation:
+ontostring:
   db: ontotoolscurator
 
 ontotools:

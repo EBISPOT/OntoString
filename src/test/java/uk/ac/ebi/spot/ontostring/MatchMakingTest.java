@@ -1,0 +1,117 @@
+package uk.ac.ebi.spot.ontostring;
+
+import org.apache.commons.lang3.RandomStringUtils;
+import org.joda.time.DateTime;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import uk.ac.ebi.spot.ontostring.domain.Project;
+import uk.ac.ebi.spot.ontostring.domain.Provenance;
+import uk.ac.ebi.spot.ontostring.domain.config.ExternalServiceConfig;
+import uk.ac.ebi.spot.ontostring.domain.mapping.*;
+import uk.ac.ebi.spot.ontostring.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontostring.rest.dto.project.SourceDto;
+import uk.ac.ebi.spot.ontostring.service.*;
+import uk.ac.ebi.spot.ontostring.constants.CurationConstants;
+import uk.ac.ebi.spot.ontostring.constants.EntityStatus;
+import uk.ac.ebi.spot.ontostring.constants.MappingStatus;
+import uk.ac.ebi.spot.ontostring.constants.TermStatus;
+import uk.ac.ebi.spot.ontostring.domain.mapping.*;
+import uk.ac.ebi.spot.ontostring.repository.ExternalServiceConfigRepository;
+import uk.ac.ebi.spot.ontostring.service.*;
+
+import java.util.*;
+
+import static org.junit.Assert.*;
+
+@ContextConfiguration(classes = {IntegrationTest.MockTaskExecutorConfig.class})
+public class MatchMakingTest extends IntegrationTest {
+
+    @Autowired
+    private ExternalServiceConfigRepository externalServiceConfigRepository;
+
+    @Autowired
+    private EntityService entityService;
+
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private MatchmakerService matchmakerService;
+
+    @Autowired
+    private MappingSuggestionsService mappingSuggestionsService;
+
+    @Autowired
+    private MappingService mappingService;
+
+    private Project project;
+
+    private SourceDto sourceDto;
+
+    private Entity entity;
+
+    @Override
+    public void setup() throws Exception {
+        super.setup();
+        externalServiceConfigRepository.insert(new ExternalServiceConfig(null, "OLS", Arrays.asList(new String[]{"orphanet::ordo"})));
+        externalServiceConfigRepository.insert(new ExternalServiceConfig(null, "OXO", Arrays.asList(new String[]{"ordo::orphanet"})));
+
+        List<String> datasources = Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"});
+        List<String> ontologies = Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"});
+
+        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "efo", 0, null);
+        user1 = userService.findByEmail(user1.getEmail());
+        project = projectService.retrieveProject(projectDto.getId(), user1);
+        sourceDto = super.createSource(project.getId());
+        Provenance provenance = new Provenance(user1.getName(), user1.getEmail(), DateTime.now());
+
+        /**
+         * Other examples:
+         * - Hemochromatosis type 1
+         * - Retinal dystrophy
+         */
+        entity = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
+                CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), 10, provenance, EntityStatus.UNMAPPED));
+    }
+
+    @Test
+    public void runMatchmakingTest() {
+        matchmakerService.runMatchmaking(sourceDto.getId(), project);
+        Entity updated = entityService.retrieveEntity(entity.getId());
+        assertEquals(EntityStatus.AUTO_MAPPED, updated.getMappingStatus());
+
+        List<OntologyTerm> ontologyTerms = ontologyTermRepository.findAll();
+        Map<String, OntologyTerm> ontoMap = new HashMap<>();
+        for (OntologyTerm ontologyTerm : ontologyTerms) {
+            ontoMap.put(ontologyTerm.getId(), ontologyTerm);
+            if (ontologyTerm.getCurie().equalsIgnoreCase("Orphanet:15")) {
+                Optional<OntologyTermContext> ontologyTermContextOp = ontologyTermContextRepository.findByOntologyTermIdAndProjectIdAndContext(ontologyTerm.getId(), project.getId(), updated.getContext());
+                assertTrue(ontologyTermContextOp.isPresent());
+                assertEquals(TermStatus.CURRENT.name(), ontologyTermContextOp.get().getStatus());
+            }
+            if (ontologyTerm.getCurie().equalsIgnoreCase("MONDO:0007037")) {
+                Optional<OntologyTermContext> ontologyTermContextOp = ontologyTermContextRepository.findByOntologyTermIdAndProjectIdAndContext(ontologyTerm.getId(), project.getId(), updated.getContext());
+                assertTrue(ontologyTermContextOp.isPresent());
+                assertEquals(TermStatus.NEEDS_IMPORT.name(), ontologyTermContextOp.get().getStatus());
+            }
+        }
+
+        Map<String, List<MappingSuggestion>> mappingSuggestionMap = mappingSuggestionsService.retrieveMappingSuggestionsForEntities(Arrays.asList(new String[]{entity.getId()}), project.getId(), updated.getContext());
+        assertEquals(1, mappingSuggestionMap.size());
+        List<MappingSuggestion> mappingSuggestions = mappingSuggestionMap.get(entity.getId());
+        assertEquals(2, mappingSuggestions.size());
+
+        for (MappingSuggestion mappingSuggestion : mappingSuggestions) {
+            assertTrue(ontoMap.containsKey(mappingSuggestion.getOntologyTermId()));
+        }
+
+        Mapping mapping = mappingService.retrieveMappingForEntity(entity.getId());
+        assertNotNull(mapping);
+        assertTrue(ontoMap.containsKey(mapping.getOntologyTermIds().get(0)));
+        assertEquals(MappingStatus.AWAITING_REVIEW.name(), mapping.getStatus());
+    }
+}

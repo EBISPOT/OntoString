@@ -1,32 +1,32 @@
-# Default values for ontotools-curation-service.
+# Default values for ontostring.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
 image:
-  repository: ebispot/ontotools-curation-service
+  repository: ebispot/ontostring
   tag: latest
   pullPolicy: Always
   containerPort: 8080
   logMountPath: "/var/log/ontotools"
   env:
     envName: "sandbox"
-    logFileName: "ontotools-curation-service"
+    logFileName: "ontostring"
     xms: "-Xms256m"
     xmx: "-Xmx256m"
     dbUser: ""
     secretsName: ""
     secretsKey: ""
   volume:
-    claimName: ontotools-curation-logs
+    claimName: ontostring-logs
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
 service:
-  name: ontotools-curation-service
+  name: ontostring
   type: NodePort
   port: 8080
 

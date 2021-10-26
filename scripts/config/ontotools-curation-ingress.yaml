@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: ontotools-curation-ingress
+  name: ontostring-ingress
   namespace: ontotools
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
@@ -14,5 +14,5 @@ spec:
       paths:
       - path: /spot/ontostring/api(/|$)(.*)
         backend:
-          serviceName: ontotools-curation-service
+          serviceName: ontostring
           servicePort: 8080

@@ -5,17 +5,18 @@ OntoString is a tool for curating mappings from free text to ontology terms.
 ## Requirements to build and run locally
 
 * Local MongoDB instance running on port `27017`
-* Some test credentials and data added to the DB (if authentication is turned on) - see https://github.com/EBISPOT/ontotools-curator/wiki/Test-data
+* Some test credentials and data added to the DB (if authentication is turned on) - see https://github.com/EBISPOT/OntoString/wiki/Test-data
 * Alternatively:
   * Add at least one `super` user in the DB in the `users` collection:
   ```
   {
     "name": "Super user",
-    "email": "ontotools-curator@ebi.ac.uk",
-    "superUser": true
+    "email": "ontostring@ebi.ac.uk",
+    "superUser": true,
+    "roles": []
   }
   ```
-  * Set `ontotools-curation.auth.enabled` to `false` in the `dev` profile in `application.yml`
+  * Set `ontostring.auth.enabled` to `false` in the `dev` profile in `application.yml`
 
 ### Build package
 
@@ -27,5 +28,5 @@ OntoString is a tool for curating mappings from free text to ontology terms.
 * Run the `build.sh` script under `scripts`
 
 ### Run locally
-* `java -jar -Dspring.profiles.active=dev target/ontotools-curation-service-*.jar`
+* `java -jar -Dspring.profiles.active=dev target/ontostring-*.jar`
 

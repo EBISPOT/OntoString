@@ -1,0 +1,135 @@
+package uk.ac.ebi.spot.ontostring.tasks;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.joda.time.DateTime;
+import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import uk.ac.ebi.spot.ontostring.domain.Project;
+import uk.ac.ebi.spot.ontostring.domain.Provenance;
+import uk.ac.ebi.spot.ontostring.domain.config.ExternalServiceConfig;
+import uk.ac.ebi.spot.ontostring.domain.mapping.Entity;
+import uk.ac.ebi.spot.ontostring.domain.mapping.Mapping;
+import uk.ac.ebi.spot.ontostring.domain.mapping.OntologyTerm;
+import uk.ac.ebi.spot.ontostring.domain.mapping.OntologyTermContext;
+import uk.ac.ebi.spot.ontostring.rest.dto.ols.OLSTermDto;
+import uk.ac.ebi.spot.ontostring.rest.dto.project.ProjectDto;
+import uk.ac.ebi.spot.ontostring.rest.dto.project.SourceDto;
+import uk.ac.ebi.spot.ontostring.service.EntityService;
+import uk.ac.ebi.spot.ontostring.service.OLSService;
+import uk.ac.ebi.spot.ontostring.service.ProjectService;
+import uk.ac.ebi.spot.ontostring.util.CurationUtil;
+import uk.ac.ebi.spot.ontostring.IntegrationTest;
+import uk.ac.ebi.spot.ontostring.constants.CurationConstants;
+import uk.ac.ebi.spot.ontostring.constants.EntityStatus;
+import uk.ac.ebi.spot.ontostring.constants.MappingStatus;
+import uk.ac.ebi.spot.ontostring.constants.TermStatus;
+import uk.ac.ebi.spot.ontostring.repository.ExternalServiceConfigRepository;
+import uk.ac.ebi.spot.ontostring.repository.OntologyTermRepository;
+import uk.ac.ebi.spot.ontostring.repository.OntologyTermUpdateLogEntryRepository;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.when;
+
+@ContextConfiguration(classes = {IntegrationTest.MockTaskExecutorConfig.class,
+        IntegrationTest.MockOLSServiceConfig.class})
+public class OntologyTermUpdateTaskTest extends IntegrationTest {
+
+    @Autowired
+    private ExternalServiceConfigRepository externalServiceConfigRepository;
+
+    @Autowired
+    private OntologyTermUpdateTask ontologyTermUpdateTask;
+
+    @Autowired
+    private OLSService olsService;
+
+    @Autowired
+    private OntologyTermRepository ontologyTermRepository;
+
+    @Autowired
+    private OntologyTermUpdateLogEntryRepository ontologyTermUpdateLogEntryRepository;
+
+    @Autowired
+    private EntityService entityService;
+
+    @Autowired
+    private ProjectService projectService;
+
+    private OntologyTerm orphaTerm;
+
+    private OntologyTerm mondoTerm;
+
+    private Mapping mapping;
+
+    @Override
+    public void setup() throws Exception {
+        super.setup();
+
+        externalServiceConfigRepository.insert(new ExternalServiceConfig(null, "OLS", Arrays.asList(new String[]{"orphanet::ordo"})));
+        externalServiceConfigRepository.insert(new ExternalServiceConfig(null, "OXO", Arrays.asList(new String[]{"ordo::orphanet"})));
+
+        List<String> datasources = Arrays.asList(new String[]{"cttv", "sysmicro", "atlas", "ebisc", "uniprot", "gwas", "cbi", "clinvar-xrefs"});
+        List<String> ontologies = Arrays.asList(new String[]{"efo", "mondo", "hp", "ordo", "orphanet"});
+
+        ProjectDto projectDto = super.createProject("New Project", user1, datasources, ontologies, "mondo", 0, null);
+        user1 = userService.findByEmail(user1.getEmail());
+        Project project = projectService.retrieveProject(projectDto.getId(), user1);
+        SourceDto sourceDto = super.createSource(project.getId());
+        Provenance provenance = new Provenance(user1.getName(), user1.getEmail(), DateTime.now());
+
+        this.orphaTerm = ontologyTermRepository.insert(new OntologyTerm(null, "Orphanet:15", "http://www.orpha.net/ORDO/Orphanet_15",
+                DigestUtils.sha256Hex("http://www.orpha.net/ORDO/Orphanet_15"), "Achondroplasia", null, null, new ArrayList<>(), null));
+        OntologyTermContext ontologyTermContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                null, orphaTerm.getId(), project.getId(), CurationConstants.CONTEXT_DEFAULT, TermStatus.CURRENT.name(), new ArrayList<>(), false
+        ));
+        orphaTerm.getOntoTermContexts().add(ontologyTermContext.getId());
+        orphaTerm = ontologyTermRepository.save(orphaTerm);
+
+        this.mondoTerm = ontologyTermRepository.insert(new OntologyTerm(null, "MONDO:0007037", "http://purl.obolibrary.org/obo/MONDO_0007037",
+                DigestUtils.sha256Hex("http://purl.obolibrary.org/obo/MONDO_0007037"), "Achondroplasia", null, null, new ArrayList<>(), null));
+        ontologyTermContext = ontologyTermContextRepository.insert(new OntologyTermContext(
+                null, mondoTerm.getId(), project.getId(), CurationConstants.CONTEXT_DEFAULT, TermStatus.NEEDS_IMPORT.name(), new ArrayList<>(), false
+        ));
+        mondoTerm.getOntoTermContexts().add(ontologyTermContext.getId());
+        mondoTerm = ontologyTermRepository.save(mondoTerm);
+
+        entity = entityService.createEntity(new Entity(null, "Achondroplasia", RandomStringUtils.randomAlphabetic(10),
+                CurationConstants.CONTEXT_DEFAULT, sourceDto.getId(), project.getId(), 10, provenance, EntityStatus.UNMAPPED));
+
+        mapping = mappingRepository.insert(new Mapping(null, entity.getId(), entity.getContext(), Arrays.asList(new String[]{orphaTerm.getId()}),
+                entity.getProjectId(), false, new ArrayList<>(), new ArrayList<>(), MappingStatus.AWAITING_REVIEW.name(),
+                new Provenance(user1.getName(), user1.getEmail(), DateTime.now()), null));
+
+        when(olsService.retrieveTerms(ArgumentMatchers.eq(CurationUtil.ontoFromIRI(orphaTerm.getIri())), eq(orphaTerm.getIri()))).thenReturn(new ArrayList<>());
+        when(olsService.retrieveTerms(eq("mondo"), eq(mondoTerm.getIri()))).thenReturn(
+                Arrays.asList(new OLSTermDto[]{new OLSTermDto(mondoTerm.getIri(), "MONDO:0007037", "Achondroplasia", "efo", false, true)})
+        );
+    }
+
+    @Test
+    public void shouldRunUpdate() {
+        ontologyTermUpdateTask.updateOntologyTerms();
+
+        OntologyTerm ontologyTerm = ontologyTermRepository.findById(this.orphaTerm.getId()).get();
+        List<OntologyTermContext> ontologyTermContexts = ontologyTermContextRepository.findByOntologyTermId(ontologyTerm.getId());
+        assertEquals(1, ontologyTermContexts.size());
+        assertEquals(TermStatus.DELETED.name(), ontologyTermContexts.get(0).getStatus());
+
+        Mapping newMapping = mappingRepository.findById(mapping.getId()).get();
+        assertEquals(MappingStatus.HAS_OBSOLETE_TERM.name(), newMapping.getStatus());
+
+        ontologyTerm = ontologyTermRepository.findById(this.mondoTerm.getId()).get();
+        ontologyTermContexts = ontologyTermContextRepository.findByOntologyTermId(ontologyTerm.getId());
+        assertEquals(1, ontologyTermContexts.size());
+        assertEquals(TermStatus.CURRENT.name(), ontologyTermContexts.get(0).getStatus());
+        assertEquals(2, ontologyTermUpdateLogEntryRepository.findAll().size());
+    }
+}
