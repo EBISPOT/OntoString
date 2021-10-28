@@ -19,7 +19,7 @@ image:
     secretsName: ""
     secretsKey: ""
   volume:
-    claimName: ontostring-logs
+    claimName: ontotools-curation-logs
 
 imagePullSecrets: []
 nameOverride: ""
