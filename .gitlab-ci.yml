@@ -17,7 +17,7 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
   REGISTRY_IMAGE: ebispot/ontostring
-  SERVICE_NAME: ontostring
+  SERVICE_NAME: ontotools-curation-service
 
 build-front:
   image: node:10.15.3
@@ -117,8 +117,8 @@ deploy-sandbox:
   - mkdir -p /root/.kube
   - echo ${SANBOX_KUBECONF} | base64 -d > /root/.kube/config
   - helm init --stable-repo-url https://charts.helm.sh/stable
-  - helm delete --purge ontostring || true
-  - helm install --name ontostring --set k8Namespace=ontotools,image.repository=$REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.secretsName=ontotools-secrets,image.env.secretsKey=db-pwd ./k8chart/ --wait
+  - helm delete --purge ontotools-curation-service || true
+  - helm install --name ontotools-curation-service --set k8Namespace=ontotools,image.repository=$REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.secretsName=ontotools-secrets,image.env.secretsKey=db-pwd ./k8chart/ --wait
   environment:
     name: sandbox
   only:
@@ -132,8 +132,8 @@ deploy-fallback:
   - mkdir -p /root/.kube
   - echo ${PFALLBACK_KUBECONFIG} | base64 -d > /root/.kube/config
   - helm init --stable-repo-url https://charts.helm.sh/stable
-  - helm delete --purge ontostring || true
-  - helm install --name ontostring --set k8Namespace=ontotools,replicaCount=1,image.env.envName=fallback,image.repository=$REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.dbUser=ontotoolscurator,image.env.secretsName=ontotools-secrets,image.env.secretsKey=db-pwd ./k8chart/ --wait
+  - helm delete --purge ontotools-curation-service || true
+  - helm install --name ontotools-curation-service --set k8Namespace=ontotools,replicaCount=1,image.env.envName=fallback,image.repository=$REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.dbUser=ontotoolscurator,image.env.secretsName=ontotools-secrets,image.env.secretsKey=db-pwd ./k8chart/ --wait
   environment:
     name: prod
   when: manual
@@ -148,8 +148,8 @@ deploy-live:
   - mkdir -p /root/.kube
   - echo ${PLIVE_KUBECONFIG} | base64 -d > /root/.kube/config
   - helm init --stable-repo-url https://charts.helm.sh/stable
-  - helm delete --purge ontostring || true
-  - helm install --name ontostring --set k8Namespace=ontotools,replicaCount=1,image.env.envName=prod,image.repository=$REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.dbUser=ontotoolscurator,image.env.secretsName=ontotools-secrets,image.env.secretsKey=db-pwd ./k8chart/ --wait
+  - helm delete --purge ontotools-curation-service || true
+  - helm install --name ontotools-curation-service --set k8Namespace=ontotools,replicaCount=1,image.env.envName=prod,image.repository=$REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.dbUser=ontotoolscurator,image.env.secretsName=ontotools-secrets,image.env.secretsKey=db-pwd ./k8chart/ --wait
   environment:
     name: prod
   when: manual
