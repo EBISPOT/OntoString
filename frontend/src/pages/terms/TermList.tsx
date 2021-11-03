@@ -126,6 +126,7 @@ class TermListingList extends React.Component<Props, State> {
         }
 
         let actionable = this.state.tab === 'NEEDS_IMPORT'
+	let downloadable = true
 
         return <Fragment>
 
@@ -142,7 +143,7 @@ class TermListingList extends React.Component<Props, State> {
                         justifyContent="center"
                         flexDirection="row"
                     >
-                        <Button variant="outlined" color="primary" onClick={this.downloadCSV} disabled={!actionable}><CloudDownload /> &nbsp; Download CSV</Button>
+                        <Button variant="outlined" color="primary" onClick={this.downloadCSV} disabled={!downloadable}><CloudDownload /> &nbsp; Download CSV</Button>
                         &nbsp;
                         <Button variant="outlined" color="primary" onClick={this.markActioned} disabled={!actionable}><DoneAll /> &nbsp; Mark All As Actioned</Button>
                     </Box>
