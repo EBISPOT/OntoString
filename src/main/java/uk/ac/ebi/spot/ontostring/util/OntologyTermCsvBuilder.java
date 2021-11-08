@@ -6,11 +6,11 @@ import uk.ac.ebi.spot.ontostring.domain.mapping.OntologyTerm;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContentCompiler {
+public class OntologyTermCsvBuilder {
 
     private List<String> lines;
 
-    public ContentCompiler() {
+    public OntologyTermCsvBuilder() {
         this.lines = new ArrayList<>();
         this.lines.add(new StringBuffer()
                 .append("IRI")

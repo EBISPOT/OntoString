@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,8 @@ import uk.ac.ebi.spot.ontostring.domain.auth.User;
 import uk.ac.ebi.spot.ontostring.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontostring.domain.mapping.Mapping;
 import uk.ac.ebi.spot.ontostring.domain.mapping.MappingSuggestion;
+import uk.ac.ebi.spot.ontostring.rest.dto.mapping.ExportEntitiesDto;
+import uk.ac.ebi.spot.ontostring.rest.dto.mapping.ExportOntologyTermsDto;
 import uk.ac.ebi.spot.ontostring.service.*;
 import uk.ac.ebi.spot.ontostring.system.GeneralCommon;
 import uk.ac.ebi.spot.ontostring.util.HeadersUtil;
@@ -26,6 +30,8 @@ import uk.ac.ebi.spot.ontostring.rest.dto.RestResponsePage;
 import uk.ac.ebi.spot.ontostring.rest.dto.project.SourceDto;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -108,5 +114,28 @@ public class EntityController {
         return EntityDtoAssembler.assemble(entity, SourceDtoAssembler.assemble(source),
                 mapping, mappingSuggestions.get(entityId),
                 auditEntryService.retrieveAuditEntries(entity.getId()));
+    }
+
+    /**
+     * POST /v1/projects/{projectId}/entities/export
+     */
+    @PostMapping(value = "/{projectId}" + CurationConstants.API_ENTITIES + CurationConstants.API_EXPORT,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public HttpEntity<byte[]> exportEntities(@PathVariable String projectId,
+                                             @RequestParam(value = CurationConstants.PARAM_CONTEXT, required = false) String context,
+                                             @RequestBody @Valid ExportEntitiesDto exportEntitiesDto, HttpServletRequest request) {
+        User user = jwtService.extractUser(HeadersUtil.extractJWT(request));
+        log.info("[{}] Request to export entities: {}", user.getEmail(), projectId);
+        projectService.verifyAccess(projectId, user, Arrays.asList(new ProjectRole[]{ProjectRole.ADMIN, ProjectRole.CONTRIBUTOR, ProjectRole.CONSUMER}));
+
+        String csvContent = entityService.exportEntities(projectId, context);
+        byte[] payload = csvContent.getBytes(StandardCharsets.UTF_8);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=entities_" + projectId + ".csv");
+        responseHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        responseHeaders.add(HttpHeaders.CONTENT_LENGTH, Integer.toString(payload.length));
+        return new HttpEntity<>(payload, responseHeaders);
     }
 }
