@@ -7,7 +7,6 @@ stages:
   - build-artefact-release
   - build-container
   - build-container-release
-  - deploy-sandbox
   - deploy-fallback
   - deploy-live
 
@@ -17,17 +16,6 @@ variables:
   REGISTRY_IMAGE: ebispot/ontostring
   SERVICE_NAME: ontotools-curation-service
 
-maven-build:
-  image: maven:3-jdk-12
-  stage: build-artefact
-  script:
-    - mvn clean package spring-boot:repackage -DskipTests=true
-  artifacts:
-    paths:
-      - target/*.war
-  only:
-    - develop
-
 build-container:
   stage: build-container
   script:
@@ -36,8 +24,7 @@ build-container:
     - docker build --cache-from $REGISTRY_IMAGE:latest -t $REGISTRY_IMAGE:$CI_COMMIT_SHA .
     - docker push $REGISTRY_IMAGE:$CI_COMMIT_SHA
   only:
-    - develop
-    - tags
+    - stable
 
 maven-build-release:
   image: maven:3-jdk-12
@@ -48,7 +35,7 @@ maven-build-release:
     paths:
       - target/*.war
   only:
-    - tags
+    - stable
 
 build-release:
   variables:
@@ -63,22 +50,7 @@ build-release:
   - docker push $REGISTRY_IMAGE:latest
   - docker push $REGISTRY_IMAGE:$CI_COMMIT_TAG
   only:
-  - tags
-
-deploy-sandbox:
-  image: dtzar/helm-kubectl:2.13.1
-  stage: deploy-sandbox
-  script:
-  - echo "Deploy to sandbox server"
-  - mkdir -p /root/.kube
-  - echo ${SANBOX_KUBECONF} | base64 -d > /root/.kube/config
-  - helm init --stable-repo-url https://charts.helm.sh/stable
-  - helm delete --purge ontotools-curation-service || true
-  - helm install --name ontotools-curation-service --set k8Namespace=ontotools,image.repository=$REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.secretsName=ontotools-secrets,image.env.secretsKey=db-pwd ./k8chart/ --wait
-  environment:
-    name: sandbox
-  only:
-  - develop
+  - stable
 
 deploy-fallback:
   image: dtzar/helm-kubectl:2.13.1
@@ -94,7 +66,7 @@ deploy-fallback:
     name: prod
   when: manual
   only:
-  - tags
+  - stable
 
 deploy-live:
   image: dtzar/helm-kubectl:2.13.1
@@ -110,4 +82,4 @@ deploy-live:
     name: prod
   when: manual
   only:
-  - tags
+  - stable
