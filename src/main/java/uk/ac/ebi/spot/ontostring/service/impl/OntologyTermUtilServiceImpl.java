@@ -15,8 +15,7 @@ import uk.ac.ebi.spot.ontostring.repository.MappingRepository;
 import uk.ac.ebi.spot.ontostring.repository.OntologyTermContextRepository;
 import uk.ac.ebi.spot.ontostring.repository.OntologyTermRepository;
 import uk.ac.ebi.spot.ontostring.service.OntologyTermUtilService;
-import uk.ac.ebi.spot.ontostring.util.ContentCompiler;
-import uk.ac.ebi.spot.ontostring.domain.mapping.*;
+import uk.ac.ebi.spot.ontostring.util.OntologyTermCsvBuilder;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -48,7 +47,7 @@ public class OntologyTermUtilServiceImpl implements OntologyTermUtilService {
 
     @Override
     public String exportOntologyTerms(String projectId, String context, String status) {
-        ContentCompiler contentCompiler = new ContentCompiler();
+        OntologyTermCsvBuilder ontologyTermCsvBuilder = new OntologyTermCsvBuilder();
         List<OntologyTermContext> ontologyTermContexts = ontologyTermContextRepository.findByHasMappingAndProjectIdAndContextAndStatus(true, projectId, context, status);
 
         List<Entity> entities = entityRepository.findByProjectIdAndContext(projectId, context);
@@ -73,10 +72,10 @@ public class OntologyTermUtilServiceImpl implements OntologyTermUtilService {
         for (OntologyTermContext ontologyTermContext : ontologyTermContexts) {
             OntologyTerm ontologyTerm = ontologyTermRepository.findById(ontologyTermContext.getOntologyTermId()).get();
             List<String> entityNames = mappingMap.get(ontologyTerm.getId());
-            contentCompiler.addOntologyTerm(ontologyTerm, StringUtils.join(entityNames, " | "));
+            ontologyTermCsvBuilder.addOntologyTerm(ontologyTerm, StringUtils.join(entityNames, " | "));
         }
 
-        return contentCompiler.getContent();
+        return ontologyTermCsvBuilder.getContent();
     }
 
     @Override

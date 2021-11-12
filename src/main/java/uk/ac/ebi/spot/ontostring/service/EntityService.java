@@ -22,4 +22,6 @@ public interface EntityService {
     Entity retrieveEntity(String entityId);
 
     void moveEntities(String projectId, String fromContext, String toContext);
+
+    String exportEntities(String projectId, String context);
 }

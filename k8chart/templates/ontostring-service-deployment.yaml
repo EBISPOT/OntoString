@@ -45,6 +45,16 @@ spec:
           value: {{.Values.image.env.logFileName}}
         - name: DB_USER
           value: {{.Values.image.env.dbUser}}
+        - name: HTTP_PROXY
+          value: http://hh-wwwcache.ebi.ac.uk:3128
+        - name: HTTPS_PROXY
+          value: http://hh-wwwcache.ebi.ac.uk:3128
+        - name: http_proxy
+          value: http://hh-wwwcache.ebi.ac.uk:3128
+        - name: https_proxy
+          value: http://hh-wwwcache.ebi.ac.uk:3128
+        - name: no_proxy
+          value: localhost,.cluster.local
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:

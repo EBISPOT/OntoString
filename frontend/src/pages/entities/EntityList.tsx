@@ -14,8 +14,9 @@ import Spinner from "../../components/Spinner";
 import Context from "../../dto/Context";
 import Project from "../../dto/Project";
 import ContextSelector from "../../components/ContextSelector";
-import { CloudUpload } from "@material-ui/icons";
+import { CloudDownload, CloudUpload } from "@material-ui/icons";
 import UploadDialog from "./UploadDialog";
+import FileSaver from 'file-saver';
 
 const styles = (theme:Theme) => createStyles({
     tableRow: {
@@ -153,6 +154,8 @@ class EntityList extends React.Component<Props, State> {
                         flexDirection="row"
                     >
                         <Button variant="outlined" color="primary" onClick={this.upload}><CloudUpload /> &nbsp; Upload CSV/JSON</Button>
+                        &nbsp;
+                        <Button variant="outlined" color="primary" onClick={this.downloadCSV} ><CloudDownload /> &nbsp; Download CSV</Button>
                     </Box>
                 </Grid>
             </Grid>
@@ -281,6 +284,30 @@ class EntityList extends React.Component<Props, State> {
     onUpload = () => {
         this.setState(prevState => ({ ...prevState, showUploadDialog: false }))
 	this.fetchEntities()
+    }
+
+    downloadCSV = async () => {
+
+        let { project } = this.props
+        let { context } = this.state
+
+        let res = await fetch(`${process.env.REACT_APP_APIURL}/v1/projects/${project.id}/entities/export`, {
+            method: 'POST',
+            body: JSON.stringify({
+		    ...(context ? { context: context.name! } : {}),
+            }),
+            headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+        })
+
+        let b = await res.arrayBuffer()
+
+        var blob = new Blob([b], { type: 'text/csv' })
+
+	let filename = context ? 
+		`${project.name}_${context.name}.csv` :
+		`${project.name}.csv`
+
+        FileSaver.saveAs(blob, filename)
     }
 }
 

@@ -14,7 +14,7 @@ public class RestTemplateConfig {
     @Bean
     public RestTemplate restTemplate() {
         CloseableHttpClient httpClient =
-                HttpClients.custom().setSSLHostnameVerifier(new NoopHostnameVerifier()).build();
+                HttpClients.custom().setSSLHostnameVerifier(new NoopHostnameVerifier()).useSystemProperties().build();
         HttpComponentsClientHttpRequestFactory requestFactory =
                 new HttpComponentsClientHttpRequestFactory();
         requestFactory.setHttpClient(httpClient);

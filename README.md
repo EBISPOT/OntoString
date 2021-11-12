@@ -20,7 +20,7 @@ OntoString is a tool for curating mappings from free text to ontology terms.
 
 ### Build package
 
-* Run `mvn clean install -Dspring.profiles.active=dev`
+* Run `mvn clean package -Dspring.profiles.active=dev`
 * Alternatively, introduce in a new profile in `application.yml` and use it as active when building
 * At least one active profile has to be specified when building the package
 
@@ -28,5 +28,5 @@ OntoString is a tool for curating mappings from free text to ontology terms.
 * Run the `build.sh` script under `scripts`
 
 ### Run locally
-* `java -jar -Dspring.profiles.active=dev target/ontostring-*.jar`
+* `java -jar -Dspring.profiles.active=dev target/ontostring-*.war`
 

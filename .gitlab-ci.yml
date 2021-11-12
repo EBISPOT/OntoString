@@ -3,9 +3,7 @@ services:
   - docker:dind
 
 stages:
-  - build-frontend
   - build-artefact
-  - build-frontend-release
   - build-artefact-release
   - build-container
   - build-container-release
@@ -19,32 +17,11 @@ variables:
   REGISTRY_IMAGE: ebispot/ontostring
   SERVICE_NAME: ontotools-curation-service
 
-build-front:
-  image: node:10.15.3
-  stage: build-frontend
-  script:
-    - npm -v
-    - node -v
-    - cd frontend
-    - rm -rf node_modules
-    - npm install
-    - CI=false npm run build:sandbox
-  artifacts:
-    paths:
-      - frontend/build/*
-  only:
-    - develop
-
 maven-build:
   image: maven:3-jdk-12
   stage: build-artefact
   script:
-    - mkdir src/main/webapp
-    - mv frontend/build/* src/main/webapp/
-    - ls -lah src/main/webapp
     - mvn clean package spring-boot:repackage -DskipTests=true
-  dependencies:
-    - build-front
   artifacts:
     paths:
       - target/*.war
@@ -62,32 +39,11 @@ build-container:
     - develop
     - tags
 
-build-front-release:
-  image: node:10.15.3
-  stage: build-frontend-release
-  script:
-    - npm -v
-    - node -v
-    - cd frontend
-    - rm -rf node_modules
-    - npm install
-    - CI=false npm run build:prod
-  artifacts:
-    paths:
-      - frontend/build/*
-  only:
-    - tags
-
 maven-build-release:
   image: maven:3-jdk-12
   stage: build-artefact-release
   script:
-    - mkdir src/main/webapp
-    - mv frontend/build/* src/main/webapp/
-    - ls -lah src/main/webapp
     - mvn clean package spring-boot:repackage -DskipTests=true
-  dependencies:
-    - build-front-release
   artifacts:
     paths:
       - target/*.war

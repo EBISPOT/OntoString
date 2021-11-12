@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.ontostring.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,12 +8,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.ontostring.constants.EntityStatus;
-import uk.ac.ebi.spot.ontostring.domain.mapping.Entity;
+import uk.ac.ebi.spot.ontostring.domain.mapping.*;
 import uk.ac.ebi.spot.ontostring.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.ontostring.repository.EntityRepository;
+import uk.ac.ebi.spot.ontostring.repository.MappingRepository;
+import uk.ac.ebi.spot.ontostring.repository.MappingSuggestionRepository;
 import uk.ac.ebi.spot.ontostring.service.EntityService;
+import uk.ac.ebi.spot.ontostring.util.EntitiesCsvBuilder;
+import uk.ac.ebi.spot.ontostring.util.OntologyTermCsvBuilder;
 
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -22,6 +27,12 @@ public class EntityServiceImpl implements EntityService {
 
     @Autowired
     private EntityRepository entityRepository;
+
+    @Autowired
+    private MappingRepository mappingRepository;
+
+    @Autowired
+    private MappingSuggestionRepository mappingSuggestionRepository;
 
     @Override
     public Entity createEntity(Entity entity) {
@@ -92,4 +103,63 @@ public class EntityServiceImpl implements EntityService {
         entityRepository.save(entity);
     }
 
+    @Override
+    public String exportEntities(String projectId, String context) {
+
+        EntitiesCsvBuilder csvBuilder = new EntitiesCsvBuilder();
+
+
+        List<Entity> entities = entityRepository.findByProjectIdAndContext(projectId, context);
+        Map<String, Entity> entityMap = new LinkedHashMap<>();
+        for (Entity entity : entities) {
+            entityMap.put(entity.getId(), entity);
+        }
+
+
+        List<Mapping> mappings = mappingRepository.findByProjectIdAndContext(projectId, context);
+        Map<String, List<OntologyTerm>> mappingMap = new LinkedHashMap<>();
+        for (Mapping mapping : mappings) {
+            List<OntologyTerm> mappinglist = mappingMap.get(mapping.getEntityId());
+            if(mappinglist == null) {
+                mappinglist = new ArrayList<OntologyTerm>();
+                mappingMap.put(mapping.getEntityId(), mappinglist);
+            }
+            for(OntologyTerm term : mapping.getOntologyTerms()) {
+                mappinglist.add(term);
+            }
+        }
+
+        List<MappingSuggestion> mappingSuggestions = mappingSuggestionRepository.findByProjectId(projectId);
+        Map<String, List<OntologyTerm>> mappingSuggestionMap = new LinkedHashMap<>();
+        for (MappingSuggestion mappingSuggestion : mappingSuggestions) {
+            List<OntologyTerm> suggestions = mappingSuggestionMap.get(mappingSuggestion.getEntityId());
+            if(suggestions == null) {
+                suggestions = new ArrayList<OntologyTerm>();
+                mappingSuggestionMap.put(mappingSuggestion.getEntityId(), suggestions);
+            }
+            suggestions.add(mappingSuggestion.getOntologyTerm());
+        }
+
+
+        for (Entity entity : entities) {
+
+            List<OntologyTerm> mappingslist = mappingMap.get(entity.getId());
+
+            if(mappingslist != null) {
+                for (OntologyTerm mapping : mappingslist) {
+                    csvBuilder.addMappingRow(entity, mapping);
+                }
+            }
+
+            List<OntologyTerm> suggestionslist = mappingSuggestionMap.get(entity.getId());
+
+            if(suggestionslist != null) {
+                for (OntologyTerm suggestion : suggestionslist) {
+                    csvBuilder.addMappingRow(entity, suggestion);
+                }
+            }
+        }
+
+        return csvBuilder.getContent();
+    }
 }
