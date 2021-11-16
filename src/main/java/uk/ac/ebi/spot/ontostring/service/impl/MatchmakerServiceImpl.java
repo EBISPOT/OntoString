@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static uk.ac.ebi.spot.ontostring.constants.CurationConstants.ZOOMA_CONFIDENCE_HIGH;
+import static uk.ac.ebi.spot.ontostring.constants.CurationConstants.ZOOMA_CONFIDENCE_GOOD;
 
 @Service
 public class MatchmakerServiceImpl implements MatchmakerService {
@@ -110,7 +111,10 @@ public class MatchmakerServiceImpl implements MatchmakerService {
             /**
              * Retain high confidence terms to attempt exact mapping.
              */
-            if (zoomaResponseDto.getConfidence().equalsIgnoreCase(ZOOMA_CONFIDENCE_HIGH) && !highConfidenceIRIs.contains(suggestedTermIRI)) {
+            boolean tryExact = zoomaResponseDto.getConfidence().equalsIgnoreCase(ZOOMA_CONFIDENCE_HIGH) ||
+                    zoomaResponseDto.getConfidence().equalsIgnoreCase(ZOOMA_CONFIDENCE_GOOD);
+
+            if (tryExact && !highConfidenceIRIs.contains(suggestedTermIRI)) {
                 highConfidenceIRIs.add(suggestedTermIRI);
             }
 

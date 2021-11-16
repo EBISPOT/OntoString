@@ -52,6 +52,8 @@ public class CurationConstants {
 
     public static final String ZOOMA_CONFIDENCE_HIGH = "HIGH";
 
+    public static final String ZOOMA_CONFIDENCE_GOOD = "GOOD";
+
     public static final String CONTEXT_DEFAULT = "DEFAULT";
 
 }
