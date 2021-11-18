@@ -13,6 +13,7 @@ import uk.ac.ebi.spot.ontostring.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.ontostring.repository.EntityRepository;
 import uk.ac.ebi.spot.ontostring.repository.MappingRepository;
 import uk.ac.ebi.spot.ontostring.repository.MappingSuggestionRepository;
+import uk.ac.ebi.spot.ontostring.repository.OntologyTermRepository;
 import uk.ac.ebi.spot.ontostring.service.EntityService;
 import uk.ac.ebi.spot.ontostring.util.EntitiesCsvBuilder;
 import uk.ac.ebi.spot.ontostring.util.OntologyTermCsvBuilder;
@@ -33,6 +34,9 @@ public class EntityServiceImpl implements EntityService {
 
     @Autowired
     private MappingSuggestionRepository mappingSuggestionRepository;
+
+    @Autowired
+    private OntologyTermRepository ontologyTermRepository;
 
     @Override
     public Entity createEntity(Entity entity) {
@@ -109,14 +113,29 @@ public class EntityServiceImpl implements EntityService {
         EntitiesCsvBuilder csvBuilder = new EntitiesCsvBuilder();
 
 
-        List<Entity> entities = entityRepository.findByProjectIdAndContext(projectId, context);
+        List<Entity> entities = context != null ?
+		entityRepository.findByProjectIdAndContext(projectId, context) :
+		entityRepository.findByProjectId(projectId);
+
         Map<String, Entity> entityMap = new LinkedHashMap<>();
         for (Entity entity : entities) {
             entityMap.put(entity.getId(), entity);
         }
 
 
-        List<Mapping> mappings = mappingRepository.findByProjectIdAndContext(projectId, context);
+	List<OntologyTerm> terms = ontologyTermRepository.findAll();
+
+	Map<String, OntologyTerm> termsMap = new HashMap<>();
+
+	for(OntologyTerm term : terms) {
+		termsMap.put(term.getId(), term);
+	}
+
+
+        List<Mapping> mappings = context != null ?
+		mappingRepository.findByProjectIdAndContext(projectId, context) :
+		mappingRepository.findByProjectId(projectId);
+
         Map<String, List<OntologyTerm>> mappingMap = new LinkedHashMap<>();
         for (Mapping mapping : mappings) {
             List<OntologyTerm> mappinglist = mappingMap.get(mapping.getEntityId());
@@ -124,7 +143,8 @@ public class EntityServiceImpl implements EntityService {
                 mappinglist = new ArrayList<OntologyTerm>();
                 mappingMap.put(mapping.getEntityId(), mappinglist);
             }
-            for(OntologyTerm term : mapping.getOntologyTerms()) {
+            for(String termId : mapping.getOntologyTermIds()) {
+		    OntologyTerm term = termsMap.get(termId);
                 mappinglist.add(term);
             }
         }
@@ -137,7 +157,8 @@ public class EntityServiceImpl implements EntityService {
                 suggestions = new ArrayList<OntologyTerm>();
                 mappingSuggestionMap.put(mappingSuggestion.getEntityId(), suggestions);
             }
-            suggestions.add(mappingSuggestion.getOntologyTerm());
+	    OntologyTerm term = termsMap.get(mappingSuggestion.getOntologyTermId());
+            suggestions.add(term);
         }
 
 
@@ -155,7 +176,7 @@ public class EntityServiceImpl implements EntityService {
 
             if(suggestionslist != null) {
                 for (OntologyTerm suggestion : suggestionslist) {
-                    csvBuilder.addMappingRow(entity, suggestion);
+                    csvBuilder.addSuggestionRow(entity, suggestion);
                 }
             }
         }

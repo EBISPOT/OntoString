@@ -17,13 +17,15 @@ public class EntitiesCsvBuilder {
         this.lines.add(new StringBuffer()
                 .append("entityId")
                 .append(",")
-                .append("text")
-                .append(",")
                 .append("context")
+                .append(",")
+                .append("text")
                 .append(",")
                 .append("type")
                 .append(",")
                 .append("term")
+                .append(",")
+                .append("iri")
                 .toString());
     }
 
@@ -32,14 +34,15 @@ public class EntitiesCsvBuilder {
         sb
                 .append("\"" + entity.getId() + "\"")
                 .append(",")
-                .append("\"" + entity.getName() + "\"")
-                .append(ontologyTerm.getIri())
-                .append(",")
                 .append("\"" + entity.getContext() + "\"")
+                .append(",")
+                .append("\"" + entity.getName() + "\"")
                 .append(",")
                 .append("\"SUGGESTION\"")
                 .append(",")
-                .append("\"" + ontologyTerm.getLabel() + "\"");
+                .append("\"" + ontologyTerm.getLabel() + "\"")
+                .append(",")
+                .append(ontologyTerm.getIri());
         lines.add(sb.toString());
     }
 
@@ -48,14 +51,15 @@ public class EntitiesCsvBuilder {
         sb
                 .append("\"" + entity.getId() + "\"")
                 .append(",")
-                .append("\"" + entity.getName() + "\"")
-                .append(ontologyTerm.getIri())
-                .append(",")
                 .append("\"" + entity.getContext() + "\"")
+                .append(",")
+                .append("\"" + entity.getName() + "\"")
                 .append(",")
                 .append("\"MAPPING\"")
                 .append(",")
-                .append("\"" + ontologyTerm.getLabel() + "\"");
+                .append("\"" + ontologyTerm.getLabel() + "\"")
+                .append(",")
+                .append(ontologyTerm.getIri());
         lines.add(sb.toString());
     }
 
