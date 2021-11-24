@@ -30,6 +30,7 @@ maven-build-release:
   image: maven:3-jdk-12
   stage: build-artefact-release
   script:
+    - unset CI
     - mvn clean package spring-boot:repackage -DskipTests=true
   artifacts:
     paths:
