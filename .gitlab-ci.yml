@@ -47,9 +47,7 @@ build-release:
   - docker login -u "${DOCKER_HUB_USER}" --password-stdin < dhpw.txt
   - docker pull $REGISTRY_IMAGE:$CI_COMMIT_SHA
   - docker tag $REGISTRY_IMAGE:$CI_COMMIT_SHA $REGISTRY_IMAGE:latest
-  - docker tag $REGISTRY_IMAGE:$CI_COMMIT_SHA $REGISTRY_IMAGE:$CI_COMMIT_TAG
   - docker push $REGISTRY_IMAGE:latest
-  - docker push $REGISTRY_IMAGE:$CI_COMMIT_TAG
   only:
   - stable
 
