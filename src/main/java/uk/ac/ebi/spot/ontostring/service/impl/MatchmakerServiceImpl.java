@@ -16,6 +16,7 @@ import uk.ac.ebi.spot.ontostring.domain.Provenance;
 import uk.ac.ebi.spot.ontostring.domain.auth.User;
 import uk.ac.ebi.spot.ontostring.domain.mapping.Entity;
 import uk.ac.ebi.spot.ontostring.domain.mapping.OntologyTerm;
+import uk.ac.ebi.spot.ontostring.rest.dto.ols.OLSQueryDocDto;
 import uk.ac.ebi.spot.ontostring.rest.dto.zooma.ZoomaResponseDto;
 import uk.ac.ebi.spot.ontostring.service.*;
 import uk.ac.ebi.spot.ontostring.util.CurationUtil;
@@ -42,6 +43,9 @@ public class MatchmakerServiceImpl implements MatchmakerService {
 
     @Autowired
     private ZoomaService zoomaService;
+
+    @Autowired
+    private OLSService olsService;
 
     @Autowired
     private OntologyTermService ontologyTermService;
@@ -84,6 +88,38 @@ public class MatchmakerServiceImpl implements MatchmakerService {
         List<String> projectDatasources = projectContext.getDatasources();
         List<String> projectOntologies = projectContext.getOntologies();
 
+
+        List<OntologyTerm> termsCreated = new ArrayList<>();
+
+        Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
+
+
+
+	for(String ontology : projectOntologies) {
+
+		List<OLSQueryDocDto> olsResults = olsService.searchExact(ontology, entity.getName());
+
+		for(OLSQueryDocDto result : olsResults) {
+
+			OntologyTerm ontologyTerm = ontologyTermService.createTerm(result.getIri(), projectContext);
+
+			if(ontologyTerm != null) {
+				termsCreated.add(ontologyTerm);
+				mappingSuggestionsService.createMappingSuggestion(entity, ontologyTerm, provenance);
+
+				if (entity.getName().equalsIgnoreCase(ontologyTerm.getLabel())) {
+					mappingService.createMapping(entity, Arrays.asList(new OntologyTerm[]{ontologyTerm}), provenance);
+					entity = entityService.updateMappingStatus(entity, EntityStatus.AUTO_MAPPED);
+					log.info("Found OLS exact text matching for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
+				}
+			}
+		}
+
+	}
+
+
+	
+
         /**
          * Retrieve annotations from Zooma from datasources stored in the project
          */
@@ -111,8 +147,7 @@ public class MatchmakerServiceImpl implements MatchmakerService {
             /**
              * Retain high confidence terms to attempt exact mapping.
              */
-            boolean tryExact = zoomaResponseDto.getConfidence().equalsIgnoreCase(ZOOMA_CONFIDENCE_HIGH) ||
-                    zoomaResponseDto.getConfidence().equalsIgnoreCase(ZOOMA_CONFIDENCE_GOOD);
+            boolean tryExact = zoomaResponseDto.getConfidence().equalsIgnoreCase(ZOOMA_CONFIDENCE_HIGH);
 
             if (tryExact && !highConfidenceIRIs.contains(suggestedTermIRI)) {
                 highConfidenceIRIs.add(suggestedTermIRI);
@@ -143,8 +178,6 @@ public class MatchmakerServiceImpl implements MatchmakerService {
 
         matchmakingLogService.logEntry(new MatchmakingLogEntry(null, batchId, entity.getId(),
                 entity.getName(), highConfidenceIRIs, finalIRIs));
-        Provenance provenance = new Provenance(user.getName(), user.getEmail(), DateTime.now());
-        List<OntologyTerm> termsCreated = new ArrayList<>();
         for (String iri : finalIRIs) {
             OntologyTerm ontologyTerm = ontologyTermService.createTerm(iri, projectContext);
             if (ontologyTerm != null) {

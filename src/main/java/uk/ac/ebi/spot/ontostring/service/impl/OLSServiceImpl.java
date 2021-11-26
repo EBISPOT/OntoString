@@ -69,6 +69,35 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
     }
 
     @Override
+    public List<OLSQueryDocDto> searchExact(String ontologyId, String q) {
+        log.info("Calling OLS exact search: {} - {}", q, ontologyId);
+        if (ontoAliases.containsKey(ontologyId.toLowerCase())) {
+            log.info("Replacing ontologyId [{}] with alias: {}", ontologyId, ontoAliases.get(ontologyId.toLowerCase()));
+            ontologyId = ontoAliases.get(ontologyId.toLowerCase());
+        }
+        String base = restInteractionConfig.getOlsSearchEndpoint();
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(base)
+                .queryParam(RestInteractionConstants.OLS_PARAM_Q, q)
+                .queryParam(RestInteractionConstants.OLS_PARAM_GROUPFIELD, "iri")
+                .queryParam(RestInteractionConstants.OLS_PARAM_EXACT, "on")
+                .queryParam(RestInteractionConstants.OLS_PARAM_START, "0")
+                .queryParam(RestInteractionConstants.OLS_PARAM_ONTOLOGY, ontologyId);
+        String endpoint = uriBuilder.build().toUriString();
+
+        try {
+            OLSQueryResponseDto olsResponseDto = this.queryOLS(endpoint);
+            if (olsResponseDto != null) {
+                log.info("[{}] OLS: received {} terms.", q, olsResponseDto.getResponse().getNumFound());
+                return olsResponseDto.getResponse().getDocs();
+            }
+            log.info("[{}] OLS: Term not found.", q);
+        } catch (Exception e) {
+            log.error("Unable to call OLS: {}", e.getMessage(), e);
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
     public List<OLSTermDto> retrieveTerms(String ontologyId, String identifierValue) {
         log.info("Calling OLS: {} - {}", ontologyId, identifierValue);
         if (ontoAliases.containsKey(ontologyId.toLowerCase())) {
@@ -210,6 +239,20 @@ public class OLSServiceImpl implements OLSService, ConfigListener {
     private OLSResponseDto callOLS(String endpoint) {
         HttpEntity httpEntity = restInteractionConfig.httpEntity().build();
         ResponseEntity<OLSResponseDto> response =
+                restTemplate.exchange(endpoint,
+                        HttpMethod.GET, httpEntity,
+                        new ParameterizedTypeReference<>() {
+                        });
+
+        if (response.getStatusCode().equals(HttpStatus.OK)) {
+            return response.getBody();
+        }
+        return null;
+    }
+
+    private OLSQueryResponseDto queryOLS(String endpoint) {
+        HttpEntity httpEntity = restInteractionConfig.httpEntity().build();
+        ResponseEntity<OLSQueryResponseDto> response =
                 restTemplate.exchange(endpoint,
                         HttpMethod.GET, httpEntity,
                         new ParameterizedTypeReference<>() {

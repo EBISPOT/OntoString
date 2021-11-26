@@ -28,6 +28,12 @@ public class RestInteractionConstants {
 
     public static final String OLS_PARAM_Q = "q";
 
+    public static final String OLS_PARAM_GROUPFIELD = "groupField";
+
+    public static final String OLS_PARAM_EXACT = "exact";
+
+    public static final String OLS_PARAM_START = "start";
+
     public static final String OLS_PARAM_ONTOLOGY = "ontology";
 
     public static final String OLS_PARAM_ALLCHILDRENOF = "allChildrenOf";

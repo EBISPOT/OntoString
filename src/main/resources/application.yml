@@ -9,6 +9,9 @@ spring:
     resources:
       add-mappings: true
       static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/ontostring-dev
 
 logging:
   level:
