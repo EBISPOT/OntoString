@@ -97,7 +97,7 @@ public class MatchmakerServiceImpl implements MatchmakerService {
 
 	for(String ontology : projectOntologies) {
 
-		List<OLSQueryDocDto> olsResults = olsService.searchExact(ontology, entity.getName());
+		List<OLSQueryDocDto> olsResults = olsService.searchExact(ontology, entity.getName().trim());
 
 		for(OLSQueryDocDto result : olsResults) {
 
@@ -123,7 +123,7 @@ public class MatchmakerServiceImpl implements MatchmakerService {
         /**
          * Retrieve annotations from Zooma from datasources stored in the project
          */
-        List<ZoomaResponseDto> zoomaResults = zoomaService.annotate(entity.getName(), projectDatasources, null);
+        List<ZoomaResponseDto> zoomaResults = zoomaService.annotate(entity.getName().trim(), projectDatasources, null);
 
         /**
          * Retrieve annotations from Zooma from ontologies stored in the project
