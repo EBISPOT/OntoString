@@ -2,13 +2,13 @@ package uk.ac.ebi.spot.ontostring;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.ac.ebi.spot.ontostring.constants.CurationConstants;
 import uk.ac.ebi.spot.ontostring.domain.Project;
 import uk.ac.ebi.spot.ontostring.rest.dto.ols.OLSQueryDocDto;
 import uk.ac.ebi.spot.ontostring.rest.dto.ols.OLSTermDto;
 import uk.ac.ebi.spot.ontostring.rest.dto.project.ProjectDto;
 import uk.ac.ebi.spot.ontostring.service.OLSService;
 import uk.ac.ebi.spot.ontostring.service.ProjectService;
-import uk.ac.ebi.spot.ontostring.constants.CurationConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,6 +82,6 @@ public class OLSServiceTest extends IntegrationTest {
         String termId = "http://www.orpha.net/ORDO/Orphanet_15";
 
         List<OLSTermDto> terms = olsService.retrieveAncestors(ontoId, termId, false);
-        assertEquals(23, terms.size());
+        assertTrue(terms.size() > 15);
     }
 }

@@ -42,10 +42,10 @@
         <ognl.version>3.2.18</ognl.version>
         <junit.version>4.13.1</junit.version>
         <mockito.core>3.7.7</mockito.core>
-        <equalsverifier.version>3.5.2</equalsverifier.version>
+        <equalsverifier.version>3.8.2</equalsverifier.version>
         <opencsv.version>5.4</opencsv.version>
 
-        <jacoco.plugin.version>0.8.6</jacoco.plugin.version>
+        <jacoco.plugin.version>0.8.7</jacoco.plugin.version>
         <skip.coverage>false</skip.coverage>
 
         <coverage.ratio.instruction>0.7000</coverage.ratio.instruction>
