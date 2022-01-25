@@ -108,8 +108,12 @@ public class MatchmakerServiceImpl implements MatchmakerService {
 				mappingSuggestionsService.createMappingSuggestion(entity, ontologyTerm, provenance);
 
 				if (entity.getName().trim().equalsIgnoreCase(ontologyTerm.getLabel().trim())) {
-					mappingService.createMapping(entity, Arrays.asList(new OntologyTerm[]{ontologyTerm}), provenance);
-					entity = entityService.updateMappingStatus(entity, EntityStatus.AUTO_MAPPED);
+                    if (entity.getMappingStatus().equals(EntityStatus.AUTO_MAPPED)) {
+                        mappingService.addMapping(entity, ontologyTerm, provenance);
+                    } else {
+                        mappingService.createMapping(entity, Arrays.asList(new OntologyTerm[]{ontologyTerm}), provenance);
+                        entity = entityService.updateMappingStatus(entity, EntityStatus.AUTO_MAPPED);
+                    }
 					log.info("Found OLS exact text matching for [{}] in: {}", entity.getName(), ontologyTerm.getIri());
 				}
 			}
