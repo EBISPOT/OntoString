@@ -28,7 +28,7 @@ public class ZoomaServiceTest extends IntegrationTest {
             String semanticTag = responseDto.getSemanticTags().get(0);
             if (semanticTag.contains("orpha")) {
                 assertEquals("http://www.orpha.net/ORDO/Orphanet_15", semanticTag);
-                assertEquals("HIGH", responseDto.getConfidence());
+                assertEquals("GOOD", responseDto.getConfidence());
             }
         }
     }
@@ -44,7 +44,7 @@ public class ZoomaServiceTest extends IntegrationTest {
             String semanticTag = responseDto.getSemanticTags().get(0);
             if (semanticTag.contains("orpha")) {
                 assertEquals("http://www.orpha.net/ORDO/Orphanet_15", semanticTag);
-                assertEquals("HIGH", responseDto.getConfidence());
+                assertEquals("GOOD", responseDto.getConfidence());
             }
         }
     }
