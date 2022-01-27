@@ -4,8 +4,15 @@ OntoString is a tool for curating mappings from free text to ontology terms.
 
 ## Build and run locally
 
+### Prerequisites
+
+* Java 11
+* MongoDB
+
+### Instructions
+
 1. You need a local MongoDB instance running on port `27017`
-2. Add at least one `super` user in the DB in the `users` collection:
+2. Add at least one `super` user in the DB in the `users` collection. From the Mongo shell:
   ```
   db.users.insert({
     "name": "Super user",
