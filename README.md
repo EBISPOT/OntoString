@@ -9,12 +9,12 @@ OntoString is a tool for curating mappings from free text to ontology terms.
 * Alternatively:
   * Add at least one `super` user in the DB in the `users` collection:
   ```
-  {
+  db.users.insert({
     "name": "Super user",
     "email": "ontostring@ebi.ac.uk",
     "superUser": true,
     "roles": []
-  }
+  })
   ```
   * Set `ontostring.auth.enabled` to `false` in the `dev` profile in `application.yml`
 
