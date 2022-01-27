@@ -22,7 +22,7 @@ OntoString is a tool for curating mappings from free text to ontology terms.
 OntoString should now be live at `http://localhost:8080/spot/ontostring`
 
 
-## Docke
+## Docker
 
 To build a Docker image run the `build.sh` script under `scripts`
 
