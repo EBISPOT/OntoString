@@ -2,12 +2,10 @@
 
 OntoString is a tool for curating mappings from free text to ontology terms.
 
-## Requirements to build and run locally
+## Build and run locally
 
-* Local MongoDB instance running on port `27017`
-* Some test credentials and data added to the DB (if authentication is turned on) - see https://github.com/EBISPOT/OntoString/wiki/Test-data
-* Alternatively:
-  * Add at least one `super` user in the DB in the `users` collection:
+1. You need a local MongoDB instance running on port `27017`
+2. Add at least one `super` user in the DB in the `users` collection:
   ```
   db.users.insert({
     "name": "Super user",
@@ -16,17 +14,15 @@ OntoString is a tool for curating mappings from free text to ontology terms.
     "roles": []
   })
   ```
-  * Set `ontostring.auth.enabled` to `false` in the `dev` profile in `application.yml`
 
-### Build package
+3. Set `ontostring.auth.enabled` to `false` in the `dev` profile in `application.yml`  
+4. Run `mvn clean package -Dspring.profiles.active=dev`
+5. Then you can start the server: `java -jar -Dspring.profiles.active=dev target/ontostring-*.war`
 
-* Run `mvn clean package -Dspring.profiles.active=dev`
-* Alternatively, introduce in a new profile in `application.yml` and use it as active when building
-* At least one active profile has to be specified when building the package
+OntoString should now be live at `http://localhost:8080/spot/ontostring`
 
-### Build docker container
-* Run the `build.sh` script under `scripts`
 
-### Run locally
-* `java -jar -Dspring.profiles.active=dev target/ontostring-*.war`
+## Docke
+
+To build a Docker image run the `build.sh` script under `scripts`
 
