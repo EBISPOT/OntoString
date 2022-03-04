@@ -2,6 +2,8 @@
 
 OntoString is a tool for curating mappings from free text to ontology terms.
 
+![Alt text](/screenshot.png?raw=true "OntoString is a tool for curating mappings from free text to ontology terms")
+
 ## Build and run locally
 
 ### Prerequisites
