@@ -77,7 +77,7 @@ class Login extends Component<Props> {
 
 
     handleLogin = (event:any) => {
-        this.ElixirAuthService.login();
+        // this.ElixirAuthService.login();
 
         if (!this.messageIsAcceptable(event)) {
             return;
@@ -146,7 +146,7 @@ class Login extends Component<Props> {
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
-                    <button onClick={this.handleLogin} className={classes.button}>
+                    <button onClick={this.ElixirAuthService.login} className={classes.button}>
                         < span >
                             <img src={elixir_login_button} alt="login" style={{ height: '2em', verticalAlign: 'middle', paddingRight: '4px' }} />
                             LOGIN
