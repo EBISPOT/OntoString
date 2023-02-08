@@ -3,4 +3,4 @@
 /.idea/
 frontend/curator/static/
 frontend/.env
-
+frontend/node/
