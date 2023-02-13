@@ -1,140 +1,137 @@
-
-import { Button, CircularProgress, createStyles, darken, IconButton, lighten, makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { createStyles, Theme, WithStyles, withStyles } from "@material-ui/core";
 import React from "react";
-import { useState, useEffect } from "react";
-import { getAuthHeaders, getToken, isLoggedIn } from "../../auth";
+import DataTable from "react-data-table-component";
+import { Redirect } from "react-router-dom";
+import { get, post } from "../../api";
+import Spinner from "../../components/Spinner";
+import Project from "../../dto/Project";
 import Source from "../../dto/Source";
 import CreateSourceDialog from "./CreateSourceDialog";
-import { Link, Redirect } from 'react-router-dom'
-import formatDate from "../../formatDate";
-import Spinner from "../../components/Spinner";
-import { Settings } from "@material-ui/icons";
-import Project from "../../dto/Project";
-import { get, post } from "../../api";
 
-const styles = (theme:Theme) => createStyles({
+const styles = (theme: Theme) =>
+  createStyles({
     tableRow: {
-        // "&": {
-        //     cursor: 'pointer'
-        // },
-        // "&:hover": {
-        //     backgroundColor: lighten(theme.palette.primary.light, 0.85)
-        // }
-    }
-})
+      // "&": {
+      //     cursor: 'pointer'
+      // },
+      // "&:hover": {
+      //     backgroundColor: lighten(theme.palette.primary.light, 0.85)
+      // }
+    },
+  });
 
 interface Props extends WithStyles<typeof styles> {
-    project:Project
-    onCreateSource:()=>void
+  project: Project;
+  onCreateSource: () => void;
 }
 
 interface State {
-    loading:boolean
-    sources:Source[]|null
-    goToSource:Source|null
+  loading: boolean;
+  sources: Source[] | null;
+  goToSource: Source | null;
 }
 
 class SourceList extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
 
-    constructor(props:Props) {
+    this.state = {
+      sources: [],
+      loading: true,
+      goToSource: null,
+    };
+  }
 
-        super(props)
+  componentDidMount() {
+    this.fetch();
+  }
 
-        this.state = {
-            sources: [],
-            loading: true,
-            goToSource: null
-        }
+  columns: any[] = [
+    {
+      name: "Name",
+      selector: "name",
+      sortable: true,
+    },
+    {
+      name: "Description",
+      selector: "description",
+      sortable: true,
+    },
+    {
+      name: "Type",
+      selector: "type",
+      sortable: true,
+    },
+    {
+      name: "URL",
+      selector: "uri",
+      sortable: true,
+    },
+  ];
+
+  render() {
+    let { goToSource, sources, loading } = this.state;
+    let { project } = this.props;
+
+    if (goToSource !== null) {
+      return (
+        <Redirect to={`/projects/${project.id}/sources/${goToSource.name}`} />
+      );
     }
 
-    componentDidMount() {
-        this.fetch()
+    if (loading || !sources) {
+      return <Spinner />;
     }
 
-    render() {
+    return (
+      <div>
+        <div style={{ textAlign: "right" }}>
+          <CreateSourceDialog onCreate={this.createSource} />
+        </div>
+        <DataTable
+          columns={this.columns}
+          data={sources || []}
+          pagination
+          paginationTotalRows={sources.length}
+          paginationPerPage={10}
+          paginationDefaultPage={1}
+          paginationRowsPerPageOptions={[10, 25, 100]}
+          noHeader
+          highlightOnHover
+          progressPending={sources === null}
+          progressComponent={<Spinner />}
+        />
+      </div>
+    );
+  }
 
-        let { goToSource, sources, loading } = this.state
-        let { classes, project } = this.props
+  async fetch() {
+    let { project } = this.props;
 
-        if(goToSource !== null) {
-            return <Redirect to={`/projects/${project.id}/sources/${goToSource.name}`} />
-        }
+    await this.setState((prevState) => ({ ...prevState, loading: true }));
 
-        if(loading || !sources) {
-            return <Spinner/>
-        }
+    let sources = await get<Source[]>(`/v1/projects/${project.id}/sources`);
 
-        return <TableContainer component={Paper}>
-        <Table size="small" aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell align="left">Description</TableCell>
-              {/* <TableCell align="left">Created by</TableCell>
-              <TableCell align="left">Created</TableCell> */}
-              <TableCell align="left"></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sources.map((source:Source) => (
-              <TableRow className={classes.tableRow} key={source.name}>
-                <TableCell component="th" scope="row">
-                    {source.name}
-                </TableCell>
-                <TableCell align="left">
-                    {source.description}
-                </TableCell>
-                {/* <TableCell align="left">
-                    {source.created!.user.name}
-                </TableCell>
-                <TableCell align="left">
-                    {formatDate(source.created!.timestamp)}
-                </TableCell> */}
-                <TableCell align="left">
-                    {/* <IconButton onClick={(e) => { e.preventDefault(); e.stopPropagation(); this.onClickSourceSettings(source) }}>
-                        <Settings />
-                    </IconButton> */}
-                </TableCell>
-              </TableRow>
-            ))}
-            <TableRow>
-                <TableCell colSpan={3} align="right">
-                    <CreateSourceDialog onCreate={this.createSource} />
-                </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
-    }
+    this.setState((prevState) => ({ ...prevState, sources, loading: false }));
+  }
 
-    async fetch() {
+  onClickSourceSettings = async (source: Source) => {
+    this.setState((prevState) => ({ ...prevState, goToSource: source }));
+  };
 
-        let { project } = this.props
+  createSource = async (source: Source) => {
+    let { project } = this.props;
 
-        await this.setState(prevState => ({ ...prevState, loading: true }))
+    await post<Source>(`/v1/projects/${project.id}/sources`, source);
+    await this.fetch();
 
-        let sources = await get<Source[]>(`/v1/projects/${project.id}/sources`)
+    this.props.onCreateSource();
 
-        this.setState(prevState => ({ ...prevState, sources, loading: false }))
-    }
-
-    onClickSourceSettings = async (source:Source) => {
-        this.setState(prevState => ({ ...prevState, goToSource: source }))
-    }
-
-    createSource = async (source: Source) => {
-
-        let { project } = this.props
-
-        await post<Source>(`/v1/projects/${project.id}/sources`, source)
-
-        this.props.onCreateSource()
-
-        this.setState(prevState => ({ ...prevState, showCreateSourceDialog: false }))
-    }
-
-
+    this.setState((prevState) => ({
+      ...prevState,
+      showCreateSourceDialog: false,
+    }));
+  };
 }
 
-export default withStyles(styles)(SourceList)
-
+export default withStyles(styles)(SourceList);
