@@ -1,4 +1,3 @@
-import { Copyright } from "@material-ui/icons";
 
 export default function Footer() {
   return (
@@ -7,7 +6,7 @@ export default function Footer() {
         <i className="icon icon-common icon-copyright icon-spacer" />
         EMBL-EBI&nbsp;2023
       </span>
-      <a href="https://www.ebi.ac.uk/licencing" className="footer-link">
+      <a href={process.env.REACT_APP_EBI_LICENSING} className="footer-link">
         Licensing
       </a>
     </footer>

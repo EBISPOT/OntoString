@@ -3,7 +3,7 @@ html {
 }
 
 #root {
-  padding-bottom: var(--footer-height);
+  padding-bottom: calc(var(--footer-height) + 1rem);
   position: relative;
   min-height: calc(100vh - var(--footer-height));
 }
@@ -11,7 +11,7 @@ html {
 .footer {
   height: var(--footer-height);
   background-color: #54585a;
-  border-top: 8px solid #d4c10c;
+  border-top: 0.5rem solid #d4c10c;
   position: absolute;
   right: 0;
   bottom: 0;
