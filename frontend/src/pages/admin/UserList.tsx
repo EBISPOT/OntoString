@@ -141,7 +141,7 @@ class UserList extends React.Component<Props, State> {
           columns={this.columns}
           data={users.content || []}
           pagination
-          paginationTotalRows={users.totalElements || 0}
+          paginationTotalRows={users.content.length}
           paginationPerPage={10}
           paginationDefaultPage={1}
           paginationRowsPerPageOptions={[10, 25, 100]}
