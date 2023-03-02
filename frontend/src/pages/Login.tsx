@@ -1,19 +1,17 @@
-import { Component, Fragment } from "react";
-import elixir_login_button from "../elixir_logo.png";
-import Grid from "@material-ui/core/Grid";
-import ElixirAuthService from "../ElixirAuthService";
-import { AuthConsumer } from "../auth-context";
-import { createStyles, Theme, Typography, WithStyles } from "@material-ui/core";
-import Link from "@material-ui/core/Link";
+import { createStyles, Theme, WithStyles } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
+import { Component } from "react";
 import { Redirect } from "react-router-dom";
 import { isLoggedIn } from "../auth";
+import { AuthConsumer } from "../auth-context";
 import Header from "../components/Header";
+import ElixirAuthService from "../ElixirAuthService";
+import elixir_login_button from "../elixir_logo.png";
 import history from "../history";
 
 const AAP_URL = process.env.REACT_APP_AAPURL;
 
-const elixirRegisterationLink = "https://elixir-europe.org/register";
+const elixirRegisterationLink = process.env.REACT_APP_ELIXIR_REGISTER;
 
 const elixirLoginContact = (
   <a href="mailto:aai-contact@elixir-europe.org">
@@ -111,6 +109,7 @@ class Login extends Component<Props> {
         }
       );
     } else {
+      history.push("/");
       history.back();
     }
   };
@@ -136,22 +135,13 @@ class Login extends Component<Props> {
     if (isLoggedIn()) return <Redirect to="/projects" />;
     else
       return (
-        <Fragment>
+        <div>
           <Header section="none" />
-          <Grid
-            container
-            direction="column"
-            justify="space-evenly"
-            alignItems="center"
-            spacing={3}
-          >
-            <Grid item xs={12} sm={6}>
-              <Typography>
-                Please sign in using ELIXIR to access this service.
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
+          <div style={{ textAlign: "center", marginInline: "20%" }}>
+            <div style={{ marginBlock: "2rem" }}>
+              Please sign in using ELIXIR to access this service.
+            </div>
+            <div style={{ marginBottom: "2rem" }}>
               <button
                 onClick={this.ElixirAuthService.login}
                 className={classes.button}
@@ -169,32 +159,20 @@ class Login extends Component<Props> {
                   LOGIN
                 </span>
               </button>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <Typography>
-                You can use the ELIXIR identity service and other ELIXIR
-                services with the freely available ELIXIR identity, which
-                integrates with Google, ORCID and most academic institutions.
-                Obtain your ELIXIR identity{" "}
-                <Link
-                  href={elixirRegisterationLink}
-                  className={classes.linkColor}
-                >
-                  here
-                </Link>
-                .
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <Typography>
-                If you have problems logging in please contact{" "}
-                {elixirLoginContact}.
-              </Typography>
-            </Grid>
-          </Grid>
-        </Fragment>
+            </div>
+            <div style={{ marginBottom: "1rem" }}>
+              You can use the ELIXIR identity service and other ELIXIR services
+              with the freely available ELIXIR identity, which integrates with
+              Google, ORCID and most academic institutions. Obtain your ELIXIR
+              identity&thinsp;
+              <a href={elixirRegisterationLink}>here</a>.
+            </div>
+            <div>
+              If you have problems logging in please contact&thinsp;
+              {elixirLoginContact}.
+            </div>
+          </div>
+        </div>
       );
   }
 }
