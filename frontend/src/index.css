@@ -3,7 +3,7 @@ html {
 }
 
 #root {
-  padding-bottom: calc(var(--footer-height) + 1rem);
+  padding-bottom: var(--footer-height);
   position: relative;
   min-height: calc(100vh - var(--footer-height));
 }

@@ -167,7 +167,7 @@ class Login extends Component<Props> {
               identity&thinsp;
               <a href={elixirRegisterationLink}>here</a>.
             </div>
-            <div>
+            <div style={{ marginBottom: "1rem" }}>
               If you have problems logging in please contact&thinsp;
               {elixirLoginContact}.
             </div>
