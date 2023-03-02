@@ -1,14 +1,14 @@
-import { Component, Fragment } from "react";
-import elixir_login_button from "../elixir_logo.png";
-import Grid from "@material-ui/core/Grid";
-import ElixirAuthService from "../ElixirAuthService";
-import { AuthConsumer } from "../auth-context";
 import { createStyles, Theme, Typography, WithStyles } from "@material-ui/core";
+import Grid from "@material-ui/core/Grid";
 import Link from "@material-ui/core/Link";
 import { withStyles } from "@material-ui/core/styles";
+import { Component, Fragment } from "react";
 import { Redirect } from "react-router-dom";
 import { isLoggedIn } from "../auth";
+import { AuthConsumer } from "../auth-context";
 import Header from "../components/Header";
+import ElixirAuthService from "../ElixirAuthService";
+import elixir_login_button from "../elixir_logo.png";
 import history from "../history";
 
 const AAP_URL = process.env.REACT_APP_AAPURL;
@@ -111,6 +111,7 @@ class Login extends Component<Props> {
         }
       );
     } else {
+      history.push("/");
       history.back();
     }
   };
@@ -143,15 +144,14 @@ class Login extends Component<Props> {
             direction="column"
             justify="space-evenly"
             alignItems="center"
-            spacing={3}
           >
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={6} style={{paddingBlock: "2rem"}}>
               <Typography>
                 Please sign in using ELIXIR to access this service.
               </Typography>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={6} style={{paddingBottom: "2rem"}}>
               <button
                 onClick={this.ElixirAuthService.login}
                 className={classes.button}
@@ -171,7 +171,7 @@ class Login extends Component<Props> {
               </button>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={6} style={{paddingBottom: "1rem"}}>
               <Typography>
                 You can use the ELIXIR identity service and other ELIXIR
                 services with the freely available ELIXIR identity, which
