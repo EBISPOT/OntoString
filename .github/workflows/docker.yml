@@ -27,6 +27,6 @@ jobs:
 
       - name: Build and push ontostring Docker image
         run: |
-          docker build -t ebispot/ontostring:${{ github.sha }} .
-          docker tag ebispot/ontostring:${{ github.sha }} ebispot/ontostring:latest
-          docker push --all-tags ebispot/ontostring
+          docker build -t ghcr.io/ebispot/ontostring:${{ github.sha }} .
+          docker tag ghcr.io/ebispot/ontostring:${{ github.sha }} ghcr.io/ebispot/ontostring:latest
+          docker push --all-tags ghcr.io/ebispot/ontostring

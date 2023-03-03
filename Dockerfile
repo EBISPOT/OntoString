@@ -9,6 +9,8 @@ RUN groupadd -r ontostring && useradd -r --create-home -g ontostring ontostring
 RUN if [ ! -d /var/log/ontotools/ ];then mkdir /var/log/ontotools/;fi
 RUN chown -R ontostring:ontostring /var/log/ontotools
 
+RUN mvn clean package spring-boot:repackage -DskipTests=true
+
 # Move project artifact
 COPY target/ontostring-*.war /home/ontostring/
 USER ontostring
