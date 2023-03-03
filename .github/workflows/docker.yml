@@ -2,7 +2,7 @@ name: Build & publish ontostring images
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "dev", "issue-188" ]
 
 env:
   REGISTRY: ghcr.io
