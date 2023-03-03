@@ -2,7 +2,7 @@ name: Build & publish ontostring images
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "dev", "stable" ]
 
 env:
   REGISTRY: ghcr.io
@@ -28,5 +28,5 @@ jobs:
       - name: Build and push ontostring Docker image
         run: |
           docker build -t ghcr.io/ebispot/ontostring:${{ github.sha }} .
-          docker tag ghcr.io/ebispot/ontostring:${{ github.sha }} ghcr.io/ebispot/ontostring:latest
+          docker tag ghcr.io/ebispot/ontostring:${{ github.sha }} ghcr.io/ebispot/ontostring:${{ github.ref_name }}
           docker push --all-tags ghcr.io/ebispot/ontostring
