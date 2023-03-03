@@ -1,11 +1,16 @@
 import {
-    Box,
-    Button, createStyles, Grid,
-    Input,
-    InputAdornment,
-    lighten, Tab, Tabs, Theme,
-    WithStyles,
-    withStyles
+  Box,
+  Button,
+  createStyles,
+  Grid,
+  Input,
+  InputAdornment,
+  lighten,
+  Tab,
+  Tabs,
+  Theme,
+  WithStyles,
+  withStyles
 } from "@material-ui/core";
 import { CloudDownload, DoneAll } from "@material-ui/icons";
 import SearchIcon from "@material-ui/icons/Search";
@@ -112,7 +117,6 @@ class TermListingList extends React.Component<Props, State> {
         sortable: true,
         cell: (t: TermListing) => (
           <Box>
-            {" "}
             {t.entities.map((e) => (
               <Fragment>
                 <Link to={`/projects/${project.id}/entities/${e.id}`}>
@@ -179,7 +183,7 @@ class TermListingList extends React.Component<Props, State> {
 
         <p>
           This list displays all of the ontology terms to which entities have
-          been mapped in this project. Where the term status is{" "}
+          been mapped in this project. Where the term status is&thinsp;
           <b>Needs Import</b>, it does not exist in any of the preferred
           ontologies, and therefore needs to be added.
         </p>
