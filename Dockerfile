@@ -2,7 +2,7 @@
 FROM openjdk:15-buster
 
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends less
+RUN apt-get install -y --no-install-recommends less maven
 
 # Create log file directory and set permission
 RUN groupadd -r ontostring && useradd -r --create-home -g ontostring ontostring
