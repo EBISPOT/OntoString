@@ -10,7 +10,7 @@ RUN if [ ! -d /var/log/ontotools/ ];then mkdir /var/log/ontotools/;fi
 RUN chown -R ontostring:ontostring /var/log/ontotools
 
 # Move project artifact
-COPY ./target/ontostring-*.war /home/ontostring/
+COPY target/ontostring-*.war /home/ontostring/
 USER ontostring
 
 # Launch application server
