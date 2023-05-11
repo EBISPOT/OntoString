@@ -4,7 +4,7 @@ metadata:
   name: ontotools-curation-logs
   namespace: ontotools
 spec:
-  storageClassName: local-storage
+  storageClassName: standard-nfs-production
   accessModes:
     - ReadWriteOnce
   resources:
