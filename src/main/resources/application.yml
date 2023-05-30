@@ -102,7 +102,7 @@ spring:
       on-profile: "prod"
   data:
     mongodb:
-      uri: mongos-hx-ontotoolscuratorprors071-01.ebi.ac.uk:27017,mongos-hl-ontotoolscuratorprors071-02.ebi.ac.uk:27017/admin
+      uri: mongos-hl-ontotoolscuratorprors071-02.ebi.ac.uk:27017,mongos-hx-ontotoolscuratorprors071-01.ebi.ac.uk:27017/ontotoolscurator?replicaSet=ontotoolscuratorprors071&authSource=admin
 
 ontostring:
   db: ontotoolscurator
@@ -125,7 +125,7 @@ spring:
       on-profile: "fallback"
   data:
     mongodb:
-      uri: mongos-hx-ontotoolscuratorprors071-01.ebi.ac.uk:27017,mongos-hl-ontotoolscuratorprors071-02.ebi.ac.uk:27017/admin
+      uri: mongos-hl-ontotoolscuratorprors071-02.ebi.ac.uk:27017,mongos-hx-ontotoolscuratorprors071-01.ebi.ac.uk:27017/ontotoolscurator?replicaSet=ontotoolscuratorprors071&authSource=admin
 
 ontostring:
   db: ontotoolscurator

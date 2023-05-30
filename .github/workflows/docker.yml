@@ -29,4 +29,4 @@ jobs:
         run: |
           docker build -t ghcr.io/ebispot/ontostring:${{ github.sha }} .
           docker tag ghcr.io/ebispot/ontostring:${{ github.sha }} ghcr.io/ebispot/ontostring:${{ github.ref_name }}
-          docker push --all-tags ghcr.io/ebispot/ontostring
+          docker push ghcr.io/ebispot/ontostring:${{ github.ref_name }}
